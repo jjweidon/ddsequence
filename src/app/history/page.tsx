@@ -36,37 +36,39 @@ export default function HistoryPage() {
   }, []);
 
   return (
-    <main className="flex min-h-screen flex-col items-center p-6 max-w-4xl mx-auto">
-      <div className="w-full">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">역대 기록</h1>
-          <Link 
-            href="/" 
-            className="text-indigo-600 hover:text-indigo-800 transition-colors"
-          >
-            &lt; 홈으로 돌아가기
-          </Link>
-        </div>
-
-        {loading ? (
-          <div className="text-center py-8">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-600"></div>
-            <p className="mt-2 text-gray-500">기록 불러오는 중...</p>
-          </div>
-        ) : error ? (
-          <div className="text-center py-8 text-red-500">
-            <p>{error}</p>
-            <button 
-              className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors"
-              onClick={fetchGames}
+    <>
+      <main className="flex min-h-screen flex-col items-center p-6 max-w-4xl mx-auto">
+        <div className="w-full">
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl font-bold">역대 기록</h1>
+            <Link 
+              href="/" 
+              className="text-indigo-600 hover:text-indigo-800 transition-colors"
             >
-              다시 시도
-            </button>
+              &lt; 홈으로 돌아가기
+            </Link>
           </div>
-        ) : (
-          <GameHistoryList games={games} />
-        )}
-      </div>
-    </main>
+
+          {loading ? (
+            <div className="text-center py-8">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-600"></div>
+              <p className="mt-2 text-gray-500">기록 불러오는 중...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-8 text-red-500">
+              <p>{error}</p>
+              <button 
+                className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors"
+                onClick={fetchGames}
+              >
+                다시 시도
+              </button>
+            </div>
+          ) : (
+            <GameHistoryList games={games} />
+          )}
+        </div>
+      </main>
+    </>
   );
 } 
