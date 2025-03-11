@@ -6,9 +6,17 @@ type SortDirection = 'asc' | 'desc';
 
 interface GameHistoryListProps {
   games: IGame[];
+  isEditMode?: boolean;
+  selectedGames?: string[];
+  setSelectedGames?: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
-const GameHistoryList: React.FC<GameHistoryListProps> = ({ games }) => {
+const GameHistoryList: React.FC<GameHistoryListProps> = ({ 
+  games,
+  isEditMode = false,
+  selectedGames = [],
+  setSelectedGames = () => {}
+}) => {
   const [sortField, setSortField] = useState<SortField>('createdAt');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
@@ -21,6 +29,28 @@ const GameHistoryList: React.FC<GameHistoryListProps> = ({ games }) => {
       // 다른 필드 클릭 시 해당 필드로 변경, 기본 내림차순
       setSortField(field);
       setSortDirection('desc');
+    }
+  };
+
+  // 체크박스 토글 함수
+  const toggleGameSelection = (gameId: string) => {
+    if (selectedGames.includes(gameId)) {
+      // 이미 선택된 경우 선택 해제
+      setSelectedGames(selectedGames.filter(id => id !== gameId));
+    } else {
+      // 선택되지 않은 경우 선택 추가
+      setSelectedGames([...selectedGames, gameId]);
+    }
+  };
+
+  // 모든 게임 선택/해제 토글
+  const toggleSelectAll = () => {
+    if (selectedGames.length === games.length) {
+      // 모두 선택된 상태면 모두 해제
+      setSelectedGames([]);
+    } else {
+      // 일부만 선택되었거나 아무것도 선택되지 않았으면 모두 선택
+      setSelectedGames(games.map(game => game._id || '').filter(id => id));
     }
   };
 
@@ -57,6 +87,16 @@ const GameHistoryList: React.FC<GameHistoryListProps> = ({ games }) => {
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
+            {isEditMode && (
+              <th className="px-4 py-3 w-12">
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                  checked={games.length > 0 && selectedGames.length === games.length}
+                  onChange={toggleSelectAll}
+                />
+              </th>
+            )}
             <th 
               className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
               onClick={() => toggleSort('index')}
@@ -90,6 +130,16 @@ const GameHistoryList: React.FC<GameHistoryListProps> = ({ games }) => {
         <tbody className="bg-white divide-y divide-gray-200">
           {sortedGames.map((game, index) => (
             <tr key={game._id || index} className="hover:bg-gray-50">
+              {isEditMode && (
+                <td className="px-4 py-3 whitespace-nowrap w-12">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                    checked={selectedGames.includes(game._id || '')}
+                    onChange={() => game._id && toggleGameSelection(game._id)}
+                  />
+                </td>
+              )}
               <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
                 {sortDirection === 'asc' ? index + 1 : games.length - index}
               </td>
