@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import PlayerSelect from '@/components/PlayerSelect';
 import StatsList from '@/components/StatsList';
 
@@ -197,6 +198,12 @@ export default function Home() {
         
         {/* 통계 */}
         <div className="mt-8 w-full">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">통계</h2>
+            <Link href="/history" className="text-gray-500 hover:text-gray-700 transition-colors">
+              역대 기록 &gt;
+            </Link>
+          </div>
           {statsLoading ? (
             <div className="text-center">통계 로딩 중...</div>
           ) : (

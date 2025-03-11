@@ -44,7 +44,7 @@ const StatsList: React.FC<StatsListProps> = ({
       
       {/* 개인 승률 */}
       <div className="flex flex-col gap-2">
-        <h3 className="text-lg font-semibold">개인 승률:</h3>
+        <h3 className="text-lg font-semibold">개인 승률</h3>
         <div className="flex flex-col divide-y divide-gray-200">
           {playerWinrates.map((stat) => (
             <div key={stat.player} className="py-2 flex justify-between">
@@ -57,7 +57,7 @@ const StatsList: React.FC<StatsListProps> = ({
       
       {/* 팀 승률 */}
       <div className="flex flex-col gap-2">
-        <h3 className="text-lg font-semibold">팀 승률:</h3>
+        <h3 className="text-lg font-semibold">팀 승률</h3>
         <div className="flex flex-col divide-y divide-gray-200">
           {teamWinrates.map((stat) => (
             <div key={stat.team} className="py-2 flex justify-between">
@@ -70,7 +70,7 @@ const StatsList: React.FC<StatsListProps> = ({
       
       {/* 개인 승리 횟수 */}
       <div className="flex flex-col gap-2">
-        <h3 className="text-lg font-semibold">개인 승리 횟수 순위:</h3>
+        <h3 className="text-lg font-semibold">개인 승리 횟수 순위</h3>
         <div className="flex flex-col divide-y divide-gray-200">
           {playerWins.map((stat) => (
             <div key={stat.player} className="py-2">

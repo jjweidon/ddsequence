@@ -2,6 +2,7 @@ import mongoose, { Schema } from 'mongoose';
 
 // 게임 로그 인터페이스
 export interface IGame {
+  _id?: string;         // MongoDB ID
   winningTeam: string[];  // 승리 팀 플레이어
   losingTeam: string[];   // 패배 팀 플레이어
   createdAt: Date;        // 생성 날짜
