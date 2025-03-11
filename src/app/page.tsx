@@ -30,14 +30,22 @@ export default function Home() {
 
   // 승리팀 플레이어 선택
   const handleSelectWinningPlayer = (player: string) => {
-    if (winningTeam.length < 2 && !winningTeam.includes(player) && !losingTeam.includes(player)) {
+    if (winningTeam.includes(player)) {
+      // 이미 선택된 플레이어라면 선택 해제
+      setWinningTeam(winningTeam.filter(p => p !== player));
+    } else if (winningTeam.length < 2 && !losingTeam.includes(player)) {
+      // 아직 선택되지 않았고, 패배팀에도 없으며, 승리팀이 2명 미만일 때 선택
       setWinningTeam([...winningTeam, player]);
     }
   };
 
   // 패배팀 플레이어 선택
   const handleSelectLosingPlayer = (player: string) => {
-    if (losingTeam.length < 2 && !losingTeam.includes(player) && !winningTeam.includes(player)) {
+    if (losingTeam.includes(player)) {
+      // 이미 선택된 플레이어라면 선택 해제
+      setLosingTeam(losingTeam.filter(p => p !== player));
+    } else if (losingTeam.length < 2 && !winningTeam.includes(player)) {
+      // 아직 선택되지 않았고, 승리팀에도 없으며, 패배팀이 2명 미만일 때 선택
       setLosingTeam([...losingTeam, player]);
     }
   };
@@ -133,29 +141,40 @@ export default function Home() {
           <h2 className="text-xl font-semibold">기록 추가</h2>
           
           <div className="flex justify-between items-center gap-2">
-            <PlayerSelect 
-              label="승" 
-              selectedPlayers={winningTeam} 
-              onSelectPlayer={handleSelectWinningPlayer} 
-            />
-
-            <PlayerSelect 
-              label="패" 
-              selectedPlayers={losingTeam} 
-              onSelectPlayer={handleSelectLosingPlayer} 
-            />
+            <div className="transition-all duration-300 ease-in-out transform hover:scale-105">
+              <PlayerSelect 
+                label="승" 
+                selectedPlayers={winningTeam} 
+                oppositeTeamPlayers={losingTeam}
+                onSelectPlayer={handleSelectWinningPlayer} 
+              />
+            </div>
+            
+            <div className="transition-all duration-300 ease-in-out transform hover:scale-105">
+              <PlayerSelect 
+                label="패" 
+                selectedPlayers={losingTeam} 
+                oppositeTeamPlayers={winningTeam}
+                onSelectPlayer={handleSelectLosingPlayer} 
+              />
+            </div>
           </div>
           
           {/* 버튼 영역 */}
           <div className="grid grid-cols-2 gap-4 mt-4">
             <button
-              className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-md"
+              className="bg-white border border-gray-300 text-gray-700 font-bold px-4 py-2 rounded-md 
+                transition-all duration-300 ease-in-out transform hover:bg-gray-100 hover:scale-105 
+                active:scale-95"
               onClick={handleReset}
             >
               초기화
             </button>
             <button
-              className="bg-indigo-600 text-white px-4 py-2 rounded-md disabled:opacity-50"
+              className="bg-indigo-600 text-white font-bold px-4 py-2 rounded-md 
+                transition-all duration-300 ease-in-out transform hover:bg-indigo-700 
+                hover:scale-105 active:scale-95 disabled:opacity-50 disabled:scale-100 
+                disabled:hover:bg-indigo-600"
               onClick={handleSubmit}
               disabled={loading || winningTeam.length !== 2 || losingTeam.length !== 2}
             >
@@ -164,8 +183,16 @@ export default function Home() {
           </div>
           
           {/* 에러/성공 메시지 */}
-          {error && <div className="text-red-500 mt-2">{error}</div>}
-          {success && <div className="text-green-500 mt-2">{success}</div>}
+          {error && (
+            <div className="text-red-500 mt-2 p-2 border border-red-200 bg-red-50 rounded animate-fadeIn">
+              {error}
+            </div>
+          )}
+          {success && (
+            <div className="text-green-500 mt-2 p-2 border border-green-200 bg-green-50 rounded animate-fadeIn">
+              {success}
+            </div>
+          )}
         </div>
         
         {/* 통계 */}
