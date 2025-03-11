@@ -1,4 +1,4 @@
-ddsequence.vercel.app
+[승률 계산기](https://ddsequence.vercel.app)
 
 # 뚱팸 시퀀스 승률 계산기
 
