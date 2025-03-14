@@ -1,35 +1,52 @@
 import React, { useState } from 'react';
 import { IGame } from '@/models/Game';
 
-type SortField = 'index' | 'createdAt';
-type SortDirection = 'asc' | 'desc';
+export type SortField = 'index' | 'createdAt';
+export type SortDirection = 'asc' | 'desc';
 
 interface GameHistoryListProps {
   games: IGame[];
   isEditMode?: boolean;
   selectedGames?: string[];
   setSelectedGames?: React.Dispatch<React.SetStateAction<string[]>>;
+  sortField?: SortField;
+  sortDirection?: SortDirection;
+  onSortChange?: (field: SortField, direction: SortDirection) => void;
 }
 
 const GameHistoryList: React.FC<GameHistoryListProps> = ({ 
   games,
   isEditMode = false,
   selectedGames = [],
-  setSelectedGames = () => {}
+  setSelectedGames = () => {},
+  sortField: propsSortField = 'createdAt',
+  sortDirection: propsSortDirection = 'desc',
+  onSortChange = () => {}
 }) => {
-  const [sortField, setSortField] = useState<SortField>('createdAt');
-  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [localSortField, setLocalSortField] = useState<SortField>(propsSortField);
+  const [localSortDirection, setLocalSortDirection] = useState<SortDirection>(propsSortDirection);
+
+  // props가 변경될 때 local 상태 업데이트
+  React.useEffect(() => {
+    setLocalSortField(propsSortField);
+    setLocalSortDirection(propsSortDirection);
+  }, [propsSortField, propsSortDirection]);
 
   // 정렬 토글 함수
   const toggleSort = (field: SortField) => {
-    if (sortField === field) {
+    let newDirection: SortDirection = 'desc';
+    
+    if (localSortField === field) {
       // 같은 필드를 다시 클릭하면 정렬 방향 토글
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      // 다른 필드 클릭 시 해당 필드로 변경, 기본 내림차순
-      setSortField(field);
-      setSortDirection('desc');
+      newDirection = localSortDirection === 'asc' ? 'desc' : 'asc';
     }
+    
+    // 로컬 상태 업데이트
+    setLocalSortField(field);
+    setLocalSortDirection(newDirection);
+    
+    // 부모 컴포넌트에 변경 알림
+    onSortChange(field, newDirection);
   };
 
   // 체크박스 토글 함수
@@ -56,16 +73,16 @@ const GameHistoryList: React.FC<GameHistoryListProps> = ({
 
   // 게임 데이터 정렬
   const sortedGames = [...games].sort((a, b) => {
-    if (sortField === 'index') {
+    if (localSortField === 'index') {
       // 인덱스 기준 정렬은 실제로는 createdAt 기준으로 정렬합니다
       const aTime = new Date(a.createdAt).getTime();
       const bTime = new Date(b.createdAt).getTime();
-      return sortDirection === 'asc' ? aTime - bTime : bTime - aTime;
+      return localSortDirection === 'asc' ? aTime - bTime : bTime - aTime;
     } else {
       // 날짜 기준 정렬
       const aTime = new Date(a.createdAt).getTime();
       const bTime = new Date(b.createdAt).getTime();
-      return sortDirection === 'asc' ? aTime - bTime : bTime - aTime;
+      return localSortDirection === 'asc' ? aTime - bTime : bTime - aTime;
     }
   });
 
@@ -116,9 +133,9 @@ const GameHistoryList: React.FC<GameHistoryListProps> = ({
                 onClick={() => toggleSort('index')}
               >
                 No.
-                {sortField === 'index' && (
+                {localSortField === 'index' && (
                   <span className="ml-1">
-                    {sortDirection === 'asc' ? '↑' : '↓'}
+                    {localSortDirection === 'asc' ? '↑' : '↓'}
                   </span>
                 )}
               </th>
@@ -127,9 +144,9 @@ const GameHistoryList: React.FC<GameHistoryListProps> = ({
                 onClick={() => toggleSort('createdAt')}
               >
                 날짜/시간
-                {sortField === 'createdAt' && (
+                {localSortField === 'createdAt' && (
                   <span className="ml-1">
-                    {sortDirection === 'asc' ? '↑' : '↓'}
+                    {localSortDirection === 'asc' ? '↑' : '↓'}
                   </span>
                 )}
               </th>
@@ -155,7 +172,7 @@ const GameHistoryList: React.FC<GameHistoryListProps> = ({
                   </td>
                 )}
                 <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
-                  {sortDirection === 'asc' ? index + 1 : games.length - index}
+                  {localSortDirection === 'asc' ? index + 1 : games.length - index}
                 </td>
                 <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
                   {formatDate(game.createdAt)}
@@ -205,7 +222,7 @@ const GameHistoryList: React.FC<GameHistoryListProps> = ({
                     </div>
                   )}
                   <span className="text-xs font-medium px-2 py-1 text-gray-500">
-                    {sortDirection === 'asc' ? index + 1 : games.length - index}
+                    {localSortDirection === 'asc' ? index + 1 : games.length - index}
                   </span>
                 </div>
                 <span className="text-xs text-gray-500">

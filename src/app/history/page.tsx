@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import GameHistoryList from '@/components/GameHistoryList';
 import { IGame } from '@/models/Game';
+import { SortField, SortDirection } from '@/components/GameHistoryList';
 
 export default function HistoryPage() {
   const [games, setGames] = useState<IGame[]>([]);
@@ -13,6 +14,8 @@ export default function HistoryPage() {
   const [selectedGames, setSelectedGames] = useState<string[]>([]);
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
   const [isCopied, setIsCopied] = useState<boolean>(false);
+  const [sortField, setSortField] = useState<SortField>('createdAt');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
   // 게임 데이터 가져오기
   const fetchGames = async () => {
@@ -74,20 +77,38 @@ export default function HistoryPage() {
     }
   };
 
+  // 정렬 상태 변경 처리
+  const handleSortChange = (field: SortField, direction: SortDirection) => {
+    setSortField(field);
+    setSortDirection(direction);
+  };
+
   // 날짜 포맷팅 함수 (YYYY년 MM월 DD일)
   const formatDate = (dateString: string | Date) => {
     const date = new Date(dateString);
     return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
   };
 
+  // 현재 정렬 설정에 따라 게임 정렬
+  const getSortedGames = () => {
+    return [...games].sort((a, b) => {
+      const aTime = new Date(a.createdAt).getTime();
+      const bTime = new Date(b.createdAt).getTime();
+      
+      if (sortField === 'index' || sortField === 'createdAt') {
+        return sortDirection === 'asc' ? aTime - bTime : bTime - aTime;
+      }
+      
+      return 0;
+    });
+  };
+
   // 게임 데이터를 날짜별로 그룹화
   const groupGamesByDate = () => {
     const groupedGames: { [key: string]: IGame[] } = {};
     
-    // 날짜 순으로 정렬 (최신순)
-    const sortedGames = [...games].sort((a, b) => {
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    });
+    // 현재 정렬 설정에 따라 정렬된 게임
+    const sortedGames = getSortedGames();
     
     // 날짜별로 그룹화
     sortedGames.forEach(game => {
@@ -106,7 +127,10 @@ export default function HistoryPage() {
     let text = `https://ddsequence.vercel.app\n\n`;
     
     const groupedGames = groupGamesByDate();
-    let counter = 1;
+    
+    // 정렬된 전체 게임 목록
+    const sortedGames = getSortedGames();
+    let gameCounter = 1;
     
     // 날짜별로 순회
     Object.entries(groupedGames).forEach(([date, gamesInDay]) => {
@@ -116,8 +140,13 @@ export default function HistoryPage() {
       gamesInDay.forEach(game => {
         const winTeam = game.winningTeam.join('');
         const loseTeam = game.losingTeam.join('');
-        text += `${counter}. ${winTeam} 승 : ${loseTeam} 패\n`;
-        counter++;
+        
+        // 정렬 방향에 따라 게임 번호 결정
+        const gameNumber = sortDirection === 'asc' 
+          ? gameCounter++ 
+          : sortedGames.length - gameCounter++ + 1;
+        
+        text += `${(gameNumber + ".").padEnd(4)} ${winTeam} 승 : ${loseTeam} 패\n`;
       });
       
       text += '\n';
@@ -237,6 +266,9 @@ export default function HistoryPage() {
               isEditMode={isEditMode}
               selectedGames={selectedGames}
               setSelectedGames={setSelectedGames}
+              sortField={sortField}
+              sortDirection={sortDirection}
+              onSortChange={handleSortChange}
             />
           )}
         </div>
