@@ -15,6 +15,7 @@ export default function Home() {
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [statsLoading, setStatsLoading] = useState<boolean>(false);
+  const [isCopied, setIsCopied] = useState<boolean>(false);
   
   // 통계 데이터
   const [stats, setStats] = useState<{
@@ -126,6 +127,48 @@ export default function Home() {
     }
   };
 
+  // 통계 데이터를 텍스트로 변환
+  const getStatsAsText = () => {
+    let text = `https://ddsequence.vercel.app\n\n`;
+    text += `전체 게임 수: ${stats.totalGames}\n\n`;
+    
+    // 팀 승률
+    text += '팀 승률:\n';
+    stats.teamWinrates.forEach((team, index) => {
+      text += `${index + 1}위 팀 ${team.team}: ${team.winrate.toFixed(2)}% (승리: ${team.wins}, 경기 수: ${team.total})\n`;
+    });
+    
+    // 개인 승률
+    text += '\n개인 승률:\n';
+    stats.playerWinrates.forEach((player) => {
+      text += `${player.rank}위 ${player.player}: ${player.winrate.toFixed(2)}% (승리: ${player.wins}, 경기 수: ${player.total})\n`;
+    });
+    
+    // 개인 승리 횟수
+    text += '\n개인 승리 횟수 순위:\n';
+    stats.playerWins.forEach((player) => {
+      text += `${player.rank}위 ${player.player}: 승리 ${player.wins}회\n`;
+    });
+    
+    return text;
+  };
+
+  // 통계 복사 함수
+  const copyStatsToClipboard = async () => {
+    try {
+      const statsText = getStatsAsText();
+      await navigator.clipboard.writeText(statsText);
+      setIsCopied(true);
+      
+      // 2초 후 아이콘 원래대로 변경
+      setTimeout(() => {
+        setIsCopied(false);
+      }, 2000);
+    } catch (err) {
+      console.error('클립보드 복사 실패:', err);
+    }
+  };
+
   // 컴포넌트 마운트 시 통계 데이터 가져오기
   useEffect(() => {
     fetchStats();
@@ -198,11 +241,29 @@ export default function Home() {
         
         {/* 통계 */}
         <div className="mt-8 w-full">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">통계</h2>
-            <Link href="/history" className="text-gray-500 hover:text-gray-700 transition-colors">
+          <div className="flex flex-col mb-4">
+            <Link href="/history" className="self-end text-gray-500 hover:text-gray-700 transition-colors mb-2">
               역대 기록 &gt;
             </Link>
+            <div className="flex items-center">
+              <h2 className="text-xl font-semibold">통계</h2>
+              <button 
+                onClick={copyStatsToClipboard}
+                className="ml-2 text-gray-400 hover:text-gray-600 transition-colors focus:outline-none"
+                title="통계 복사하기"
+              >
+                {isCopied ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                    <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                  </svg>
+                )}
+              </button>
+            </div>
           </div>
           {statsLoading ? (
             <div className="text-center">통계 로딩 중...</div>
