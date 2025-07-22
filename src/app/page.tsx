@@ -132,16 +132,16 @@ export default function Home() {
     let text = `https://ddsequence.vercel.app\n\n`;
     text += `전체 게임 수: ${stats.totalGames}\n\n`;
     
-    // 팀 승률
-    text += '팀 승률:\n';
-    stats.teamWinrates.forEach((team, index) => {
-      text += `${index + 1}위 팀 ${team.team}: ${team.winrate.toFixed(2)}% (승리: ${team.wins}, 경기 수: ${team.total})\n`;
-    });
-    
     // 개인 승률
-    text += '\n개인 승률:\n';
+    text += '개인 승률:\n';
     stats.playerWinrates.forEach((player) => {
       text += `${player.rank}위 ${player.player}: ${player.winrate.toFixed(2)}% (승리: ${player.wins}, 경기 수: ${player.total})\n`;
+    });
+    
+    // 팀 승률
+    text += '\n팀 승률:\n';
+    stats.teamWinrates.forEach((team, index) => {
+      text += `${index + 1}위 팀 ${team.team}: ${team.winrate.toFixed(2)}% (승리: ${team.wins}, 경기 수: ${team.total})\n`;
     });
     
     // 개인 승리 횟수
