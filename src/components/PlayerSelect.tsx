@@ -17,7 +17,9 @@ const PlayerSelect: React.FC<PlayerSelectProps> = ({
   
   return (
     <div className="flex flex-col items-center w-full gap-2">
-      <label className="text-lg font-semibold">{label}</label>
+      <label className={`text-lg font-semibold ${label === '승' ? 'text-green-700' : 'text-red-700'}`}>
+        {label}
+      </label>
       <div className="flex flex-wrap gap-2 justify-center">
         {players.map((player) => {
           // 현재 팀에서 선택된 플레이어
@@ -25,18 +27,32 @@ const PlayerSelect: React.FC<PlayerSelectProps> = ({
           // 반대 팀에서 선택된 플레이어
           const isOppositeSelected = oppositeTeamPlayers.includes(player);
           
+          const baseClasses = "w-12 h-12 rounded-full text-xl font-bold shadow";
+          const transitionClasses = "transition-[transform,background-color,box-shadow] duration-300 ease-in-out";
+          
+          const buttonClasses = `${baseClasses} ${transitionClasses} ${
+            isSelected 
+              ? label === '승'
+                ? 'bg-green-600 text-white scale-110 shadow-lg hover:bg-green-700 border-0' 
+                : 'bg-red-600 text-white scale-110 shadow-lg hover:bg-red-700 border-0'
+              : isOppositeSelected
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60 border-0' 
+                : label === '승'
+                  ? 'bg-white text-gray-700 hover:bg-green-50'
+                  : 'bg-white text-gray-700 hover:bg-red-50'
+          }`;
+          
           return (
             <button
               key={player}
-              className={`w-12 h-12 rounded-full text-xl font-bold shadow 
-                transition-all duration-300 ease-in-out transform
-                ${isSelected 
-                  ? 'bg-indigo-600 text-white scale-110 shadow-lg' 
-                  : isOppositeSelected
-                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60' 
-                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'}`}
+              className={buttonClasses}
               onClick={() => onSelectPlayer(player)}
               disabled={isOppositeSelected}
+              style={{
+                borderWidth: isSelected ? 0 : '1px',
+                borderStyle: 'solid',
+                borderColor: isSelected ? 'transparent' : (label === '승' ? '#86efac' : '#fca5a5')
+              }}
             >
               {player}
             </button>
