@@ -329,7 +329,7 @@ export default function Home() {
             </div>
             
             {/* 기간 선택 탭 */}
-            <div className="relative flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1 mb-4">
+            <div className="relative flex bg-transparent rounded-lg p-2 mb-4">
               {/* 슬라이더 바 */}
               <div
                 className="absolute bottom-1 left-0 h-[calc(100%-8px)] bg-indigo-100 dark:bg-indigo-700 rounded-md z-0 transition-all duration-300"

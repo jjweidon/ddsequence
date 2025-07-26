@@ -15,6 +15,15 @@ const PlayerSelect: React.FC<PlayerSelectProps> = ({
 }) => {
   const players = ['잡', '큐', '지', '머', '웅'];
   
+  // 플레이어 표시 이름 매핑
+  const playerDisplayNames: { [key: string]: string } = {
+    '잡': '채림',
+    '큐': '순규',
+    '지': '진호',
+    '머': '희림',
+    '웅': '재웅'
+  };
+  
   return (
     <div className="flex flex-col items-center w-full gap-2">
       <label className={`text-lg font-semibold ${label === '승' ? 'text-green-700' : 'text-red-700'}`}>
@@ -27,7 +36,7 @@ const PlayerSelect: React.FC<PlayerSelectProps> = ({
           // 반대 팀에서 선택된 플레이어
           const isOppositeSelected = oppositeTeamPlayers.includes(player);
           
-          const baseClasses = "w-12 h-12 rounded-full text-xl font-bold shadow";
+          const baseClasses = "w-16 h-10 rounded-lg text-lg font-bold shadow";
           const transitionClasses = "transition-[transform,background-color,box-shadow] duration-300 ease-in-out";
           
           const buttonClasses = `${baseClasses} ${transitionClasses} ${
@@ -54,7 +63,7 @@ const PlayerSelect: React.FC<PlayerSelectProps> = ({
                 borderColor: isSelected ? 'transparent' : (label === '승' ? '#86efac' : '#fca5a5')
               }}
             >
-              {player}
+              {playerDisplayNames[player]}
             </button>
           );
         })}
