@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import PlayerSelect from '@/components/PlayerSelect';
 import StatsList from '@/components/StatsList';
+import DateRangeSelector from '@/components/DateRangeSelector';
 
 export default function Home() {
   // 선택된 플레이어
@@ -29,6 +30,10 @@ export default function Home() {
     teamWinrates: [],
     playerWins: []
   });
+
+  // 기간별 통계 관련 상태
+  const [dateRangeMode, setDateRangeMode] = useState<'all' | 'custom'>('all');
+  const [dateRange, setDateRange] = useState<{ startDate: string; endDate: string } | null>(null);
 
   // 승리팀 플레이어 선택
   const handleSelectWinningPlayer = (player: string) => {
@@ -108,11 +113,20 @@ export default function Home() {
   };
 
   // 통계 데이터 가져오기
-  const fetchStats = async () => {
+  const fetchStats = async (startDate?: string, endDate?: string) => {
     setStatsLoading(true);
     
     try {
-      const response = await fetch('/api/stats');
+      let url = '/api/stats';
+      const params = new URLSearchParams();
+      
+      if (startDate && endDate) {
+        params.append('startDate', startDate);
+        params.append('endDate', endDate);
+        url += `?${params.toString()}`;
+      }
+      
+      const response = await fetch(url);
       const data = await response.json();
       
       if (!response.ok) {
@@ -127,10 +141,30 @@ export default function Home() {
     }
   };
 
+  // 기간별 통계 모드 변경
+  const handleDateRangeModeChange = (mode: 'all' | 'custom') => {
+    setDateRangeMode(mode);
+    if (mode === 'all') {
+      setDateRange(null);
+      fetchStats();
+    }
+  };
+
+  // 기간 변경 처리
+  const handleDateRangeChange = (startDate: string, endDate: string) => {
+    setDateRange({ startDate, endDate });
+    fetchStats(startDate, endDate);
+  };
+
   // 통계 데이터를 텍스트로 변환
   const getStatsAsText = () => {
     let text = `https://ddsequence.vercel.app\n\n`;
-    text += `전체 게임 수: ${stats.totalGames}\n\n`;
+    
+    if (dateRangeMode === 'custom' && dateRange) {
+      text += `기간: ${dateRange.startDate} ~ ${dateRange.endDate}\n`;
+    }
+    
+    text += `게임 수: ${stats.totalGames}\n\n`;
     
     // 개인 승률
     text += '개인 승률:\n';
@@ -245,11 +279,11 @@ export default function Home() {
             <Link href="/history" className="self-end text-gray-500 hover:text-gray-700 transition-colors mb-2">
               역대 기록 &gt;
             </Link>
-            <div className="flex items-center">
+            <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold">통계</h2>
               <button 
                 onClick={copyStatsToClipboard}
-                className="ml-2 text-gray-400 hover:text-gray-600 transition-colors focus:outline-none"
+                className="text-gray-400 hover:text-gray-600 transition-colors focus:outline-none"
                 title="통계 복사하기"
               >
                 {isCopied ? (
@@ -264,6 +298,44 @@ export default function Home() {
                 )}
               </button>
             </div>
+            
+            {/* 기간 선택 탭 */}
+            <div className="relative flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1 mb-4">
+              {/* 슬라이더 바 */}
+              <div
+                className="absolute bottom-1 left-0 h-[calc(100%-8px)] bg-indigo-100 dark:bg-indigo-700 rounded-md z-0 transition-all duration-300"
+                style={{
+                  width: '50%',
+                  left: dateRangeMode === 'all' ? '0%' : '50%',
+                }}
+              />
+              <button
+                onClick={() => handleDateRangeModeChange('all')}
+                className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all duration-200 cursor-pointer relative z-10 ${
+                  dateRangeMode === 'all'
+                    ? 'text-indigo-600 dark:text-white font-semibold'
+                    : 'text-gray-600 dark:text-white'
+                }`}
+              >
+                전체 기간
+              </button>
+              <button
+                onClick={() => handleDateRangeModeChange('custom')}
+                className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all duration-200 cursor-pointer relative z-10 ${
+                  dateRangeMode === 'custom'
+                    ? 'text-indigo-600 dark:text-white font-black'
+                    : 'text-gray-600 dark:text-white'
+                }`}
+              >
+                기간 선택
+              </button>
+            </div>
+            
+            {/* 기간 선택 컴포넌트 */}
+            <DateRangeSelector
+              onDateRangeChange={handleDateRangeChange}
+              isActive={dateRangeMode === 'custom'}
+            />
           </div>
           {statsLoading ? (
             <div className="text-center">통계 로딩 중...</div>
@@ -273,6 +345,7 @@ export default function Home() {
               playerWinrates={stats.playerWinrates}
               teamWinrates={stats.teamWinrates}
               playerWins={stats.playerWins}
+              dateRange={dateRange}
             />
           )}
         </div>

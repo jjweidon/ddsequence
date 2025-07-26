@@ -28,18 +28,35 @@ interface StatsListProps {
   playerWinrates: PlayerWinrateData[];
   teamWinrates: TeamWinrateData[];
   playerWins: PlayerWinsData[];
+  dateRange?: { startDate: string; endDate: string } | null;
 }
 
 const StatsList: React.FC<StatsListProps> = ({
   totalGames,
   playerWinrates,
   teamWinrates,
-  playerWins
+  playerWins,
+  dateRange
 }) => {
+  // 날짜에서 요일을 가져오는 함수
+  const getDayOfWeek = (dateString: string) => {
+    const date = new Date(dateString);
+    const days = ['일', '월', '화', '수', '목', '금', '토'];
+    return days[date.getDay()];
+  };
   return (
     <div className="flex flex-col w-full gap-6 mt-4">
       <div className="text-lg font-semibold text-center">
-        전체 게임 수: {totalGames}
+        {dateRange ? (
+          <div>
+            <div className="text-sm text-gray-600 mb-1">
+              {dateRange.startDate} ({getDayOfWeek(dateRange.startDate)}) ~ {dateRange.endDate} ({getDayOfWeek(dateRange.endDate)})
+            </div>
+            <div>게임 수: {totalGames}</div>
+          </div>
+        ) : (
+          <div>전체 게임 수: {totalGames}</div>
+        )}
       </div>
       
       {/* 개인 승률 */}

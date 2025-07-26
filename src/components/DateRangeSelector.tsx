@@ -1,0 +1,135 @@
+import React, { useState } from 'react';
+
+interface DateRangeSelectorProps {
+  onDateRangeChange: (startDate: string, endDate: string) => void;
+  isActive: boolean;
+}
+
+const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({ 
+  onDateRangeChange, 
+  isActive 
+}) => {
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
+
+  // 오늘 날짜를 YYYY-MM-DD 형식으로 반환
+  const getTodayString = () => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  };
+
+  // 빠른 선택 버튼들
+  const quickSelectOptions = [
+    { label: '최근 7일', days: 7 },
+    { label: '이번주', type: 'thisWeek' },
+    { label: '이번달', type: 'thisMonth' },
+    { label: '이번년도', type: 'thisYear' }
+  ];
+
+  // 빠른 선택 처리
+  const handleQuickSelect = (option: any) => {
+    const today = new Date();
+    let start: Date, end: Date;
+
+    if (option.days) {
+      // N일 전부터 오늘까지
+      end = new Date(today);
+      start = new Date(today);
+      start.setDate(today.getDate() - option.days + 1);
+    } else if (option.type === 'thisWeek') {
+      // 이번주 (월요일부터 오늘까지)
+      const dayOfWeek = today.getDay(); // 0: 일요일, 1: 월요일, ..., 6: 토요일
+      const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // 월요일을 0으로 만들기
+      start = new Date(today);
+      start.setDate(today.getDate() - mondayOffset);
+      end = new Date(today);
+    } else if (option.type === 'thisMonth') {
+      // 이번달
+      start = new Date(today.getFullYear(), today.getMonth(), 1);
+      end = new Date(today);
+    } else if (option.type === 'thisYear') {
+      // 이번년도
+      start = new Date(today.getFullYear(), 0, 1); // 1월 1일
+      end = new Date(today);
+    } else {
+      // 기본값 (오늘)
+      start = new Date(today);
+      end = new Date(today);
+    }
+
+    const startStr = start.toISOString().split('T')[0];
+    const endStr = end.toISOString().split('T')[0];
+    
+    setStartDate(startStr);
+    setEndDate(endStr);
+    onDateRangeChange(startStr, endStr);
+  };
+
+  // 수동 날짜 변경 처리
+  const handleDateChange = () => {
+    if (startDate && endDate) {
+      onDateRangeChange(startDate, endDate);
+    }
+  };
+
+  if (!isActive) return null;
+
+  return (
+    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 mb-4 shadow-sm animate-fadeIn">
+      <h3 className="text-sm font-medium text-gray-700 dark:text-white mb-3">기간 선택</h3>
+      
+      {/* 빠른 선택 버튼들 */}
+      <div className="flex flex-wrap gap-2 mb-4">
+        {quickSelectOptions.map((option, index) => (
+          <button
+            key={index}
+            onClick={() => handleQuickSelect(option)}
+            className="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-md 
+                     hover:bg-gray-200 transition-colors duration-200"
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+      
+      {/* 수동 날짜 선택 */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex-1">
+            <label className="block text-xs text-gray-600 dark:text-white mb-1">시작일</label>
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            max={getTodayString()}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm
+                     focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+          />
+        </div>
+        <div className="flex-1">
+          <label className="block text-xs text-gray-600 dark:text-white mb-1">종료일</label>
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            max={getTodayString()}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm
+                     focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+          />
+        </div>
+      </div>
+      
+      {/* 적용 버튼 */}
+      <button
+        onClick={handleDateChange}
+        disabled={!startDate || !endDate}
+        className="mt-3 w-full bg-indigo-600 text-white text-sm py-2 px-4 rounded-md
+                 hover:bg-indigo-700 transition-colors duration-200
+                 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        기간 적용
+      </button>
+    </div>
+  );
+};
+
+export default DateRangeSelector; 

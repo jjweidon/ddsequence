@@ -11,10 +11,26 @@ import {
 } from '@/utils/gameStats';
 
 // GET: 게임 통계 데이터 제공
-export async function GET() {
+export async function GET(request: Request) {
   try {
     await dbConnect();
-    const games = await Game.find().sort({ createdAt: -1 });
+    
+    // URL 파라미터에서 기간 정보 추출
+    const { searchParams } = new URL(request.url);
+    const startDate = searchParams.get('startDate');
+    const endDate = searchParams.get('endDate');
+    
+    // 쿼리 조건 구성
+    let query: any = {};
+    
+    if (startDate && endDate) {
+      query.createdAt = {
+        $gte: new Date(startDate + 'T00:00:00.000Z'),
+        $lte: new Date(endDate + 'T23:59:59.999Z')
+      };
+    }
+    
+    const games = await Game.find(query).sort({ createdAt: -1 });
     
     // 통계 계산
     const playerStats = calculatePlayerStats(games);
