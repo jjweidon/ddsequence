@@ -20,10 +20,10 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
 
   // 빠른 선택 버튼들
   const quickSelectOptions = [
-    { label: '최근 7일', days: 7 },
-    { label: '이번주', type: 'thisWeek' },
-    { label: '이번달', type: 'thisMonth' },
-    { label: '이번년도', type: 'thisYear' }
+    { label: '1일', days: 1 },
+    { label: '7일', days: 7 },
+    { label: '30일', days: 30 },
+    { label: '365일', days: 365 }
   ];
 
   // 빠른 선택 처리
@@ -32,33 +32,9 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
     e.stopPropagation(); // 이벤트 버블링 방지
     
     const today = new Date();
-    let start: Date, end: Date;
-
-    if (option.days) {
-      // N일 전부터 오늘까지
-      end = new Date(today);
-      start = new Date(today);
-      start.setDate(today.getDate() - option.days + 1);
-    } else if (option.type === 'thisWeek') {
-      // 이번주 (월요일부터 오늘까지)
-      const dayOfWeek = today.getDay(); // 0: 일요일, 1: 월요일, ..., 6: 토요일
-      const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // 월요일을 0으로 만들기
-      start = new Date(today);
-      start.setDate(today.getDate() - mondayOffset);
-      end = new Date(today);
-    } else if (option.type === 'thisMonth') {
-      // 이번달
-      start = new Date(today.getFullYear(), today.getMonth(), 1);
-      end = new Date(today);
-    } else if (option.type === 'thisYear') {
-      // 이번년도
-      start = new Date(today.getFullYear(), 0, 1); // 1월 1일
-      end = new Date(today);
-    } else {
-      // 기본값 (오늘)
-      start = new Date(today);
-      end = new Date(today);
-    }
+    const end = new Date(today);
+    const start = new Date(today);
+    start.setDate(today.getDate() - option.days + 1);
 
     const startStr = start.toISOString().split('T')[0];
     const endStr = end.toISOString().split('T')[0];
