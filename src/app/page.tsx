@@ -134,8 +134,10 @@ export default function Home() {
       }
       
       setStats(data.data);
+      return data.data; // Promise를 반환하도록 수정
     } catch (error: any) {
       console.error('통계 데이터 불러오기 오류:', error);
+      throw error; // 에러를 다시 던져서 Promise rejection 처리
     } finally {
       setStatsLoading(false);
     }
@@ -146,14 +148,36 @@ export default function Home() {
     setDateRangeMode(mode);
     if (mode === 'all') {
       setDateRange(null);
-      fetchStats();
+      // 전체 기간으로 돌아갈 때는 통계를 다시 가져오지 않음
+      // 이미 초기 로드 시 전체 기간 통계가 로드되어 있음
     }
   };
 
   // 기간 변경 처리
   const handleDateRangeChange = (startDate: string, endDate: string) => {
     setDateRange({ startDate, endDate });
-    fetchStats(startDate, endDate);
+    
+    // 백그라운드에서 통계를 가져오되, 로딩 상태는 변경하지 않음
+    setTimeout(async () => {
+      try {
+        let url = '/api/stats';
+        const params = new URLSearchParams();
+        params.append('startDate', startDate);
+        params.append('endDate', endDate);
+        url += `?${params.toString()}`;
+        
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.error || '통계 데이터를 가져오는 중 오류가 발생했습니다.');
+        }
+        
+        setStats(data.data);
+      } catch (error: any) {
+        console.error('통계 데이터 불러오기 오류:', error);
+      }
+    }, 100);
   };
 
   // 통계 데이터를 텍스트로 변환
@@ -282,7 +306,12 @@ export default function Home() {
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold">통계</h2>
               <button 
-                onClick={copyStatsToClipboard}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  copyStatsToClipboard();
+                }}
                 className="text-gray-400 hover:text-gray-600 transition-colors focus:outline-none"
                 title="통계 복사하기"
               >
@@ -310,7 +339,12 @@ export default function Home() {
                 }}
               />
               <button
-                onClick={() => handleDateRangeModeChange('all')}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleDateRangeModeChange('all');
+                }}
                 className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all duration-200 cursor-pointer relative z-10 ${
                   dateRangeMode === 'all'
                     ? 'text-indigo-600 dark:text-white font-semibold'
@@ -320,7 +354,12 @@ export default function Home() {
                 전체 기간
               </button>
               <button
-                onClick={() => handleDateRangeModeChange('custom')}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleDateRangeModeChange('custom');
+                }}
                 className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all duration-200 cursor-pointer relative z-10 ${
                   dateRangeMode === 'custom'
                     ? 'text-indigo-600 dark:text-white font-black'

@@ -27,7 +27,10 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
   ];
 
   // 빠른 선택 처리
-  const handleQuickSelect = (option: any) => {
+  const handleQuickSelect = (option: any, e: React.MouseEvent) => {
+    e.preventDefault(); // 기본 동작 방지
+    e.stopPropagation(); // 이벤트 버블링 방지
+    
     const today = new Date();
     let start: Date, end: Date;
 
@@ -62,20 +65,27 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
     
     setStartDate(startStr);
     setEndDate(endStr);
-    onDateRangeChange(startStr, endStr);
+    // 빠른 선택 시에는 즉시 통계를 가져오지 않고, 사용자가 적용 버튼을 클릭할 때까지 대기
   };
 
   // 수동 날짜 변경 처리
-  const handleDateChange = () => {
+  const handleDateChange = (e: React.MouseEvent) => {
+    e.preventDefault(); // 기본 동작 방지
+    e.stopPropagation(); // 이벤트 버블링 방지
+    
     if (startDate && endDate) {
       onDateRangeChange(startDate, endDate);
     }
   };
 
-  if (!isActive) return null;
-
   return (
-    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 mb-4 shadow-sm animate-fadeIn">
+    <div 
+      className={`bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 mb-4 shadow-sm transition-all duration-300 ease-in-out ${
+        isActive 
+          ? 'opacity-100 max-h-96 transform translate-y-0' 
+          : 'opacity-0 max-h-0 overflow-hidden transform -translate-y-4 pointer-events-none'
+      }`}
+    >
       <h3 className="text-sm font-medium text-gray-700 dark:text-white mb-3">기간 선택</h3>
       
       {/* 빠른 선택 버튼들 */}
@@ -83,9 +93,10 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
         {quickSelectOptions.map((option, index) => (
           <button
             key={index}
-            onClick={() => handleQuickSelect(option)}
-            className="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-md 
-                     hover:bg-gray-200 transition-colors duration-200"
+            type="button"
+            onClick={(e) => handleQuickSelect(option, e)}
+            className="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-md dark:bg-gray-700 dark:text-white
+                     hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200 font-bold"
           >
             {option.label}
           </button>
@@ -120,6 +131,7 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
       
       {/* 적용 버튼 */}
       <button
+        type="button"
         onClick={handleDateChange}
         disabled={!startDate || !endDate}
         className="mt-3 w-full bg-indigo-600 text-white text-sm py-2 px-4 rounded-md
