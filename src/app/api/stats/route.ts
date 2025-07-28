@@ -24,9 +24,15 @@ export async function GET(request: Request) {
     let query: any = {};
     
     if (startDate && endDate) {
+      // 한국 시간 기준으로 날짜 범위 설정
+      // startDate의 00:00:00 (한국 시간) = UTC로는 전날 15:00:00
+      // endDate의 23:59:59 (한국 시간) = UTC로는 다음날 14:59:59
+      const startDateTime = new Date(startDate + 'T00:00:00+09:00');
+      const endDateTime = new Date(endDate + 'T23:59:59+09:00');
+      
       query.createdAt = {
-        $gte: new Date(startDate + 'T00:00:00.000Z'),
-        $lte: new Date(endDate + 'T23:59:59.999Z')
+        $gte: startDateTime,
+        $lte: endDateTime
       };
     }
     

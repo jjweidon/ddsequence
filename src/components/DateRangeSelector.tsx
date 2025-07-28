@@ -12,10 +12,12 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
 
-  // 오늘 날짜를 YYYY-MM-DD 형식으로 반환
+  // 오늘 날짜를 YYYY-MM-DD 형식으로 반환 (한국 시간 기준)
   const getTodayString = () => {
     const today = new Date();
-    return today.toISOString().split('T')[0];
+    // 한국 시간대로 변환 (UTC+9)
+    const koreaTime = new Date(today.getTime() + (9 * 60 * 60 * 1000));
+    return koreaTime.toISOString().split('T')[0];
   };
 
   // 빠른 선택 버튼들
@@ -26,15 +28,18 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
     { label: '365일', days: 365 }
   ];
 
-  // 빠른 선택 처리
+  // 빠른 선택 처리 (한국 시간 기준)
   const handleQuickSelect = (option: any, e: React.MouseEvent) => {
     e.preventDefault(); // 기본 동작 방지
     e.stopPropagation(); // 이벤트 버블링 방지
     
     const today = new Date();
-    const end = new Date(today);
-    const start = new Date(today);
-    start.setDate(today.getDate() - option.days + 1);
+    // 한국 시간대로 변환
+    const koreaTime = new Date(today.getTime() + (9 * 60 * 60 * 1000));
+    
+    const end = new Date(koreaTime);
+    const start = new Date(koreaTime);
+    start.setDate(koreaTime.getDate() - option.days + 1);
 
     const startStr = start.toISOString().split('T')[0];
     const endStr = end.toISOString().split('T')[0];
