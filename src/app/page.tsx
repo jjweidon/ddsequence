@@ -5,6 +5,7 @@ import Link from 'next/link';
 import PlayerSelect from '@/components/PlayerSelect';
 import StatsList from '@/components/StatsList';
 import DateRangeSelector from '@/components/DateRangeSelector';
+import { useStatsStore } from '@/lib/statsStore';
 
 export default function Home() {
   // 선택된 플레이어
@@ -15,25 +16,21 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [statsLoading, setStatsLoading] = useState<boolean>(false);
   const [isCopied, setIsCopied] = useState<boolean>(false);
   
-  // 통계 데이터
-  const [stats, setStats] = useState<{
-    totalGames: number;
-    playerWinrates: any[];
-    teamWinrates: any[];
-    playerWins: any[];
-  }>({
-    totalGames: 0,
-    playerWinrates: [],
-    teamWinrates: [],
-    playerWins: []
-  });
-
   // 기간별 통계 관련 상태
   const [dateRangeMode, setDateRangeMode] = useState<'all' | 'custom'>('all');
-  const [dateRange, setDateRange] = useState<{ startDate: string; endDate: string } | null>(null);
+  
+  // Zustand 스토어에서 통계 상태 가져오기
+  const {
+    currentStats: stats,
+    loading: statsLoading,
+    error: statsError,
+    dateRange,
+    fetchAllStats,
+    filterStatsByDateRange,
+    resetDateRange
+  } = useStatsStore();
 
   // 승리팀 플레이어 선택
   const handleSelectWinningPlayer = (player: string) => {
@@ -104,7 +101,7 @@ export default function Home() {
 
       setSuccess('게임 데이터가 성공적으로 저장되었습니다.');
       handleReset();
-      fetchStats(); // 통계 다시 가져오기
+      fetchAllStats(); // 통계 다시 가져오기
     } catch (error: any) {
       setError(error.message || '게임 데이터 저장 중 오류가 발생했습니다.');
     } finally {
@@ -112,76 +109,23 @@ export default function Home() {
     }
   };
 
-  // 통계 데이터 가져오기
-  const fetchStats = async (startDate?: string, endDate?: string) => {
-    setStatsLoading(true);
-    
-    try {
-      let url = '/api/stats';
-      const params = new URLSearchParams();
-      
-      if (startDate && endDate) {
-        params.append('startDate', startDate);
-        params.append('endDate', endDate);
-        url += `?${params.toString()}`;
-      }
-      
-      const response = await fetch(url);
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error || '통계 데이터를 가져오는 중 오류가 발생했습니다.');
-      }
-      
-      setStats(data.data);
-      return data.data; // Promise를 반환하도록 수정
-    } catch (error: any) {
-      console.error('통계 데이터 불러오기 오류:', error);
-      throw error; // 에러를 다시 던져서 Promise rejection 처리
-    } finally {
-      setStatsLoading(false);
-    }
-  };
-
-  // 기간별 통계 모드 변경
+    // 기간별 통계 모드 변경
   const handleDateRangeModeChange = (mode: 'all' | 'custom') => {
     setDateRangeMode(mode);
     if (mode === 'all') {
-      setDateRange(null);
-      // 전체 기간으로 돌아갈 때는 통계를 다시 가져오지 않음
-      // 이미 초기 로드 시 전체 기간 통계가 로드되어 있음
+      resetDateRange();
     }
   };
 
   // 기간 변경 처리
   const handleDateRangeChange = (startDate: string, endDate: string) => {
-    setDateRange({ startDate, endDate });
-    
-    // 백그라운드에서 통계를 가져오되, 로딩 상태는 변경하지 않음
-    setTimeout(async () => {
-      try {
-        let url = '/api/stats';
-        const params = new URLSearchParams();
-        params.append('startDate', startDate);
-        params.append('endDate', endDate);
-        url += `?${params.toString()}`;
-        
-        const response = await fetch(url);
-        const data = await response.json();
-        
-        if (!response.ok) {
-          throw new Error(data.error || '통계 데이터를 가져오는 중 오류가 발생했습니다.');
-        }
-        
-        setStats(data.data);
-      } catch (error: any) {
-        console.error('통계 데이터 불러오기 오류:', error);
-      }
-    }, 100);
+    filterStatsByDateRange(startDate, endDate);
   };
 
   // 통계 데이터를 텍스트로 변환
   const getStatsAsText = () => {
+    if (!stats) return '';
+    
     let text = `https://ddsequence.vercel.app\n\n`;
     
     if (dateRangeMode === 'custom' && dateRange) {
@@ -229,7 +173,7 @@ export default function Home() {
 
   // 컴포넌트 마운트 시 통계 데이터 가져오기
   useEffect(() => {
-    fetchStats();
+    fetchAllStats();
   }, []);
 
   return (
@@ -379,13 +323,15 @@ export default function Home() {
           {statsLoading ? (
             <div className="text-center">통계 로딩 중...</div>
           ) : (
-            <StatsList 
-              totalGames={stats.totalGames}
-              playerWinrates={stats.playerWinrates}
-              teamWinrates={stats.teamWinrates}
-              playerWins={stats.playerWins}
-              dateRange={dateRange}
-            />
+            stats && (
+              <StatsList 
+                totalGames={stats.totalGames}
+                playerWinrates={stats.playerWinrates}
+                teamWinrates={stats.teamWinrates}
+                playerWins={stats.playerWins}
+                dateRange={dateRange}
+              />
+            )
           )}
         </div>
       </div>

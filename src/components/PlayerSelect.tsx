@@ -42,10 +42,10 @@ const PlayerSelect: React.FC<PlayerSelectProps> = ({
           const buttonClasses = `${baseClasses} ${transitionClasses} ${
             isSelected 
               ? label === '승'
-                ? 'bg-green-600 text-white scale-110 shadow-lg hover:bg-green-700 border-0' 
+                ? 'bg-green-600 text-white scale-110 shadow-lg hover:bg-green-700 border-0'
                 : 'bg-red-600 text-white scale-110 shadow-lg hover:bg-red-700 border-0'
               : isOppositeSelected
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60 border-0' 
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60 border-0'
                 : label === '승'
                   ? 'bg-white text-gray-700 hover:bg-green-50'
                   : 'bg-white text-gray-700 hover:bg-red-50'
