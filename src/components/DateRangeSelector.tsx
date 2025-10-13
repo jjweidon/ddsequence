@@ -25,6 +25,8 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
     { label: '1일', days: 1 },
     { label: '7일', days: 7 },
     { label: '30일', days: 30 },
+    { label: '3개월', days: 90 },
+    { label: '6개월', days: 180 },
     { label: '365일', days: 365 }
   ];
 
