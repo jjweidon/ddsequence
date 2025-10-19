@@ -112,93 +112,116 @@ const GameHistoryList: React.FC<GameHistoryListProps> = ({
   };
 
   return (
-    <div className="w-full overflow-hidden rounded-lg">
+    <div className="w-full">
       {/* 데스크탑 테이블 뷰 - 모바일에서는 숨김 */}
-      <div className="hidden sm:block">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              {isEditMode && (
-                <th className="px-2 py-2 w-10">
-                  <input
-                    type="checkbox"
-                    className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                    checked={games.length > 0 && selectedGames.length === games.length}
-                    onChange={toggleSelectAll}
-                  />
-                </th>
-              )}
-              <th 
-                className="px-3 py-2 text-left text-xs font-bold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                onClick={() => toggleSort('index')}
-              >
-                No.
-                {localSortField === 'index' && (
-                  <span className="ml-1">
-                    {localSortDirection === 'asc' ? '↑' : '↓'}
-                  </span>
-                )}
-              </th>
-              <th 
-                className="px-3 py-2 text-left text-xs font-bold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                onClick={() => toggleSort('createdAt')}
-              >
-                날짜/시간
-                {localSortField === 'createdAt' && (
-                  <span className="ml-1">
-                    {localSortDirection === 'asc' ? '↑' : '↓'}
-                  </span>
-                )}
-              </th>
-              <th className="px-3 py-2 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                승리팀
-              </th>
-              <th className="px-3 py-2 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                패배팀
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {sortedGames.map((game, index) => (
-              <tr key={game._id || index} className="hover:bg-gray-50">
+      <div className="hidden sm:block bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
+            <thead>
+              <tr className="bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-900 dark:to-gray-900">
                 {isEditMode && (
-                  <td className="px-2 py-2 whitespace-nowrap w-10">
+                  <th className="px-4 py-4 w-12">
                     <input
                       type="checkbox"
-                      className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                      checked={selectedGames.includes(game._id || '')}
-                      onChange={() => game._id && toggleGameSelection(game._id)}
+                      className="h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 
+                               focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 cursor-pointer"
+                      checked={games.length > 0 && selectedGames.length === games.length}
+                      onChange={toggleSelectAll}
                     />
-                  </td>
+                  </th>
                 )}
-                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
-                  {localSortDirection === 'asc' ? index + 1 : games.length - index}
-                </td>
-                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
-                  {formatDate(game.createdAt)}
-                </td>
-                <td className="px-3 py-2 whitespace-nowrap">
-                  <div className="flex items-center space-x-1">
-                    {game.winningTeam.map(player => (
-                      <span key={player} className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-green-100 text-green-800 font-medium text-sm">
-                        {player}
+                <th 
+                  className="px-4 py-4 text-left text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider 
+                           cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-200 select-none"
+                  onClick={() => toggleSort('index')}
+                >
+                  <div className="flex items-center gap-2">
+                    No.
+                    {localSortField === 'index' && (
+                      <span className="text-blue-600 dark:text-blue-400 font-bold">
+                        {localSortDirection === 'asc' ? '↑' : '↓'}
                       </span>
-                    ))}
+                    )}
                   </div>
-                </td>
-                <td className="px-3 py-2 whitespace-nowrap">
-                  <div className="flex items-center space-x-1">
-                    {game.losingTeam.map(player => (
-                      <span key={player} className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-red-100 text-red-800 font-medium text-sm">
-                        {player}
+                </th>
+                <th 
+                  className="px-4 py-4 text-left text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider 
+                           cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-200 select-none"
+                  onClick={() => toggleSort('createdAt')}
+                >
+                  <div className="flex items-center gap-2">
+                    날짜/시간
+                    {localSortField === 'createdAt' && (
+                      <span className="text-blue-600 dark:text-blue-400 font-bold">
+                        {localSortDirection === 'asc' ? '↑' : '↓'}
                       </span>
-                    ))}
+                    )}
                   </div>
-                </td>
+                </th>
+                <th className="px-4 py-4 text-left text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                  승리팀
+                </th>
+                <th className="px-4 py-4 text-left text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                  패배팀
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+              {sortedGames.map((game, index) => (
+                <tr 
+                  key={game._id || index} 
+                  className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors duration-150 animate-fadeIn"
+                  style={{ animationDelay: `${index * 20}ms` }}
+                >
+                  {isEditMode && (
+                    <td className="px-4 py-4 whitespace-nowrap w-12">
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 
+                                 focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 cursor-pointer"
+                        checked={selectedGames.includes(game._id || '')}
+                        onChange={() => game._id && toggleGameSelection(game._id)}
+                      />
+                    </td>
+                  )}
+                  <td className="px-4 py-4 whitespace-nowrap">
+                    <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 
+                                   text-slate-700 dark:text-slate-300 text-sm font-bold">
+                      {localSortDirection === 'asc' ? index + 1 : games.length - index}
+                    </span>
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-slate-600 dark:text-slate-400 font-medium">
+                    {formatDate(game.createdAt)}
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                      {game.winningTeam.map(player => (
+                        <span key={player} className="inline-flex items-center justify-center h-9 w-9 rounded-xl 
+                                                    bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900/40 dark:to-green-900/40 
+                                                    text-emerald-800 dark:text-emerald-300 font-bold text-sm 
+                                                    shadow-sm border border-emerald-200 dark:border-emerald-800">
+                          {player}
+                        </span>
+                      ))}
+                    </div>
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                      {game.losingTeam.map(player => (
+                        <span key={player} className="inline-flex items-center justify-center h-9 w-9 rounded-xl 
+                                                    bg-gradient-to-br from-rose-100 to-red-100 dark:from-rose-900/40 dark:to-red-900/40 
+                                                    text-rose-800 dark:text-rose-300 font-bold text-sm 
+                                                    shadow-sm border border-rose-200 dark:border-rose-800">
+                          {player}
+                        </span>
+                      ))}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
       
       {/* 모바일 카드 뷰 - 데스크탑에서는 숨김 */}
@@ -207,46 +230,61 @@ const GameHistoryList: React.FC<GameHistoryListProps> = ({
           {sortedGames.map((game, index) => (
             <div 
               key={game._id || index} 
-              className="bg-white rounded-lg shadow-sm border border-gray-100 p-3"
+              className="bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 
+                       p-4 transition-all duration-200 hover:shadow-lg animate-fadeIn"
+              style={{ animationDelay: `${index * 30}ms` }}
             >
-              <div className="flex justify-between items-center mb-2">
-                <div className="flex items-center">
+              <div className="flex justify-between items-center mb-3">
+                <div className="flex items-center gap-2">
                   {isEditMode && (
-                    <div className="mr-2">
-                      <input
-                        type="checkbox"
-                        className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                        checked={selectedGames.includes(game._id || '')}
-                        onChange={() => game._id && toggleGameSelection(game._id)}
-                      />
-                    </div>
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 
+                               focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 cursor-pointer"
+                      checked={selectedGames.includes(game._id || '')}
+                      onChange={() => game._id && toggleGameSelection(game._id)}
+                    />
                   )}
-                  <span className="text-xs font-medium px-2 py-1 text-gray-500">
-                    {localSortDirection === 'asc' ? index + 1 : games.length - index}
+                  <span className="inline-flex items-center justify-center min-w-[32px] h-7 px-2 rounded-lg 
+                                 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 
+                                 text-xs font-bold">
+                    #{localSortDirection === 'asc' ? index + 1 : games.length - index}
                   </span>
                 </div>
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
                   {formatMobileDate(game.createdAt)}
                 </span>
               </div>
               
-              <div className="flex items-center justify-between mt-2">
-                <div className="w-1/2">
-                  <p className="text-xs text-gray-500 mb-1">승리팀</p>
-                  <div className="flex flex-wrap gap-1">
+              <div className="flex items-stretch gap-3">
+                <div className="flex-1 bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 
+                              rounded-xl p-3 border border-emerald-200 dark:border-emerald-800">
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">승리</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
                     {game.winningTeam.map(player => (
-                      <span key={player} className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-green-100 text-green-800 font-medium text-xs">
+                      <span key={player} className="inline-flex items-center justify-center h-8 w-8 rounded-lg 
+                                                  bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-800 dark:to-green-800 
+                                                  text-emerald-800 dark:text-emerald-200 font-bold text-sm 
+                                                  shadow-sm border border-emerald-300 dark:border-emerald-700">
                         {player}
                       </span>
                     ))}
                   </div>
                 </div>
                 
-                <div className="w-1/2">
-                  <p className="text-xs text-gray-500 mb-1">패배팀</p>
-                  <div className="flex flex-wrap gap-1">
+                <div className="flex-1 bg-gradient-to-br from-rose-50 to-red-50 dark:from-rose-900/20 dark:to-red-900/20 
+                              rounded-xl p-3 border border-rose-200 dark:border-rose-800">
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <span className="text-xs font-bold text-rose-700 dark:text-rose-400">패배</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
                     {game.losingTeam.map(player => (
-                      <span key={player} className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-red-100 text-red-800 font-medium text-xs">
+                      <span key={player} className="inline-flex items-center justify-center h-8 w-8 rounded-lg 
+                                                  bg-gradient-to-br from-rose-100 to-red-100 dark:from-rose-800 dark:to-red-800 
+                                                  text-rose-800 dark:text-rose-200 font-bold text-sm 
+                                                  shadow-sm border border-rose-300 dark:border-rose-700">
                         {player}
                       </span>
                     ))}
@@ -259,8 +297,9 @@ const GameHistoryList: React.FC<GameHistoryListProps> = ({
       </div>
       
       {games.length === 0 && (
-        <div className="text-center py-6 text-gray-500 text-sm">
-          기록된 게임이 없습니다.
+        <div className="text-center py-12 bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700">
+          <div className="text-5xl mb-4 opacity-40">🎮</div>
+          <p className="text-slate-500 dark:text-slate-400 font-medium">기록된 게임이 없습니다.</p>
         </div>
       )}
     </div>

@@ -177,102 +177,144 @@ export default function HistoryPage() {
   }, []);
 
   return (
-    <>
-      <main className="flex min-h-screen flex-col items-center p-3 sm:p-6 max-w-4xl mx-auto">
-        <div className="w-full">
-          {/* 모바일과 데스크탑 화면에 맞는 헤더 레이아웃 */}
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 gap-3 sm:gap-0">
-            {/* 제목 및 편집 버튼 */}
-            <div className="flex items-center justify-between sm:justify-start sm:gap-4">
-              <div className="flex items-center">
-                <h1 className="text-xl sm:text-2xl font-bold">게임 기록</h1>
-                <button 
-                  onClick={copyGamesToClipboard}
-                  className="ml-2 text-gray-400 hover:text-gray-600 transition-colors focus:outline-none"
-                  title="게임 기록 복사하기"
-                >
-                  {isCopied ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                      <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                      <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
-                    </svg>
-                  )}
-                </button>
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-900 py-6 sm:py-8 px-4 sm:px-6">
+      <div className="max-w-6xl mx-auto">
+        {/* 헤더 */}
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            {/* 좌측: 제목과 복사 버튼 */}
+            <div className="flex items-center gap-3">
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                  게임 기록
+                </h1>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mt-0.5">
+                  전체 {games.length} 게임
+                </p>
               </div>
               <button 
+                onClick={copyGamesToClipboard}
+                className="p-2.5 rounded-xl bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700
+                         text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 
+                         hover:border-blue-300 dark:hover:border-blue-600
+                         transition-all duration-200 shadow-sm hover:shadow-md
+                         focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2"
+                title="게임 기록 복사하기"
+              >
+                {isCopied ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-emerald-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                    <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                  </svg>
+                )}
+              </button>
+            </div>
+            
+            {/* 우측: 액션 버튼들 */}
+            <div className="flex items-center gap-3">
+              <Link 
+                href="/" 
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 
+                         border-2 border-slate-200 dark:border-slate-700
+                         text-slate-700 dark:text-slate-200 font-semibold text-sm
+                         hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-blue-300 dark:hover:border-blue-600
+                         transition-all duration-200 shadow-sm hover:shadow-md
+                         focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+                <span>홈으로</span>
+              </Link>
+              
+              {isEditMode && (
+                <button
+                  onClick={handleDeleteSelected}
+                  disabled={selectedGames.length === 0 || deleteLoading}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm
+                           transition-all duration-200 shadow-sm hover:shadow-md
+                           focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
+                    selectedGames.length === 0 || deleteLoading
+                      ? 'bg-slate-300 dark:bg-slate-700 text-slate-500 dark:text-slate-500 cursor-not-allowed'
+                      : 'bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 text-white shadow-rose-500/30 hover:scale-[1.02] focus-visible:ring-rose-400'
+                  }`}
+                >
+                  {deleteLoading ? (
+                    <>
+                      <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      삭제 중...
+                    </>
+                  ) : (
+                    <>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                      삭제 {selectedGames.length > 0 && `(${selectedGames.length})`}
+                    </>
+                  )}
+                </button>
+              )}
+              
+              <button 
                 onClick={toggleEditMode}
-                className={`px-2 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm rounded-md transition-colors ${
+                className={`px-4 py-2.5 rounded-xl font-bold text-sm transition-all duration-200 shadow-sm hover:shadow-md
+                         focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 ${
                   isEditMode 
-                    ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' 
-                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                    ? 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-600' 
+                    : 'bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-blue-300 dark:hover:border-blue-600'
                 }`}
               >
                 {isEditMode ? '완료' : '편집'}
               </button>
             </div>
-            
-            {/* 삭제 버튼 및 홈으로 돌아가기 링크 */}
-            <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3">
-              {isEditMode && (
-                <button
-                  onClick={handleDeleteSelected}
-                  disabled={selectedGames.length === 0 || deleteLoading}
-                  className={`px-2 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm rounded-md text-white transition-colors ${
-                    selectedGames.length === 0 || deleteLoading
-                      ? 'bg-red-300 cursor-not-allowed'
-                      : 'bg-red-500 hover:bg-red-600'
-                  }`}
-                >
-                  {deleteLoading 
-                    ? '삭제 중...' 
-                    : selectedGames.length > 0 
-                      ? `삭제 (${selectedGames.length})` 
-                      : '삭제'
-                  }
-                </button>
-              )}
-              
-              <Link 
-                href="/" 
-                className="text-xs sm:text-sm text-indigo-600 hover:text-indigo-800 transition-colors whitespace-nowrap"
-              >
-                &lt; 홈으로
-              </Link>
-            </div>
           </div>
-
-          {loading ? (
-            <div className="text-center py-6 sm:py-8">
-              <div className="inline-block animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-t-2 border-b-2 border-indigo-600"></div>
-              <p className="mt-2 text-sm sm:text-base text-gray-500">기록 불러오는 중...</p>
-            </div>
-          ) : error ? (
-            <div className="text-center py-6 sm:py-8 text-red-500 text-sm sm:text-base">
-              <p>{error}</p>
-              <button 
-                className="mt-3 sm:mt-4 px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors"
-                onClick={fetchGames}
-              >
-                다시 시도
-              </button>
-            </div>
-          ) : (
-            <GameHistoryList 
-              games={games} 
-              isEditMode={isEditMode}
-              selectedGames={selectedGames}
-              setSelectedGames={setSelectedGames}
-              sortField={sortField}
-              sortDirection={sortDirection}
-              onSortChange={handleSortChange}
-            />
-          )}
         </div>
-      </main>
-    </>
+
+        {/* 컨텐츠 */}
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-slate-800 rounded-2xl 
+                        shadow-md border border-slate-200 dark:border-slate-700">
+            <svg className="animate-spin h-12 w-12 text-blue-600 dark:text-blue-400 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p className="text-slate-600 dark:text-slate-400 font-medium text-lg">기록 불러오는 중...</p>
+          </div>
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-slate-800 rounded-2xl 
+                        shadow-md border border-slate-200 dark:border-slate-700">
+            <div className="text-6xl mb-4 opacity-40">⚠️</div>
+            <p className="text-rose-600 dark:text-rose-400 font-medium text-lg mb-4">{error}</p>
+            <button 
+              className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 
+                       dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800
+                       text-white font-bold rounded-xl shadow-lg shadow-blue-500/30
+                       transition-all duration-200 transform hover:scale-[1.02]
+                       focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2"
+              onClick={fetchGames}
+            >
+              다시 시도
+            </button>
+          </div>
+        ) : (
+          <GameHistoryList 
+            games={games} 
+            isEditMode={isEditMode}
+            selectedGames={selectedGames}
+            setSelectedGames={setSelectedGames}
+            sortField={sortField}
+            sortDirection={sortDirection}
+            onSortChange={handleSortChange}
+          />
+        )}
+      </div>
+    </main>
   );
 } 

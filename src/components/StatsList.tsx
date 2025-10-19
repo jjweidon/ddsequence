@@ -44,57 +44,128 @@ const StatsList: React.FC<StatsListProps> = ({
     const days = ['일', '월', '화', '수', '목', '금', '토'];
     return days[date.getDay()];
   };
+
   return (
-    <div className="flex flex-col w-full gap-6 mt-4">
-      <div className="text-lg font-semibold text-center">
-        {dateRange ? (
-          <div>
-            <div className="text-sm text-gray-600 mb-1">
-              {dateRange.startDate} ({getDayOfWeek(dateRange.startDate)}) ~ {dateRange.endDate} ({getDayOfWeek(dateRange.endDate)})
-            </div>
-            <div>게임 수: {totalGames}</div>
-          </div>
-        ) : (
-          <div>전체 게임 수: {totalGames}</div>
-        )}
-      </div>
-      
-      {/* 개인 승률 */}
-      <div className="flex flex-col gap-2">
-        <h3 className="text-lg font-semibold">개인 승률</h3>
-        <div className="flex flex-col divide-y divide-gray-200">
-          {playerWinrates.map((stat) => (
-            <div key={stat.player} className="py-2 flex justify-between">
-              <span>{stat.rank}위 {stat.player}: {stat.winrate.toFixed(2)}%</span>
-              <span className="text-gray-600">(승리: {stat.wins}, 경기 수: {stat.total})</span>
-            </div>
-          ))}
+    <div className="flex flex-col w-full gap-4">
+      {/* 게임 수 */}
+      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-4 py-3">
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-slate-600 dark:text-slate-400">
+            {dateRange 
+              ? `${dateRange.startDate} (${getDayOfWeek(dateRange.startDate)}) ~ ${dateRange.endDate} (${getDayOfWeek(dateRange.endDate)})`
+              : '전체 기간'
+            }
+          </span>
+          <span className="text-lg font-bold text-slate-800 dark:text-slate-100">
+            총 {totalGames}게임
+          </span>
         </div>
       </div>
       
-      {/* 팀 승률 */}
-      <div className="flex flex-col gap-2">
-        <h3 className="text-lg font-semibold">팀 승률</h3>
-        <div className="flex flex-col divide-y divide-gray-200">
-          {teamWinrates.map((stat) => (
-            <div key={stat.team} className="py-2 flex justify-between">
-              <span>{stat.rank}위 팀 {stat.team}: {stat.winrate.toFixed(2)}%</span>
-              <span className="text-gray-600">(승리: {stat.wins}, 경기 수: {stat.total})</span>
-            </div>
-          ))}
+      {/* 개인 승률 테이블 */}
+      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
+        <div className="px-4 py-3 bg-slate-100 dark:bg-slate-700 border-b border-slate-200 dark:border-slate-600">
+          <h3 className="font-bold text-slate-800 dark:text-slate-100">개인 승률</h3>
         </div>
+        <table className="w-full">
+          <thead>
+            <tr className="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-600">
+              <th className="px-4 py-2 text-left text-xs font-semibold text-slate-600 dark:text-slate-400">순위</th>
+              <th className="px-4 py-2 text-left text-xs font-semibold text-slate-600 dark:text-slate-400">이름</th>
+              <th className="px-4 py-2 text-right text-xs font-semibold text-slate-600 dark:text-slate-400">승률</th>
+              <th className="px-4 py-2 text-right text-xs font-semibold text-slate-600 dark:text-slate-400">승/패(게임수)</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+            {playerWinrates.map((stat) => (
+              <tr 
+                key={stat.player} 
+                className={`${stat.rank === 1 ? 'bg-blue-50 dark:bg-blue-900/20' : 'hover:bg-slate-50 dark:hover:bg-slate-700/30'}`}
+              >
+                <td className="px-4 py-3">
+                  <span className={`inline-flex items-center justify-center w-7 h-7 rounded font-bold text-sm ${
+                    stat.rank === 1 
+                      ? 'bg-blue-600 text-white' 
+                      : 'text-slate-600 dark:text-slate-400'
+                  }`}>
+                    {stat.rank}
+                  </span>
+                </td>
+                <td className="px-4 py-3 font-semibold text-slate-800 dark:text-slate-100">
+                  {stat.player}
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <span className={`text-lg font-bold ${
+                    stat.rank === 1 
+                      ? 'text-blue-600 dark:text-blue-400' 
+                      : 'text-slate-800 dark:text-slate-100'
+                  }`}>
+                    {stat.winrate.toFixed(1)}%
+                  </span>
+                </td>
+                <td className="px-4 py-3 text-right text-sm text-slate-600 dark:text-slate-400">
+                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">{stat.wins}</span>
+                  <span className="mx-1">/</span>
+                  <span className="font-semibold text-rose-600 dark:text-rose-400">{stat.total - stat.wins}</span>
+                  <span className="ml-1 text-xs">({stat.total})</span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
       
-      {/* 개인 승리 횟수 */}
-      <div className="flex flex-col gap-2">
-        <h3 className="text-lg font-semibold">개인 승리 횟수 순위</h3>
-        <div className="flex flex-col divide-y divide-gray-200">
-          {playerWins.map((stat) => (
-            <div key={stat.player} className="py-2">
-              <span>{stat.rank}위 {stat.player}: 승리 {stat.wins}회</span>
-            </div>
-          ))}
+      {/* 팀 승률 테이블 */}
+      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
+        <div className="px-4 py-3 bg-slate-100 dark:bg-slate-700 border-b border-slate-200 dark:border-slate-600">
+          <h3 className="font-bold text-slate-800 dark:text-slate-100">팀 승률</h3>
         </div>
+        <table className="w-full">
+          <thead>
+            <tr className="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-600">
+              <th className="px-4 py-2 text-left text-xs font-semibold text-slate-600 dark:text-slate-400">순위</th>
+              <th className="px-4 py-2 text-left text-xs font-semibold text-slate-600 dark:text-slate-400">팀</th>
+              <th className="px-4 py-2 text-right text-xs font-semibold text-slate-600 dark:text-slate-400">승률</th>
+              <th className="px-4 py-2 text-right text-xs font-semibold text-slate-600 dark:text-slate-400">승/패(게임수)</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+            {teamWinrates.map((stat) => (
+              <tr 
+                key={stat.team} 
+                className={`${stat.rank === 1 ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'hover:bg-slate-50 dark:hover:bg-slate-700/30'}`}
+              >
+                <td className="px-4 py-3">
+                  <span className={`inline-flex items-center justify-center w-7 h-7 rounded font-bold text-sm ${
+                    stat.rank === 1 
+                      ? 'bg-emerald-600 text-white' 
+                      : 'text-slate-600 dark:text-slate-400'
+                  }`}>
+                    {stat.rank}
+                  </span>
+                </td>
+                <td className="px-4 py-3 font-semibold text-slate-800 dark:text-slate-100">
+                  {stat.team}
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <span className={`text-lg font-bold ${
+                    stat.rank === 1 
+                      ? 'text-emerald-600 dark:text-emerald-400' 
+                      : 'text-slate-800 dark:text-slate-100'
+                  }`}>
+                    {stat.winrate.toFixed(1)}%
+                  </span>
+                </td>
+                <td className="px-4 py-3 text-right text-sm text-slate-600 dark:text-slate-400">
+                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">{stat.wins}</span>
+                  <span className="mx-1">/</span>
+                  <span className="font-semibold text-rose-600 dark:text-rose-400">{stat.total - stat.wins}</span>
+                  <span className="ml-1 text-xs">({stat.total})</span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

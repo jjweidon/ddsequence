@@ -177,26 +177,42 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="flex min-h-screen flex-col items-center p-6 max-w-md mx-auto">
-      <h1 className="text-2xl font-bold mb-8 text-center border-b pb-4 w-full">
-        뚱팸 시퀀스 승률 계산기
-      </h1>
-      
-      <div className="flex flex-col gap-8 w-full">
-        <div className="grid grid-cols-1 gap-8 w-full">
-          <h2 className="text-xl font-semibold">기록 추가</h2>
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-900 py-8 px-4 sm:px-6">
+      <div className="max-w-2xl mx-auto">
+        {/* 헤더 */}
+        <div className="text-center mb-8">
           
-          <div className="flex justify-between items-center gap-2">
-            <div className="transition-all duration-300 ease-in-out transform hover:scale-105">
+          <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-400 dark:to-blue-500 
+                       bg-clip-text text-transparent">
+            뚱팸 시퀀스
+          </h1>
+          <p className="text-slate-600 dark:text-slate-400 text-sm">승률 계산기</p>
+        </div>
+      
+        <div className="flex flex-col gap-6 w-full">
+        {/* 기록 추가 섹션 */}
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 
+                      overflow-hidden">
+          <div className="px-6 py-5 bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-900 dark:to-gray-900 
+                        border-b border-slate-200 dark:border-slate-700">
+            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+              기록 추가
+            </h2>
+          </div>
+          
+          <div className="p-6 space-y-6">
+            <div className="flex flex-row justify-center items-start gap-3 sm:gap-6">
               <PlayerSelect 
                 label="승" 
                 selectedPlayers={winningTeam} 
                 oppositeTeamPlayers={losingTeam}
                 onSelectPlayer={handleSelectWinningPlayer} 
               />
-            </div>
-            
-            <div className="transition-all duration-300 ease-in-out transform hover:scale-105">
+              
+              <div className="flex items-center justify-center pt-6">
+                <div className="w-px h-12 bg-slate-200 dark:bg-slate-700"></div>
+              </div>
+              
               <PlayerSelect 
                 label="패" 
                 selectedPlayers={losingTeam} 
@@ -204,51 +220,67 @@ export default function Home() {
                 onSelectPlayer={handleSelectLosingPlayer} 
               />
             </div>
-          </div>
-          
-          {/* 버튼 영역 */}
-          <div className="grid grid-cols-2 gap-4 mt-4">
-            <button
-              className="bg-white border border-gray-300 text-gray-700 font-bold px-4 py-2 rounded-md 
-                transition-all duration-300 ease-in-out transform hover:bg-gray-100 hover:scale-105 
-                active:scale-95"
-              onClick={handleReset}
-            >
-              초기화
-            </button>
-            <button
-              className="bg-indigo-600 text-white font-bold px-4 py-2 rounded-md 
-                transition-all duration-300 ease-in-out transform hover:bg-indigo-700 
-                hover:scale-105 active:scale-95 disabled:opacity-50 disabled:scale-100 
-                disabled:hover:bg-indigo-600"
-              onClick={handleSubmit}
-              disabled={loading || winningTeam.length !== 2 || losingTeam.length !== 2}
-            >
-              {loading ? '로딩...' : '등록'}
-            </button>
-          </div>
-          
-          {/* 에러/성공 메시지 */}
-          {error && (
-            <div className="text-red-500 mt-2 p-2 border border-red-200 bg-red-50 rounded animate-fadeIn">
-              {error}
+            
+            {/* 버튼 영역 */}
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                className="bg-white dark:bg-slate-700 border-2 border-slate-300 dark:border-slate-600 
+                         text-slate-700 dark:text-slate-200 font-bold px-6 py-3 rounded-xl 
+                         transition-all duration-200 transform hover:bg-slate-50 dark:hover:bg-slate-600 
+                         hover:scale-[1.02] hover:shadow-md active:scale-95
+                         focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
+                onClick={handleReset}
+              >
+                초기화
+              </button>
+              <button
+                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 
+                         dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800
+                         text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-blue-500/30
+                         transition-all duration-200 transform hover:scale-[1.02] hover:shadow-xl 
+                         active:scale-95 disabled:opacity-50 disabled:scale-100 disabled:hover:shadow-lg
+                         disabled:cursor-not-allowed
+                         focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2"
+                onClick={handleSubmit}
+                disabled={loading || winningTeam.length !== 2 || losingTeam.length !== 2}
+              >
+                {loading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    등록 중...
+                  </span>
+                ) : '등록하기'}
+              </button>
             </div>
-          )}
-          {success && (
-            <div className="text-green-500 mt-2 p-2 border border-green-200 bg-green-50 rounded animate-fadeIn">
-              {success}
-            </div>
-          )}
+            
+            {/* 에러/성공 메시지 */}
+            {error && (
+              <div className="bg-rose-50 dark:bg-rose-900/20 border-2 border-rose-200 dark:border-rose-800 
+                            text-rose-700 dark:text-rose-300 px-4 py-3 rounded-xl animate-fadeIn flex items-start gap-3">
+                <span className="text-xl flex-shrink-0">⚠️</span>
+                <span className="text-sm font-medium">{error}</span>
+              </div>
+            )}
+            {success && (
+              <div className="bg-emerald-50 dark:bg-emerald-900/20 border-2 border-emerald-200 dark:border-emerald-800 
+                            text-emerald-700 dark:text-emerald-300 px-4 py-3 rounded-xl animate-fadeIn flex items-start gap-3">
+                <span className="text-xl flex-shrink-0">✅</span>
+                <span className="text-sm font-medium">{success}</span>
+              </div>
+            )}
+          </div>
         </div>
         
-        {/* 통계 */}
-        <div className="mt-8 w-full">
-          <div className="flex flex-col mb-4">
-            <Link href="/history" className="self-end text-gray-500 hover:text-gray-700 transition-colors mb-2">
-              역대 기록 &gt;
-            </Link>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">통계</h2>
+        {/* 통계 섹션 */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+              통계
+            </h2>
+            <div className="flex items-center gap-3">
               <button 
                 type="button"
                 onClick={(e) => {
@@ -256,11 +288,15 @@ export default function Home() {
                   e.stopPropagation();
                   copyStatsToClipboard();
                 }}
-                className="text-gray-400 hover:text-gray-600 transition-colors focus:outline-none"
+                className="p-2.5 rounded-xl bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700
+                         text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 
+                         hover:border-blue-300 dark:hover:border-blue-600
+                         transition-all duration-200 shadow-sm hover:shadow-md
+                         focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2"
                 title="통계 복사하기"
               >
                 {isCopied ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-emerald-500" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 ) : (
@@ -270,13 +306,30 @@ export default function Home() {
                   </svg>
                 )}
               </button>
+              <Link 
+                href="/history" 
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 
+                         border-2 border-slate-200 dark:border-slate-700
+                         text-slate-700 dark:text-slate-200 font-semibold text-sm
+                         hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-blue-300 dark:hover:border-blue-600
+                         transition-all duration-200 shadow-sm hover:shadow-md
+                         focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2"
+              >
+                <span>역대 기록</span>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                </svg>
+              </Link>
             </div>
-            
-            {/* 기간 선택 탭 */}
-            <div className="relative flex bg-transparent rounded-lg p-2 mb-4">
+          </div>
+          
+          {/* 기간 선택 탭 */}
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 p-2">
+            <div className="relative flex rounded-xl overflow-hidden">
               {/* 슬라이더 바 */}
               <div
-                className="absolute bottom-1 left-0 h-[calc(100%-8px)] bg-indigo-100 dark:bg-indigo-700 rounded-md z-0 transition-all duration-300"
+                className="absolute inset-y-0 bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 
+                         rounded-lg shadow-md transition-all duration-300 ease-out"
                 style={{
                   width: '50%',
                   left: dateRangeMode === 'all' ? '0%' : '50%',
@@ -289,10 +342,10 @@ export default function Home() {
                   e.stopPropagation();
                   handleDateRangeModeChange('all');
                 }}
-                className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all duration-200 cursor-pointer relative z-10 ${
+                className={`flex-1 py-3 px-6 text-sm font-bold rounded-lg transition-all duration-200 relative z-10 ${
                   dateRangeMode === 'all'
-                    ? 'text-indigo-600 dark:text-white font-semibold'
-                    : 'text-gray-600 dark:text-white'
+                    ? 'text-white'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                 }`}
               >
                 전체 기간
@@ -304,24 +357,33 @@ export default function Home() {
                   e.stopPropagation();
                   handleDateRangeModeChange('custom');
                 }}
-                className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all duration-200 cursor-pointer relative z-10 ${
+                className={`flex-1 py-3 px-6 text-sm font-bold rounded-lg transition-all duration-200 relative z-10 ${
                   dateRangeMode === 'custom'
-                    ? 'text-indigo-600 dark:text-white font-black'
-                    : 'text-gray-600 dark:text-white'
+                    ? 'text-white'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                 }`}
               >
                 기간 선택
               </button>
             </div>
-            
-            {/* 기간 선택 컴포넌트 */}
-            <DateRangeSelector
-              onDateRangeChange={handleDateRangeChange}
-              isActive={dateRangeMode === 'custom'}
-            />
           </div>
+          
+          {/* 기간 선택 컴포넌트 */}
+          <DateRangeSelector
+            onDateRangeChange={handleDateRangeChange}
+            isActive={dateRangeMode === 'custom'}
+          />
+          
+          {/* 통계 데이터 */}
           {statsLoading ? (
-            <div className="text-center">통계 로딩 중...</div>
+            <div className="flex flex-col items-center justify-center py-16 bg-white dark:bg-slate-800 rounded-2xl 
+                          shadow-md border border-slate-200 dark:border-slate-700">
+              <svg className="animate-spin h-12 w-12 text-blue-600 dark:text-blue-400 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <p className="text-slate-600 dark:text-slate-400 font-medium">통계 로딩 중...</p>
+            </div>
           ) : (
             stats && (
               <StatsList 
@@ -334,6 +396,7 @@ export default function Home() {
             )
           )}
         </div>
+      </div>
       </div>
     </main>
   );
