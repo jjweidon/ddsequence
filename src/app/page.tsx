@@ -236,9 +236,9 @@ export default function Home() {
               <button
                 className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 
                          dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800
-                         text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-blue-500/30
-                         transition-all duration-200 transform hover:scale-[1.02] hover:shadow-xl 
-                         active:scale-95 disabled:opacity-50 disabled:scale-100 disabled:hover:shadow-lg
+                         text-white font-bold px-6 py-3 rounded-xl
+                         transition-all duration-200 transform hover:scale-[1.02]
+                         active:scale-95 disabled:opacity-50 disabled:scale-100
                          disabled:cursor-not-allowed
                          focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2"
                 onClick={handleSubmit}
