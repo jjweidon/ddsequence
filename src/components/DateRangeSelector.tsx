@@ -27,7 +27,7 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
     { label: '30일', days: 30 },
     { label: '3개월', days: 90 },
     { label: '6개월', days: 180 },
-    { label: '365일', days: 365 }
+    { label: '1년', days: 365 }
   ];
 
   // 빠른 선택 처리 (한국 시간 기준)
@@ -104,7 +104,7 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
           <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-3 uppercase tracking-wider">
             직접 입력
           </label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                 시작일

@@ -325,7 +325,7 @@ export default function Home() {
           
           {/* 기간 선택 탭 */}
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 p-2">
-            <div className="relative flex rounded-xl overflow-hidden">
+            <div className="relative flex rounded-lg overflow-hidden">
               {/* 슬라이더 바 */}
               <div
                 className="absolute inset-y-0 bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 
