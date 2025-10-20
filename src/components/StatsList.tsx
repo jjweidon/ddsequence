@@ -77,40 +77,64 @@ const StatsList: React.FC<StatsListProps> = ({
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-            {playerWinrates.map((stat) => (
-              <tr 
-                key={stat.player} 
-                className={`${stat.rank === 1 ? 'bg-blue-50 dark:bg-blue-900/20' : 'hover:bg-slate-50 dark:hover:bg-slate-700/30'}`}
-              >
-                <td className="px-4 py-3">
-                  <span className={`inline-flex items-center justify-center w-7 h-7 rounded font-bold text-sm ${
-                    stat.rank === 1 
-                      ? 'bg-blue-600 text-white' 
-                      : 'text-slate-600 dark:text-slate-400'
-                  }`}>
-                    {stat.rank}
-                  </span>
-                </td>
-                <td className="px-4 py-3 font-semibold text-slate-800 dark:text-slate-100">
-                  {stat.player}
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <span className={`text-lg font-bold ${
-                    stat.rank === 1 
-                      ? 'text-blue-600 dark:text-blue-400' 
+            {playerWinrates.map((stat) => {
+              const isFirstPlace = stat.rank === 1;
+              
+              return (
+                <tr 
+                  key={stat.player} 
+                  className={`${
+                    isFirstPlace 
+                      ? 'bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 dark:from-cyan-600 dark:via-purple-700 dark:to-pink-700 animate-gradient' 
+                      : 'hover:bg-slate-50 dark:hover:bg-slate-700/30'
+                  } transition-all duration-300`}
+                >
+                  <td className="px-4 py-3">
+                    <span className={`inline-flex items-center justify-center w-7 h-7 rounded-sm font-bold text-sm ${
+                      isFirstPlace
+                        ? 'bg-white dark:bg-slate-900 text-purple-600 dark:text-purple-300'
+                        : 'text-slate-600 dark:text-slate-400'
+                    }`}>
+                      {stat.rank}
+                    </span>
+                  </td>
+                  <td className={`px-4 py-3 font-semibold ${
+                    isFirstPlace 
+                      ? 'text-white dark:text-white' 
                       : 'text-slate-800 dark:text-slate-100'
                   }`}>
-                    {stat.winrate.toFixed(1)}%
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-right text-sm text-slate-600 dark:text-slate-400">
-                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">{stat.wins}</span>
-                  <span className="mx-1">/</span>
-                  <span className="font-semibold text-rose-600 dark:text-rose-400">{stat.total - stat.wins}</span>
-                  <span className="ml-1 text-xs">({stat.total})</span>
-                </td>
-              </tr>
-            ))}
+                    {stat.player}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <span className={`text-lg font-bold ${
+                      isFirstPlace 
+                        ? 'text-white dark:text-white' 
+                        : 'text-slate-800 dark:text-slate-100'
+                    }`}>
+                      {stat.winrate.toFixed(1)}%
+                    </span>
+                  </td>
+                  <td className={`px-4 py-3 text-right text-sm ${
+                    isFirstPlace 
+                      ? 'text-white/90 dark:text-white/90' 
+                      : 'text-slate-600 dark:text-slate-400'
+                  }`}>
+                    <span className={`font-semibold ${
+                      isFirstPlace 
+                        ? 'text-white dark:text-white' 
+                        : 'text-emerald-600 dark:text-emerald-400'
+                    }`}>{stat.wins}</span>
+                    <span className="mx-1">/</span>
+                    <span className={`font-semibold ${
+                      isFirstPlace 
+                        ? 'text-white dark:text-white' 
+                        : 'text-rose-600 dark:text-rose-400'
+                    }`}>{stat.total - stat.wins}</span>
+                    <span className="ml-1 text-xs">({stat.total})</span>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -130,40 +154,64 @@ const StatsList: React.FC<StatsListProps> = ({
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-            {teamWinrates.map((stat) => (
-              <tr 
-                key={stat.team} 
-                className={`${stat.rank === 1 ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'hover:bg-slate-50 dark:hover:bg-slate-700/30'}`}
-              >
-                <td className="px-4 py-3">
-                  <span className={`inline-flex items-center justify-center w-7 h-7 rounded font-bold text-sm ${
-                    stat.rank === 1 
-                      ? 'bg-emerald-600 text-white' 
-                      : 'text-slate-600 dark:text-slate-400'
-                  }`}>
-                    {stat.rank}
-                  </span>
-                </td>
-                <td className="px-4 py-3 font-semibold text-slate-800 dark:text-slate-100">
-                  {stat.team}
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <span className={`text-lg font-bold ${
-                    stat.rank === 1 
-                      ? 'text-emerald-600 dark:text-emerald-400' 
+            {teamWinrates.map((stat) => {
+              const isFirstPlace = stat.rank === 1;
+              
+              return (
+                <tr 
+                  key={stat.team} 
+                  className={`${
+                    isFirstPlace 
+                      ? 'bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 dark:from-cyan-600 dark:via-purple-700 dark:to-pink-700 animate-gradient' 
+                      : 'hover:bg-slate-50 dark:hover:bg-slate-700/30'
+                  } transition-all duration-300`}
+                >
+                  <td className="px-4 py-3">
+                    <span className={`inline-flex items-center justify-center w-7 h-7 rounded-sm font-bold text-sm ${
+                      isFirstPlace
+                        ? 'bg-white dark:bg-slate-900 text-purple-600 dark:text-purple-300'
+                        : 'text-slate-600 dark:text-slate-400'
+                    }`}>
+                      {stat.rank}
+                    </span>
+                  </td>
+                  <td className={`px-4 py-3 font-semibold ${
+                    isFirstPlace 
+                      ? 'text-white dark:text-white' 
                       : 'text-slate-800 dark:text-slate-100'
                   }`}>
-                    {stat.winrate.toFixed(1)}%
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-right text-sm text-slate-600 dark:text-slate-400">
-                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">{stat.wins}</span>
-                  <span className="mx-1">/</span>
-                  <span className="font-semibold text-rose-600 dark:text-rose-400">{stat.total - stat.wins}</span>
-                  <span className="ml-1 text-xs">({stat.total})</span>
-                </td>
-              </tr>
-            ))}
+                    {stat.team}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <span className={`text-lg font-bold ${
+                      isFirstPlace 
+                        ? 'text-white dark:text-white' 
+                        : 'text-slate-800 dark:text-slate-100'
+                    }`}>
+                      {stat.winrate.toFixed(1)}%
+                    </span>
+                  </td>
+                  <td className={`px-4 py-3 text-right text-sm ${
+                    isFirstPlace 
+                      ? 'text-white/90 dark:text-white/90' 
+                      : 'text-slate-600 dark:text-slate-400'
+                  }`}>
+                    <span className={`font-semibold ${
+                      isFirstPlace 
+                        ? 'text-white dark:text-white' 
+                        : 'text-emerald-600 dark:text-emerald-400'
+                    }`}>{stat.wins}</span>
+                    <span className="mx-1">/</span>
+                    <span className={`font-semibold ${
+                      isFirstPlace 
+                        ? 'text-white dark:text-white' 
+                        : 'text-rose-600 dark:text-rose-400'
+                    }`}>{stat.total - stat.wins}</span>
+                    <span className="ml-1 text-xs">({stat.total})</span>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
