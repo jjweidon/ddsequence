@@ -8,6 +8,9 @@ import DateRangeSelector from '@/components/DateRangeSelector';
 import { useStatsStore } from '@/lib/statsStore';
 
 export default function Home() {
+  // 등록 간 최소 시간 간격 (분)
+  const MIN_TIME_BETWEEN_REGISTRATIONS_MINUTES = 5;
+  
   // 선택된 플레이어
   const [winningTeam, setWinningTeam] = useState<string[]>([]);
   const [losingTeam, setLosingTeam] = useState<string[]>([]);
@@ -82,6 +85,23 @@ export default function Home() {
     setError(null);
     
     try {
+      // 최근 등록 데이터 확인
+      const recentGamesResponse = await fetch('/api/games');
+      const recentGamesData = await recentGamesResponse.json();
+      
+      if (recentGamesResponse.ok && recentGamesData.data && recentGamesData.data.length > 0) {
+        const mostRecentGame = recentGamesData.data[0]; // createdAt 기준 내림차순 정렬된 첫 번째 게임
+        const lastRegistrationTime = new Date(mostRecentGame.createdAt);
+        const currentTime = new Date();
+        const timeDifferenceMinutes = (currentTime.getTime() - lastRegistrationTime.getTime()) / (1000 * 60);
+        
+        if (timeDifferenceMinutes < MIN_TIME_BETWEEN_REGISTRATIONS_MINUTES) {
+          setError('최근에 등록한 데이터가 있습니다');
+          setLoading(false);
+          return;
+        }
+      }
+
       const response = await fetch('/api/games', {
         method: 'POST',
         headers: {
