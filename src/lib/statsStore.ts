@@ -53,7 +53,13 @@ export const useStatsStore = create<StatsStore>((set, get) => ({
     setError(null);
     
     try {
-      const response = await fetch('/api/stats');
+      // 올해 연도 가져오기 (한국 시간 기준)
+      const now = new Date();
+      const koreaTime = new Date(now.getTime() + (9 * 60 * 60 * 1000));
+      const currentYear = koreaTime.getFullYear();
+      
+      // 올해 기록만 가져오기
+      const response = await fetch(`/api/stats?year=${currentYear}`);
       const data = await response.json();
       
       if (!response.ok) {
@@ -62,7 +68,7 @@ export const useStatsStore = create<StatsStore>((set, get) => ({
       
       set({
         allStats: data.data,
-        currentStats: data.data, // 초기에는 전체 통계를 현재 통계로 설정
+        currentStats: data.data, // 올해 통계를 현재 통계로 설정
         loading: false
       });
     } catch (error: any) {
@@ -116,12 +122,36 @@ export const useStatsStore = create<StatsStore>((set, get) => ({
     }
   },
   
-  resetDateRange: () => {
-    const { allStats } = get();
-    set({
-      currentStats: allStats,
-      dateRange: null
-    });
+  resetDateRange: async () => {
+    const { setLoading, setError } = get();
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      // 올해 연도 가져오기 (한국 시간 기준)
+      const now = new Date();
+      const koreaTime = new Date(now.getTime() + (9 * 60 * 60 * 1000));
+      const currentYear = koreaTime.getFullYear();
+      
+      // 올해 기록만 가져오기
+      const response = await fetch(`/api/stats?year=${currentYear}`);
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || '통계 데이터를 가져오는 중 오류가 발생했습니다.');
+      }
+      
+      set({
+        allStats: data.data,
+        currentStats: data.data,
+        dateRange: null,
+        loading: false
+      });
+    } catch (error: any) {
+      setError(error.message || '통계 데이터를 가져오는 중 오류가 발생했습니다.');
+      set({ loading: false });
+    }
   },
   
   setLoading: (loading: boolean) => set({ loading }),

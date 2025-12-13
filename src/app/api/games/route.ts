@@ -3,10 +3,32 @@ import dbConnect from '@/lib/mongodb';
 import Game, { IGame } from '@/models/Game';
 
 // GET: 모든 게임 데이터 조회
-export async function GET() {
+export async function GET(request: Request) {
   try {
     await dbConnect();
-    const games = await Game.find().sort({ createdAt: -1 });
+    
+    // URL 파라미터에서 연도 정보 추출
+    const { searchParams } = new URL(request.url);
+    const year = searchParams.get('year');
+    
+    // 쿼리 조건 구성
+    let query: any = {};
+    
+    if (year) {
+      const yearNum = parseInt(year);
+      if (!isNaN(yearNum)) {
+        // 해당 연도의 시작일과 종료일 설정 (한국 시간 기준)
+        const startDateTime = new Date(`${yearNum}-01-01T00:00:00+09:00`);
+        const endDateTime = new Date(`${yearNum}-12-31T23:59:59+09:00`);
+        
+        query.createdAt = {
+          $gte: startDateTime,
+          $lte: endDateTime
+        };
+      }
+    }
+    
+    const games = await Game.find(query).sort({ createdAt: -1 });
     return NextResponse.json({ success: true, data: games });
   } catch (error) {
     console.error('게임 데이터 조회 오류:', error);

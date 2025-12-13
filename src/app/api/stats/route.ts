@@ -19,11 +19,25 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
+    const year = searchParams.get('year');
     
     // 쿼리 조건 구성
     let query: any = {};
     
-    if (startDate && endDate) {
+    // 연도 필터링 (우선순위: year > startDate/endDate)
+    if (year) {
+      const yearNum = parseInt(year);
+      if (!isNaN(yearNum)) {
+        // 해당 연도의 시작일과 종료일 설정 (한국 시간 기준)
+        const startDateTime = new Date(`${yearNum}-01-01T00:00:00+09:00`);
+        const endDateTime = new Date(`${yearNum}-12-31T23:59:59+09:00`);
+        
+        query.createdAt = {
+          $gte: startDateTime,
+          $lte: endDateTime
+        };
+      }
+    } else if (startDate && endDate) {
       // 한국 시간 기준으로 날짜 범위 설정
       // startDate의 00:00:00 (한국 시간) = UTC로는 전날 15:00:00
       // endDate의 23:59:59 (한국 시간) = UTC로는 다음날 14:59:59
