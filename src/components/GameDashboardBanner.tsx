@@ -432,7 +432,7 @@ export const calculateDashboardEvents = (games: IGame[]): DashboardEvent[] => {
         subMessage: `다크호스 ${displayName}님, 이제 올라가는 모습만 보여주세요!`,
         icon: '⚡️',
         color: 'text-yellow-700 dark:text-yellow-300',
-        bgColor: 'bg-gradient-to-br from-yellow-100 via-orange-100 to-yellow-50 dark:from-yellow-900/40 dark:via-orange-900/40 dark:to-yellow-800/40 border-yellow-300 dark:border-yellow-700',
+        bgColor: 'bg-gradient-to-br from-yellow-100 via-gray-100 to-yellow-50 dark:from-yellow-900/40 dark:via-gray-900/40 dark:to-yellow-800/40 border-yellow-300 dark:border-yellow-700',
         streakCount: streak.currentStreak
       });
     }
@@ -506,8 +506,8 @@ export const calculateDashboardEvents = (games: IGame[]): DashboardEvent[] => {
         message: '최악의 짝꿍',
         subMessage: `${teamName} 팀 ${streak.currentStreak}연패 중... 싸우지는 마세요 😅`,
         icon: '💔',
-        color: 'text-orange-700 dark:text-orange-300',
-        bgColor: 'bg-gradient-to-br from-orange-100 via-red-100 to-orange-50 dark:from-orange-900/40 dark:via-red-900/40 dark:to-orange-800/40 border-orange-300 dark:border-orange-700',
+        color: 'text-gray-700 dark:text-gray-300',
+        bgColor: 'bg-gradient-to-br from-gray-100 via-red-100 to-gray-50 dark:from-gray-900/40 dark:via-red-900/40 dark:to-gray-800/40 border-gray-300 dark:border-gray-700',
         streakCount: streak.currentStreak
       });
     }
