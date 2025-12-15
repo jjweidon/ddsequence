@@ -3,6 +3,7 @@
 import React, { useMemo } from 'react';
 import { IGame } from '@/models/Game';
 import { calculatePlayerStats, calculateWinrate, getSortedPlayerStats } from '@/utils/gameStats';
+import { getTeamName, getTeamKey } from '@/utils/teamOrder';
 
 // 플레이어 표시 이름 매핑
 const playerDisplayNames: { [key: string]: string } = {
@@ -14,8 +15,9 @@ const playerDisplayNames: { [key: string]: string } = {
 };
 
 interface DashboardEvent {
-  type: 'winStreak' | 'loseStreak' | 'comeback' | 'darkHorse' | 'fallFromGrace';
+  type: 'winStreak' | 'loseStreak' | 'comeback' | 'darkHorse' | 'fallFromGrace' | 'teamWinStreak' | 'teamLoseStreak';
   player: string;
+  team?: string[]; // 팀 이벤트의 경우 팀 구성원
   message: string;
   subMessage: string;
   icon: string;
@@ -99,6 +101,55 @@ const GameDashboardBanner: React.FC<GameDashboardBannerProps> = ({ games }) => {
     }
     
     return loseStreak;
+  };
+
+  // 팀별 게임 기록 분석
+  const analyzeTeamGames = (team: string[], allGames: IGame[]) => {
+    const sortedGames = [...allGames].sort((a, b) => 
+      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    );
+
+    const teamGames: Array<{ game: IGame; isWin: boolean }> = [];
+    const teamKey = getTeamKey(team);
+    
+    sortedGames.forEach(game => {
+      const winningTeamKey = getTeamKey(game.winningTeam);
+      const losingTeamKey = getTeamKey(game.losingTeam);
+      
+      if (winningTeamKey === teamKey) {
+        teamGames.push({ game, isWin: true });
+      } else if (losingTeamKey === teamKey) {
+        teamGames.push({ game, isWin: false });
+      }
+    });
+
+    return teamGames;
+  };
+
+  // 팀별 연승/연패 계산
+  const calculateTeamStreak = (teamGames: Array<{ game: IGame; isWin: boolean }>) => {
+    if (teamGames.length === 0) {
+      return { currentStreak: 0, isWinStreak: true, lastResult: null };
+    }
+
+    const lastGame = teamGames[teamGames.length - 1];
+    let streak = 1;
+    const isWinStreak = lastGame.isWin;
+
+    // 마지막 게임부터 역순으로 연속된 승/패 계산
+    for (let i = teamGames.length - 2; i >= 0; i--) {
+      if (teamGames[i].isWin === isWinStreak) {
+        streak++;
+      } else {
+        break;
+      }
+    }
+
+    return {
+      currentStreak: streak,
+      isWinStreak,
+      lastResult: lastGame.isWin
+    };
   };
 
   // 이벤트 감지 및 생성
@@ -203,6 +254,62 @@ const GameDashboardBanner: React.FC<GameDashboardBannerProps> = ({ games }) => {
       }
     });
 
+    // 팀 이벤트 감지
+    const sortedGames = [...games].sort((a, b) => 
+      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    );
+
+    // 모든 팀 조합 추출 (중복 제거)
+    const teamSet = new Set<string>();
+    sortedGames.forEach(game => {
+      teamSet.add(getTeamKey(game.winningTeam));
+      teamSet.add(getTeamKey(game.losingTeam));
+    });
+
+    // 각 팀의 연승/연패 분석
+    teamSet.forEach(teamKey => {
+      // 팀 키를 다시 배열로 변환
+      const team = teamKey.split('');
+      const teamGames = analyzeTeamGames(team, games);
+      const streak = calculateTeamStreak(teamGames);
+
+      // 팀 이름 생성 (getTeamName 사용)
+      const teamName = getTeamName(team);
+      const teamDisplayNames = team.map(p => playerDisplayNames[p] || p).join(' & ');
+
+      // 3연승 팀: 환상의 궁합
+      if (streak.isWinStreak && streak.currentStreak >= 3) {
+        events.push({
+          type: 'teamWinStreak',
+          player: '', // 팀 이벤트는 player 대신 team 사용
+          team: team,
+          message: '환상의 궁합',
+          subMessage: `${teamName} 팀 ${streak.currentStreak}연승 중! 훌륭한 팀워크를 보여주시네요 ㅎㅎ`,
+          icon: '💎',
+          color: 'text-indigo-700 dark:text-indigo-300',
+          bgColor: 'bg-gradient-to-br from-indigo-100 via-purple-100 to-indigo-50 dark:from-indigo-900/40 dark:via-purple-900/40 dark:to-indigo-800/40 border-indigo-300 dark:border-indigo-700',
+          priority: 3,
+          streakCount: streak.currentStreak
+        });
+      }
+
+      // 3연패 팀: 최악의 궁합
+      if (!streak.isWinStreak && streak.currentStreak >= 3) {
+        events.push({
+          type: 'teamLoseStreak',
+          player: '', // 팀 이벤트는 player 대신 team 사용
+          team: team,
+          message: '최악의 궁합',
+          subMessage: `${teamName} 팀 ${streak.currentStreak}연패 중... 이 조합은 안 되는 것 같아요 😅`,
+          icon: '💔',
+          color: 'text-orange-700 dark:text-orange-300',
+          bgColor: 'bg-gradient-to-br from-orange-100 via-red-100 to-orange-50 dark:from-orange-900/40 dark:via-red-900/40 dark:to-orange-800/40 border-orange-300 dark:border-orange-700',
+          priority: 2,
+          streakCount: streak.currentStreak
+        });
+      }
+    });
+
     // 우선순위에 따라 정렬 (높은 우선순위가 먼저)
     return events.sort((a, b) => b.priority - a.priority);
   }, [games]);
@@ -229,6 +336,10 @@ const GameDashboardBanner: React.FC<GameDashboardBannerProps> = ({ games }) => {
             return 'animate-glow';
         case 'loseStreak':
             return 'animate-fade-slow';
+        case 'teamWinStreak':
+            return 'animate-glow';
+        case 'teamLoseStreak':
+            return 'animate-pulse-slow';
         default:
             return '';
     }
@@ -246,6 +357,10 @@ const GameDashboardBanner: React.FC<GameDashboardBannerProps> = ({ games }) => {
         case 'comeback':
             return 'animate-icon-sparkle';
         case 'loseStreak':
+            return 'animate-icon-wobble';
+        case 'teamWinStreak':
+            return 'animate-icon-bounce-strong';
+        case 'teamLoseStreak':
             return 'animate-icon-wobble';
         default:
             return '';
@@ -265,6 +380,10 @@ const GameDashboardBanner: React.FC<GameDashboardBannerProps> = ({ games }) => {
         return 'animate-text-bounce';
       case 'loseStreak':
         return 'animate-text-pulse';
+      case 'teamWinStreak':
+        return 'animate-text-glow';
+      case 'teamLoseStreak':
+        return 'animate-text-shake';
       default:
         return '';
     }
@@ -283,6 +402,10 @@ const GameDashboardBanner: React.FC<GameDashboardBannerProps> = ({ games }) => {
         return 'animate-badge-pulse';
       case 'loseStreak':
         return 'animate-badge-pulse';
+      case 'teamWinStreak':
+        return 'animate-badge-pulse';
+      case 'teamLoseStreak':
+        return 'animate-badge-pulse';
       default:
         return '';
     }
@@ -292,7 +415,7 @@ const GameDashboardBanner: React.FC<GameDashboardBannerProps> = ({ games }) => {
     <div className="mb-6 space-y-3">
       {topEvents.map((event, index) => (
         <div
-          key={`${event.player}-${event.type}-${index}`}
+          key={`${event.team ? event.team.join('') : event.player}-${event.type}-${index}`}
           className={`${event.bgColor} border-x-0 border-y p-4 sm:p-6 shadow-lg relative overflow-hidden ${getAnimationClass(event.type)}`}
           style={{ animationDelay: `${index * 100}ms` }}
         >
