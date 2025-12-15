@@ -196,11 +196,9 @@ export default function HallOfFamePage() {
             
             <Link 
               href="/" 
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 
-                       border-2 border-slate-200 dark:border-slate-700
-                       text-slate-700 dark:text-slate-200 font-semibold text-sm
-                       hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-blue-300 dark:hover:border-blue-600
-                       transition-all duration-200 shadow-sm hover:shadow-md
+              className="flex items-center gap-2 px-4 py-2.5 text-slate-700 dark:text-slate-300 font-semibold text-sm
+                       hover:bg-slate-100 dark:hover:bg-slate-800 rounded-sm
+                       transition-all duration-200
                        focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -213,7 +211,7 @@ export default function HallOfFamePage() {
 
         {/* 연도 선택 섹션 */}
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-slate-800 rounded-2xl 
+          <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-slate-800 rounded-sm 
                         shadow-md border border-slate-200 dark:border-slate-700">
             <svg className="animate-spin h-12 w-12 text-blue-600 dark:text-blue-400 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -222,14 +220,14 @@ export default function HallOfFamePage() {
             <p className="text-slate-600 dark:text-slate-400 font-medium text-lg">연도 목록 불러오는 중...</p>
           </div>
         ) : error && !selectedYear ? (
-          <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-slate-800 rounded-2xl 
+          <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-slate-800 rounded-sm 
                         shadow-md border border-slate-200 dark:border-slate-700">
             <div className="text-6xl mb-4 opacity-40">⚠️</div>
             <p className="text-rose-600 dark:text-rose-400 font-medium text-lg mb-4">{error}</p>
             <button 
               className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 
                        dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800
-                       text-white font-bold rounded-xl shadow-lg shadow-blue-500/30
+                       text-white font-bold shadow-lg shadow-blue-500/30
                        transition-all duration-200 transform hover:scale-[1.02]
                        focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2"
               onClick={fetchAvailableYears}
@@ -241,14 +239,14 @@ export default function HallOfFamePage() {
           <>
             {/* 연도 선택 버튼들 */}
             <div className="mb-6">
-              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 p-4">
+              <div className="bg-white dark:bg-slate-800 rounded-sm shadow-md border border-slate-200 dark:border-slate-700 p-4">
                 <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-4">연도 선택</h2>
                 <div className="flex flex-wrap gap-3">
                   {availableYears.map((year) => (
                     <button
                       key={year}
                       onClick={() => handleYearSelect(year)}
-                      className={`px-6 py-3 rounded-xl font-bold text-sm transition-all duration-200 shadow-sm hover:shadow-md
+                      className={`px-6 py-3 rounded-sm font-bold text-sm transition-all duration-200 shadow-sm hover:shadow-md
                                focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
                         selectedYear === year
                           ? 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white shadow-amber-500/30 focus-visible:ring-amber-400'
@@ -273,7 +271,7 @@ export default function HallOfFamePage() {
                   </div>
                   
                   {statsLoading ? (
-                    <div className="flex flex-col items-center justify-center py-16 bg-white dark:bg-slate-800 rounded-2xl 
+                    <div className="flex flex-col items-center justify-center py-16 bg-white dark:bg-slate-800 rounded-sm 
                                   shadow-md border border-slate-200 dark:border-slate-700">
                       <svg className="animate-spin h-12 w-12 text-blue-600 dark:text-blue-400 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -290,7 +288,7 @@ export default function HallOfFamePage() {
                       dateRange={null}
                     />
                   ) : (
-                    <div className="text-center py-12 bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700">
+                    <div className="text-center py-12 bg-white dark:bg-slate-800 rounded-sm shadow-md border border-slate-200 dark:border-slate-700">
                       <div className="text-5xl mb-4 opacity-40">📊</div>
                       <p className="text-slate-500 dark:text-slate-400 font-medium">해당 연도의 통계 데이터가 없습니다.</p>
                     </div>
@@ -308,7 +306,7 @@ export default function HallOfFamePage() {
                         <button
                           onClick={handleDeleteSelected}
                           disabled={selectedGames.length === 0 || deleteLoading}
-                          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm
+                          className={`flex items-center gap-2 px-4 py-2.5 font-bold text-sm
                                    transition-all duration-200 shadow-sm hover:shadow-md
                                    focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
                             selectedGames.length === 0 || deleteLoading
@@ -337,11 +335,11 @@ export default function HallOfFamePage() {
                       {games.length > 0 && isCurrentYear() && (
                         <button 
                           onClick={toggleEditMode}
-                          className={`px-4 py-2.5 rounded-xl font-bold text-sm transition-all duration-200 shadow-sm hover:shadow-md
+                          className={`px-4 py-2.5 font-semibold text-sm rounded-sm transition-all duration-200
                                    focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 ${
                             isEditMode 
-                              ? 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-600' 
-                              : 'bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-blue-300 dark:hover:border-blue-600'
+                              ? 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800' 
+                              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                           }`}
                         >
                           {isEditMode ? '완료' : '편집'}
@@ -361,7 +359,7 @@ export default function HallOfFamePage() {
                       onSortChange={handleSortChange}
                     />
                   ) : (
-                    <div className="text-center py-12 bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700">
+                    <div className="text-center py-12 bg-white dark:bg-slate-800 rounded-sm shadow-md border border-slate-200 dark:border-slate-700">
                       <div className="text-5xl mb-4 opacity-40">🎮</div>
                       <p className="text-slate-500 dark:text-slate-400 font-medium">해당 연도의 게임 기록이 없습니다.</p>
                     </div>

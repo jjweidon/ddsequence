@@ -48,7 +48,7 @@ const StatsList: React.FC<StatsListProps> = ({
   return (
     <div className="flex flex-col w-full gap-4">
       {/* 게임 수 */}
-      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-4 py-3">
+      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-sm px-4 py-3">
         <div className="flex items-center justify-between">
           <span className="text-sm text-slate-600 dark:text-slate-400">
             {dateRange 
@@ -63,7 +63,7 @@ const StatsList: React.FC<StatsListProps> = ({
       </div>
       
       {/* 개인 승률 테이블 */}
-      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
+      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-sm overflow-hidden">
         <div className="px-4 py-3 bg-slate-100 dark:bg-slate-700 border-b border-slate-200 dark:border-slate-600">
           <h3 className="font-bold text-slate-800 dark:text-slate-100">개인 승률</h3>
         </div>
@@ -140,7 +140,7 @@ const StatsList: React.FC<StatsListProps> = ({
       </div>
       
       {/* 팀 승률 테이블 */}
-      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
+      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-sm overflow-hidden">
         <div className="px-4 py-3 bg-slate-100 dark:bg-slate-700 border-b border-slate-200 dark:border-slate-600">
           <h3 className="font-bold text-slate-800 dark:text-slate-100">팀 승률</h3>
         </div>

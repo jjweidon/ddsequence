@@ -114,7 +114,7 @@ const GameHistoryList: React.FC<GameHistoryListProps> = ({
   return (
     <div className="w-full">
       {/* 데스크탑 테이블 뷰 - 모바일에서는 숨김 */}
-      <div className="hidden sm:block bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 overflow-hidden">
+      <div className="hidden sm:block bg-white dark:bg-slate-800 rounded-sm shadow-md border border-slate-200 dark:border-slate-700 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
             <thead>
@@ -185,7 +185,7 @@ const GameHistoryList: React.FC<GameHistoryListProps> = ({
                     </td>
                   )}
                   <td className="px-4 py-4 whitespace-nowrap">
-                    <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 
+                    <span className="inline-flex items-center justify-center w-8 h-8 rounded-sm bg-slate-100 dark:bg-slate-700 
                                    text-slate-700 dark:text-slate-300 text-sm font-bold">
                       {localSortDirection === 'asc' ? index + 1 : games.length - index}
                     </span>
@@ -230,7 +230,7 @@ const GameHistoryList: React.FC<GameHistoryListProps> = ({
           {sortedGames.map((game, index) => (
             <div 
               key={game._id || index} 
-              className="bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 
+              className="bg-white dark:bg-slate-800 rounded-sm shadow-md border border-slate-200 dark:border-slate-700 
                        p-4 transition-all duration-200 hover:shadow-lg animate-fadeIn"
               style={{ animationDelay: `${index * 30}ms` }}
             >
@@ -245,7 +245,7 @@ const GameHistoryList: React.FC<GameHistoryListProps> = ({
                       onChange={() => game._id && toggleGameSelection(game._id)}
                     />
                   )}
-                  <span className="inline-flex items-center justify-center min-w-[32px] h-7 px-2 rounded-lg 
+                  <span className="inline-flex items-center justify-center min-w-[32px] h-7 px-2 rounded-sm 
                                  bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 
                                  text-xs font-bold">
                     #{localSortDirection === 'asc' ? index + 1 : games.length - index}
@@ -258,13 +258,13 @@ const GameHistoryList: React.FC<GameHistoryListProps> = ({
               
               <div className="flex items-stretch gap-3">
                 <div className="flex-1 bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 
-                              rounded-xl p-3 border border-emerald-200 dark:border-emerald-800">
+                              rounded-sm p-3 border border-emerald-200 dark:border-emerald-800">
                   <div className="flex items-center gap-1.5 mb-2">
                     <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">승리</span>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
                     {game.winningTeam.map(player => (
-                      <span key={player} className="inline-flex items-center justify-center h-8 w-8 rounded-lg 
+                      <span key={player} className="inline-flex items-center justify-center h-8 w-8 rounded-xl 
                                                   bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-800 dark:to-green-800 
                                                   text-emerald-800 dark:text-emerald-200 font-bold text-sm 
                                                   shadow-sm border border-emerald-300 dark:border-emerald-700">
@@ -275,13 +275,13 @@ const GameHistoryList: React.FC<GameHistoryListProps> = ({
                 </div>
                 
                 <div className="flex-1 bg-gradient-to-br from-rose-50 to-red-50 dark:from-rose-900/20 dark:to-red-900/20 
-                              rounded-xl p-3 border border-rose-200 dark:border-rose-800">
+                              rounded-sm p-3 border border-rose-200 dark:border-rose-800">
                   <div className="flex items-center gap-1.5 mb-2">
                     <span className="text-xs font-bold text-rose-700 dark:text-rose-400">패배</span>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
                     {game.losingTeam.map(player => (
-                      <span key={player} className="inline-flex items-center justify-center h-8 w-8 rounded-lg 
+                      <span key={player} className="inline-flex items-center justify-center h-8 w-8 rounded-xl 
                                                   bg-gradient-to-br from-rose-100 to-red-100 dark:from-rose-800 dark:to-red-800 
                                                   text-rose-800 dark:text-rose-200 font-bold text-sm 
                                                   shadow-sm border border-rose-300 dark:border-rose-700">
@@ -297,7 +297,7 @@ const GameHistoryList: React.FC<GameHistoryListProps> = ({
       </div>
       
       {games.length === 0 && (
-        <div className="text-center py-12 bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700">
+        <div className="text-center py-12 bg-white dark:bg-slate-800 rounded-sm shadow-md border border-slate-200 dark:border-slate-700">
           <div className="text-5xl mb-4 opacity-40">🎮</div>
           <p className="text-slate-500 dark:text-slate-400 font-medium">기록된 게임이 없습니다.</p>
         </div>
