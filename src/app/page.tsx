@@ -70,6 +70,10 @@ export default function Home() {
     // 유효성 검사
     if (winningTeam.length !== 2 || losingTeam.length !== 2) {
       setError('승리팀과 패배팀 모두 2명의 플레이어를 선택해야 합니다.');
+      // 3초 후 에러 메시지 자동 제거
+      setTimeout(() => {
+        setError(null);
+      }, 3000);
       return;
     }
 
@@ -78,6 +82,10 @@ export default function Home() {
     const uniquePlayers = new Set(allPlayers);
     if (uniquePlayers.size !== allPlayers.length) {
       setError('동일한 플레이어는 승패 팀에 중복되어 선택할 수 없습니다.');
+      // 3초 후 에러 메시지 자동 제거
+      setTimeout(() => {
+        setError(null);
+      }, 3000);
       return;
     }
 
@@ -98,6 +106,10 @@ export default function Home() {
         if (timeDifferenceMinutes < MIN_TIME_BETWEEN_REGISTRATIONS_MINUTES) {
           setError('최근에 등록한 데이터가 있습니다');
           setLoading(false);
+          // 3초 후 에러 메시지 자동 제거
+          setTimeout(() => {
+            setError(null);
+          }, 3000);
           return;
         }
       }
@@ -124,6 +136,10 @@ export default function Home() {
       fetchAllStats(); // 통계 다시 가져오기
     } catch (error: any) {
       setError(error.message || '게임 데이터 저장 중 오류가 발생했습니다.');
+      // 3초 후 에러 메시지 자동 제거
+      setTimeout(() => {
+        setError(null);
+      }, 3000);
     } finally {
       setLoading(false);
     }
@@ -198,6 +214,16 @@ export default function Home() {
 
   return (
     <>
+    {/* 에러 팝업 */}
+    {error && (
+      <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 animate-fadeIn w-[calc(100%-2rem)] max-w-2xl">
+        <div className="bg-rose-50 dark:bg-rose-900/50 border-2 border-rose-200 dark:border-rose-800 
+                      text-rose-700 dark:text-rose-300 px-6 py-3 shadow-lg w-full">
+          <span className="text-sm font-medium text-center block">{error}</span>
+        </div>
+      </div>
+    )}
+    
     <main className="min-h-screen bg-slate-50 dark:bg-slate-900 py-8 px-4 sm:px-6">
       <div className="max-w-2xl mx-auto">
         {/* 헤더 */}
@@ -277,14 +303,7 @@ export default function Home() {
               </button>
             </div>
             
-            {/* 에러/성공 메시지 */}
-            {error && (
-              <div className="bg-rose-50 dark:bg-rose-900/20 border-2 border-rose-200 dark:border-rose-800 
-                            text-rose-700 dark:text-rose-300 px-4 py-3 rounded-xl animate-fadeIn flex items-start gap-3">
-                <span className="text-xl flex-shrink-0">⚠️</span>
-                <span className="text-sm font-medium">{error}</span>
-              </div>
-            )}
+            {/* 성공 메시지 */}
             {success && (
               <div className="bg-emerald-50 dark:bg-emerald-900/20 border-2 border-emerald-200 dark:border-emerald-800 
                             text-emerald-700 dark:text-emerald-300 px-4 py-3 rounded-xl animate-fadeIn flex items-start gap-3">
