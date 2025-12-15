@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import GameHistoryList from '@/components/GameHistoryList';
+import GameDashboardBanner from '@/components/GameDashboardBanner';
 import { IGame } from '@/models/Game';
 import { SortField, SortDirection } from '@/components/GameHistoryList';
 import { getTeamName } from '@/utils/teamOrder';
@@ -310,15 +311,23 @@ export default function HistoryPage() {
             </button>
           </div>
         ) : (
-          <GameHistoryList 
-            games={games} 
-            isEditMode={isEditMode}
-            selectedGames={selectedGames}
-            setSelectedGames={setSelectedGames}
-            sortField={sortField}
-            sortDirection={sortDirection}
-            onSortChange={handleSortChange}
-          />
+          <>
+            {/* 대시보드 배너 */}
+            <div className="-mx-4 sm:-mx-6">
+              <GameDashboardBanner games={games} />
+            </div>
+            
+            {/* 게임 기록 목록 */}
+            <GameHistoryList 
+              games={games} 
+              isEditMode={isEditMode}
+              selectedGames={selectedGames}
+              setSelectedGames={setSelectedGames}
+              sortField={sortField}
+              sortDirection={sortDirection}
+              onSortChange={handleSortChange}
+            />
+          </>
         )}
       </div>
     </main>
