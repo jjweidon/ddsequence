@@ -5,7 +5,9 @@ import Link from 'next/link';
 import PlayerSelect from '@/components/PlayerSelect';
 import StatsList from '@/components/StatsList';
 import DateRangeSelector from '@/components/DateRangeSelector';
+import GameDashboardBannerCarousel from '@/components/GameDashboardBannerCarousel';
 import { useStatsStore } from '@/lib/statsStore';
+import { IGame } from '@/models/Game';
 
 export default function Home() {
   // 등록 간 최소 시간 간격 (분)
@@ -23,6 +25,12 @@ export default function Home() {
   
   // 기간별 통계 관련 상태
   const [dateRangeMode, setDateRangeMode] = useState<'all' | 'custom'>('all');
+  
+  // 게임 데이터 및 배너 관련 상태
+  const [games, setGames] = useState<IGame[]>([]);
+  const [bannerLoading, setBannerLoading] = useState<boolean>(true);
+  const [currentBannerIndex, setCurrentBannerIndex] = useState<number>(0);
+  const [eventCount, setEventCount] = useState<number>(0);
   
   // Zustand 스토어에서 통계 상태 가져오기
   const {
@@ -207,10 +215,60 @@ export default function Home() {
     }
   };
 
-  // 컴포넌트 마운트 시 통계 데이터 가져오기
+  // 현재 연도 가져오기 (한국 시간 기준)
+  const getCurrentYear = () => {
+    const now = new Date();
+    const koreaTime = new Date(now.getTime() + (9 * 60 * 60 * 1000));
+    return koreaTime.getFullYear();
+  };
+
+  // 게임 데이터 가져오기 (현재 연도만)
+  const fetchGames = async () => {
+    setBannerLoading(true);
+    try {
+      const currentYear = getCurrentYear();
+      const response = await fetch(`/api/games?year=${currentYear}`);
+      const data = await response.json();
+      
+      if (response.ok && data.data) {
+        setGames(data.data);
+      }
+    } catch (error) {
+      console.error('게임 데이터 로딩 오류:', error);
+    } finally {
+      setBannerLoading(false);
+    }
+  };
+
+  // 컴포넌트 마운트 시 통계 데이터 및 게임 데이터 가져오기
   useEffect(() => {
     fetchAllStats();
+    fetchGames();
   }, []);
+
+  // 게임 등록 후 게임 데이터 새로고침
+  useEffect(() => {
+    if (success) {
+      fetchGames();
+    }
+  }, [success]);
+
+  // 캐러셀 자동 스와이프
+  useEffect(() => {
+    if (games.length === 0 || eventCount === 0) return;
+    
+    // 이벤트가 1개만 있으면 자동 스와이프 불필요
+    if (eventCount <= 1) return;
+    
+    const interval = setInterval(() => {
+      setCurrentBannerIndex((prevIndex) => {
+        const maxIndex = eventCount - 1;
+        return prevIndex >= maxIndex ? 0 : prevIndex + 1;
+      });
+    }, 5000); // 5초마다 자동 스와이프
+
+    return () => clearInterval(interval);
+  }, [games, eventCount]);
 
   return (
     <>
@@ -313,6 +371,16 @@ export default function Home() {
             )}
           </div>
         </div>
+
+        {/* 게임 대시보드 배너 캐러셀 */}
+        {!bannerLoading && games.length > 0 && (
+          <GameDashboardBannerCarousel 
+            games={games} 
+            onEventCountChange={setEventCount}
+            currentIndex={currentBannerIndex}
+            onIndexChange={setCurrentBannerIndex}
+          />
+        )}
         
         {/* 통계 섹션 */}
         <div className="space-y-4">

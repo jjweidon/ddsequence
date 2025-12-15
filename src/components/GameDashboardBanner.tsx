@@ -29,9 +29,10 @@ interface DashboardEvent {
 
 interface GameDashboardBannerProps {
   games: IGame[];
+  singleEventIndex?: number; // 단일 이벤트만 표시할 때 사용
 }
 
-const GameDashboardBanner: React.FC<GameDashboardBannerProps> = ({ games }) => {
+const GameDashboardBanner: React.FC<GameDashboardBannerProps> = ({ games, singleEventIndex }) => {
   // 플레이어별 게임 기록 분석
   const analyzePlayerGames = (player: string, allGames: IGame[]) => {
     // 시간순으로 정렬된 게임에서 플레이어의 승패 기록 추출
@@ -315,14 +316,21 @@ const GameDashboardBanner: React.FC<GameDashboardBannerProps> = ({ games }) => {
     return events.sort((a, b) => b.priority - a.priority);
   }, [games]);
 
-  // 가장 중요한 이벤트 3개만 표시
+  // 가장 중요한 이벤트 표시 (일반적으로 3개, 캐러셀에서는 5개까지)
   const topEvents = useMemo(() => {
-    return detectEvents.slice(0, 3);
-  }, [detectEvents]);
+    // singleEventIndex가 있으면 캐러셀 모드이므로 5개까지 허용
+    const maxEvents = singleEventIndex !== undefined ? 5 : 3;
+    return detectEvents.slice(0, maxEvents);
+  }, [detectEvents, singleEventIndex]);
 
   if (topEvents.length === 0) {
     return null;
   }
+
+  // 단일 이벤트만 표시하는 경우
+  const displayEvents = singleEventIndex !== undefined 
+    ? topEvents.slice(singleEventIndex, singleEventIndex + 1)
+    : topEvents;
 
   // 이벤트 타입별 애니메이션 클래스
   const getAnimationClass = (type: string) => {
@@ -413,8 +421,8 @@ const GameDashboardBanner: React.FC<GameDashboardBannerProps> = ({ games }) => {
   };
 
   return (
-    <div className="mb-6 space-y-3">
-      {topEvents.map((event, index) => (
+    <div className={`${singleEventIndex !== undefined ? 'mb-0' : 'mb-6'} space-y-3`}>
+      {displayEvents.map((event, index) => (
         <div
           key={`${event.team ? event.team.join('') : event.player}-${event.type}-${index}`}
           className={`${event.bgColor} border-x-0 border-y p-4 sm:p-6 shadow-lg relative overflow-hidden ${getAnimationClass(event.type)}`}
