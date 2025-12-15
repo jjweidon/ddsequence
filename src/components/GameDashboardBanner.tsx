@@ -176,9 +176,9 @@ const GameDashboardBanner: React.FC<GameDashboardBannerProps> = ({ games }) => {
 
       const displayName = playerDisplayNames[player] || player;
 
-      // 역전 승리 (연패 후 승리)
+      // 역전 승리 (5회 이상 연패 후 승리)
       const comebackLoseStreak = detectComeback(playerGames);
-      if (comebackLoseStreak >= 2 && streak.isWinStreak && streak.currentStreak >= 1) {
+      if (comebackLoseStreak >= 5 && streak.isWinStreak && streak.currentStreak >= 1) {
         events.push({
           type: 'comeback',
           player,
@@ -187,12 +187,13 @@ const GameDashboardBanner: React.FC<GameDashboardBannerProps> = ({ games }) => {
           icon: '💫',
           color: 'text-blue-700 dark:text-blue-300',
           bgColor: 'bg-gradient-to-br from-blue-100 via-cyan-100 to-blue-50 dark:from-blue-900/40 dark:via-cyan-900/40 dark:to-blue-800/40 border-blue-300 dark:border-blue-700',
-          priority: 12
+          priority: 1000 + comebackLoseStreak,
+          streakCount: comebackLoseStreak
         });
       }
 
-      // 상위권(1, 2, 3등) 플레이어의 연패 (여왕의 몰락)
-      if (total >= 5 && rank <= 3 && streak.isWinStreak === false && streak.currentStreak >= 3) {
+      // 상위권(1, 2등) 플레이어의 연패 (여왕의 몰락)
+      if (total >= 5 && rank <= 2 && streak.isWinStreak === false && streak.currentStreak >= 3) {
         events.push({
           type: 'fallFromGrace',
           player,
@@ -201,7 +202,7 @@ const GameDashboardBanner: React.FC<GameDashboardBannerProps> = ({ games }) => {
           icon: '👑',
           color: 'text-purple-700 dark:text-purple-300',
           bgColor: 'bg-gradient-to-br from-purple-100 via-pink-100 to-purple-50 dark:from-purple-900/40 dark:via-pink-900/40 dark:to-purple-800/40 border-purple-300 dark:border-purple-700',
-          priority: 11,
+          priority: 100 + streak.currentStreak,
           streakCount: streak.currentStreak
         });
       }
@@ -216,7 +217,7 @@ const GameDashboardBanner: React.FC<GameDashboardBannerProps> = ({ games }) => {
           icon: '⚡️',
           color: 'text-yellow-700 dark:text-yellow-300',
           bgColor: 'bg-gradient-to-br from-yellow-100 via-orange-100 to-yellow-50 dark:from-yellow-900/40 dark:via-orange-900/40 dark:to-yellow-800/40 border-yellow-300 dark:border-yellow-700',
-          priority: 10,
+          priority: 100 + streak.currentStreak,
           streakCount: streak.currentStreak
         });
       }
