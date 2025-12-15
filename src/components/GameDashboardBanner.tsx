@@ -2,7 +2,7 @@
 
 import React, { useMemo } from 'react';
 import { IGame } from '@/models/Game';
-import { calculatePlayerStats, calculateWinrate } from '@/utils/gameStats';
+import { calculatePlayerStats, calculateWinrate, getSortedPlayerStats } from '@/utils/gameStats';
 
 // 플레이어 표시 이름 매핑
 const playerDisplayNames: { [key: string]: string } = {
@@ -107,57 +107,50 @@ const GameDashboardBanner: React.FC<GameDashboardBannerProps> = ({ games }) => {
 
     const events: DashboardEvent[] = [];
     const playerStats = calculatePlayerStats(games);
+    const sortedPlayers = getSortedPlayerStats(playerStats);
     const validPlayers = ['잡', '큐', '지', '머', '웅'];
+
+    // 플레이어 순위 맵 생성 (1등부터 시작)
+    const playerRankMap = new Map<string, number>();
+    sortedPlayers.forEach(([player], index) => {
+      playerRankMap.set(player, index + 1);
+    });
 
     validPlayers.forEach(player => {
       const [wins, total] = playerStats[player] || [0, 0];
       const winrate = calculateWinrate(wins, total);
       const playerGames = analyzePlayerGames(player, games);
       const streak = calculateStreak(playerGames);
+      const rank = playerRankMap.get(player) || 5; // 순위가 없으면 5등으로 처리
 
       const displayName = playerDisplayNames[player] || player;
 
-      // 높은 승률 플레이어의 연패 (여왕의 몰락, 추락)
-      if (total >= 5 && winrate >= 60 && streak.isWinStreak === false && streak.currentStreak >= 3) {
+      // 상위권(1, 2, 3등) 플레이어의 연패 (여왕의 몰락)
+      if (total >= 5 && rank <= 3 && streak.isWinStreak === false && streak.currentStreak >= 3) {
         events.push({
           type: 'fallFromGrace',
           player,
           message: '여왕의 몰락',
-          subMessage: `${displayName}님, 승률 ${winrate.toFixed(1)}%에서 ${streak.currentStreak}연패 중...`,
+          subMessage: `${displayName}님, ${rank}등인데 순위 떨어지겠어요 ㅋㅋ ㅜ`,
           icon: '👑',
-          color: 'text-purple-600 dark:text-purple-400',
-          bgColor: 'bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/30 dark:to-pink-900/30 border-purple-200 dark:border-purple-800',
+          color: 'text-purple-700 dark:text-purple-300',
+          bgColor: 'bg-gradient-to-br from-purple-100 via-pink-100 to-purple-50 dark:from-purple-900/40 dark:via-pink-900/40 dark:to-purple-800/40 border-purple-300 dark:border-purple-700',
           priority: 10,
           streakCount: streak.currentStreak
         });
       }
 
-      // 낮은 승률 플레이어의 연승 (다크호스, 파죽지세)
-      if (total >= 5 && winrate < 45 && streak.isWinStreak === true && streak.currentStreak >= 3) {
+      // 하위권(3, 4, 5등) 플레이어의 연승 (다크호스, 파죽지세)
+      if (total >= 5 && rank >= 3 && streak.isWinStreak === true && streak.currentStreak >= 3) {
         events.push({
           type: 'darkHorse',
           player,
           message: '파죽지세!',
-          subMessage: `${displayName}님, 승률 ${winrate.toFixed(1)}%에서 ${streak.currentStreak}연승 돌파!`,
-          icon: '⚡',
-          color: 'text-yellow-600 dark:text-yellow-400',
-          bgColor: 'bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/30 dark:to-orange-900/30 border-yellow-200 dark:border-yellow-800',
+          subMessage: `다크호스 ${displayName}님, 이제 올라가는 모습만 보여주세요!`,
+          icon: '⚡️',
+          color: 'text-yellow-700 dark:text-yellow-300',
+          bgColor: 'bg-gradient-to-br from-yellow-100 via-orange-100 to-yellow-50 dark:from-yellow-900/40 dark:via-orange-900/40 dark:to-yellow-800/40 border-yellow-300 dark:border-yellow-700',
           priority: 9,
-          streakCount: streak.currentStreak
-        });
-      }
-
-      // 일반 연승 (3회 이상)
-      if (streak.isWinStreak === true && streak.currentStreak >= 3) {
-        events.push({
-          type: 'winStreak',
-          player,
-          message: streak.currentStreak >= 5 ? '불멸의 연승' : '연승 행진',
-          subMessage: `${displayName}님, ${streak.currentStreak}연승 중!`,
-          icon: streak.currentStreak >= 5 ? '🔥' : '✨',
-          color: 'text-emerald-600 dark:text-emerald-400',
-          bgColor: 'bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/30 dark:to-green-900/30 border-emerald-200 dark:border-emerald-800',
-          priority: streak.currentStreak >= 5 ? 8 : 6,
           streakCount: streak.currentStreak
         });
       }
@@ -168,12 +161,29 @@ const GameDashboardBanner: React.FC<GameDashboardBannerProps> = ({ games }) => {
         events.push({
           type: 'comeback',
           player,
-          message: '역전을 보여주세요',
+          message: '연패 탈출',
           subMessage: `${displayName}님, ${comebackLoseStreak}연패 후 승리! 반전의 시작인가?`,
           icon: '💫',
-          color: 'text-blue-600 dark:text-blue-400',
-          bgColor: 'bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/30 dark:to-cyan-900/30 border-blue-200 dark:border-blue-800',
-          priority: 7
+          color: 'text-blue-700 dark:text-blue-300',
+          bgColor: 'bg-gradient-to-br from-blue-100 via-cyan-100 to-blue-50 dark:from-blue-900/40 dark:via-cyan-900/40 dark:to-blue-800/40 border-blue-300 dark:border-blue-700',
+          priority: 8
+        });
+      }
+
+      // 일반 연승 (3회 이상)
+      if (streak.isWinStreak === true && streak.currentStreak >= 3) {
+        events.push({
+          type: 'winStreak',
+          player,
+          message: streak.currentStreak >= 5 ? '불멸의 연승' : '연승 행진',
+          subMessage: `축하합니다 ${displayName}님, ${streak.currentStreak}연승 중이에요!`,
+          icon: streak.currentStreak >= 5 ? '🔥' : '✨',
+          color: 'text-emerald-700 dark:text-emerald-300',
+          bgColor: streak.currentStreak >= 5 
+            ? 'bg-gradient-to-br from-emerald-100 via-green-100 to-emerald-50 dark:from-emerald-900/40 dark:via-green-900/40 dark:to-emerald-800/40 border-emerald-300 dark:border-emerald-700'
+            : 'bg-gradient-to-br from-emerald-100 to-green-50 dark:from-emerald-900/40 dark:to-green-800/40 border-emerald-300 dark:border-emerald-700',
+          priority: streak.currentStreak >= 5 ? 7 : 5,
+          streakCount: streak.currentStreak
         });
       }
 
@@ -184,10 +194,10 @@ const GameDashboardBanner: React.FC<GameDashboardBannerProps> = ({ games }) => {
           player,
           message: streak.currentStreak >= 5 ? '절망의 연패' : '연패의 늪',
           subMessage: `${displayName}님, ${streak.currentStreak}연패 중... 힘내세요!`,
-          icon: streak.currentStreak >= 5 ? '😢' : '💔',
-          color: 'text-rose-600 dark:text-rose-400',
-          bgColor: 'bg-gradient-to-r from-rose-50 to-red-50 dark:from-rose-900/30 dark:to-red-900/30 border-rose-200 dark:border-rose-800',
-          priority: 5,
+          icon: streak.currentStreak >= 5 ? '😭' : '😢',
+          color: 'text-rose-700 dark:text-rose-300',
+          bgColor: 'bg-gradient-to-br from-rose-100 via-red-100 to-rose-50 dark:from-rose-900/40 dark:via-red-900/40 dark:to-rose-800/40 border-rose-300 dark:border-rose-700',
+          priority: streak.currentStreak >= 5 ? 6 : 4,
           streakCount: streak.currentStreak
         });
       }
@@ -206,28 +216,110 @@ const GameDashboardBanner: React.FC<GameDashboardBannerProps> = ({ games }) => {
     return null;
   }
 
+  // 이벤트 타입별 애니메이션 클래스
+  const getAnimationClass = (type: string) => {
+    switch (type) {
+        case 'fallFromGrace':
+            return 'animate-pulse-slow';
+        case 'darkHorse':
+            return 'animate-bounce-subtle';
+        case 'comeback':
+            return 'animate-shimmer';
+        case 'winStreak':
+            return 'animate-glow';
+        case 'loseStreak':
+            return 'animate-fade-slow';
+        default:
+            return '';
+    }
+  };
+
+  // 이벤트 타입별 아이콘 애니메이션
+  const getIconAnimation = (type: string) => {
+    switch (type) {
+        case 'fallFromGrace':
+            return 'animate-icon-bounce-strong';
+        case 'darkHorse':
+            return 'animate-icon-rotate';
+        case 'winStreak':
+            return 'animate-icon-bounce-strong';
+        case 'comeback':
+            return 'animate-icon-sparkle';
+        case 'loseStreak':
+            return 'animate-icon-wobble';
+        default:
+            return '';
+    }
+  };
+
+  // 이벤트 타입별 텍스트 애니메이션
+  const getTextAnimation = (type: string) => {
+    switch (type) {
+      case 'fallFromGrace':
+        return 'animate-text-shake';
+      case 'darkHorse':
+        return 'animate-text-glow';
+      case 'winStreak':
+        return 'animate-text-glow';
+      case 'comeback':
+        return 'animate-text-bounce';
+      case 'loseStreak':
+        return 'animate-text-pulse';
+      default:
+        return '';
+    }
+  };
+
+  // 이벤트 타입별 배지 애니메이션
+  const getBadgeAnimation = (type: string) => {
+    switch (type) {
+      case 'fallFromGrace':
+        return 'animate-badge-pulse';
+      case 'darkHorse':
+        return 'animate-badge-pulse';
+      case 'winStreak':
+        return 'animate-badge-pulse';
+      case 'comeback':
+        return 'animate-badge-pulse';
+      case 'loseStreak':
+        return 'animate-badge-pulse';
+      default:
+        return '';
+    }
+  };
+
   return (
     <div className="mb-6 space-y-3">
       {topEvents.map((event, index) => (
         <div
           key={`${event.player}-${event.type}-${index}`}
-          className={`${event.bgColor} border-x-0 border-y p-4 sm:p-6 shadow-md animate-fadeIn`}
+          className={`${event.bgColor} border-x-0 border-y p-4 sm:p-6 shadow-lg relative overflow-hidden ${getAnimationClass(event.type)}`}
           style={{ animationDelay: `${index * 100}ms` }}
         >
-          <div className="flex items-start gap-3 max-w-6xl mx-auto px-4 sm:px-6">
-            <div className="text-3xl flex-shrink-0">{event.icon}</div>
+          {/* 배경 그라데이션 오버레이 */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-50 pointer-events-none"></div>
+          
+          {/* 역전 이벤트의 경우 추가 shimmer 효과 */}
+          {event.type === 'comeback' && (
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer pointer-events-none" style={{ backgroundSize: '200% 100%' }}></div>
+          )}
+          
+          <div className="flex items-start gap-4 max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
+            <div className={`text-4xl sm:text-5xl flex-shrink-0 ${getIconAnimation(event.type)} inline-block`}>
+              {event.icon}
+            </div>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <h3 className={`font-bold text-lg ${event.color}`}>
+              <div className="flex items-center gap-2 mb-2">
+                <h3 className={`font-bold text-xl sm:text-2xl ${event.color} drop-shadow-sm ${getTextAnimation(event.type)}`}>
                   {event.message}
                 </h3>
                 {event.streakCount && (
-                  <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${event.color} bg-white/50 dark:bg-black/20`}>
+                  <span className={`px-3 py-1 rounded-full text-xs sm:text-sm font-bold ${event.color} bg-white/70 dark:bg-black/30 backdrop-blur-sm shadow-md ${getBadgeAnimation(event.type)}`}>
                     {event.streakCount}연속
                   </span>
                 )}
               </div>
-              <p className="text-slate-600 dark:text-slate-300 text-sm">
+              <p className="text-slate-700 dark:text-slate-200 text-sm sm:text-base font-medium">
                 {event.subMessage}
               </p>
             </div>
