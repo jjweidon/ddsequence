@@ -385,7 +385,7 @@ export default function Home() {
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                 }`}
               >
-                올해
+                전체
               </button>
               <button
                 type="button"

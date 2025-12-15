@@ -131,7 +131,7 @@ const GameDashboardBanner: React.FC<GameDashboardBannerProps> = ({ games }) => {
           type: 'fallFromGrace',
           player,
           message: '여왕의 몰락',
-          subMessage: `${displayName}님, ${rank}등인데 순위 떨어지겠어요 ㅋㅋ ㅜ`,
+          subMessage: `${displayName}님, 순위 떨어지겠어요 ㅋㅋ ㅜ`,
           icon: '👑',
           color: 'text-purple-700 dark:text-purple-300',
           bgColor: 'bg-gradient-to-br from-purple-100 via-pink-100 to-purple-50 dark:from-purple-900/40 dark:via-pink-900/40 dark:to-purple-800/40 border-purple-300 dark:border-purple-700',
@@ -140,7 +140,7 @@ const GameDashboardBanner: React.FC<GameDashboardBannerProps> = ({ games }) => {
         });
       }
 
-      // 하위권(3, 4, 5등) 플레이어의 연승 (다크호스, 파죽지세)
+      // 하위권(3, 4, 5등) 플레이어의 연승 (파죽지세)
       if (total >= 5 && rank >= 3 && streak.isWinStreak === true && streak.currentStreak >= 3) {
         events.push({
           type: 'darkHorse',

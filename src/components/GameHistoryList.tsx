@@ -52,6 +52,14 @@ const GameHistoryList: React.FC<GameHistoryListProps> = ({
 
   // 체크박스 토글 함수
   const toggleGameSelection = (gameId: string) => {
+    const game = games.find(g => g._id === gameId);
+    if (!game) return;
+    
+    // 30일 지난 기록은 선택할 수 없음
+    if (isOlderThan30Days(game.createdAt)) {
+      return;
+    }
+    
     if (selectedGames.includes(gameId)) {
       // 이미 선택된 경우 선택 해제
       setSelectedGames(selectedGames.filter(id => id !== gameId));
@@ -67,8 +75,12 @@ const GameHistoryList: React.FC<GameHistoryListProps> = ({
       // 모두 선택된 상태면 모두 해제
       setSelectedGames([]);
     } else {
-      // 일부만 선택되었거나 아무것도 선택되지 않았으면 모두 선택
-      setSelectedGames(games.map(game => game._id || '').filter(id => id));
+      // 일부만 선택되었거나 아무것도 선택되지 않았으면 모두 선택 (30일 지난 기록 제외)
+      const selectableGames = games
+        .filter(game => !isOlderThan30Days(game.createdAt))
+        .map(game => game._id || '')
+        .filter(id => id);
+      setSelectedGames(selectableGames);
     }
   };
 
@@ -86,6 +98,14 @@ const GameHistoryList: React.FC<GameHistoryListProps> = ({
       return localSortDirection === 'asc' ? aTime - bTime : bTime - aTime;
     }
   });
+
+  // 30일 지났는지 확인하는 함수
+  const isOlderThan30Days = (dateString: string | Date) => {
+    const gameDate = new Date(dateString);
+    const now = new Date();
+    const daysDiff = Math.floor((now.getTime() - gameDate.getTime()) / (1000 * 60 * 60 * 24));
+    return daysDiff >= 30;
+  };
 
   // 날짜 포맷팅 함수
   const formatDate = (dateString: string | Date) => {
@@ -178,10 +198,16 @@ const GameHistoryList: React.FC<GameHistoryListProps> = ({
                     <td className="px-4 py-4 whitespace-nowrap w-12">
                       <input
                         type="checkbox"
-                        className="h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 
-                                 focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 cursor-pointer"
+                        className={`h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 
+                                 focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 ${
+                          isOlderThan30Days(game.createdAt) 
+                            ? 'cursor-not-allowed opacity-50' 
+                            : 'cursor-pointer'
+                        }`}
                         checked={selectedGames.includes(game._id || '')}
                         onChange={() => game._id && toggleGameSelection(game._id)}
+                        disabled={isOlderThan30Days(game.createdAt)}
+                        title={isOlderThan30Days(game.createdAt) ? '30일이 지난 기록은 삭제할 수 없습니다' : ''}
                       />
                     </td>
                   )}
@@ -240,10 +266,16 @@ const GameHistoryList: React.FC<GameHistoryListProps> = ({
                   {isEditMode && (
                     <input
                       type="checkbox"
-                      className="h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 
-                               focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 cursor-pointer"
+                      className={`h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 
+                               focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 ${
+                        isOlderThan30Days(game.createdAt) 
+                          ? 'cursor-not-allowed opacity-50' 
+                          : 'cursor-pointer'
+                      }`}
                       checked={selectedGames.includes(game._id || '')}
                       onChange={() => game._id && toggleGameSelection(game._id)}
+                      disabled={isOlderThan30Days(game.createdAt)}
+                      title={isOlderThan30Days(game.createdAt) ? '30일이 지난 기록은 삭제할 수 없습니다' : ''}
                     />
                   )}
                   <span className="inline-flex items-center justify-center min-w-[32px] h-7 px-2 rounded-sm 
@@ -258,40 +290,40 @@ const GameHistoryList: React.FC<GameHistoryListProps> = ({
               </div>
               
               <div className="flex items-stretch gap-3">
-                <div className="flex-1 bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 
-                              rounded-sm p-3 border border-emerald-200 dark:border-emerald-800">
-                  <div className="flex items-center gap-1.5 mb-2">
-                    <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">승리</span>
+                  <div className="flex-1 bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 
+                                rounded-sm p-3 border border-emerald-200 dark:border-emerald-800">
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">승리</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {getTeamDisplayOrder(game.winningTeam).map(player => (
+                        <span key={player} className="inline-flex items-center justify-center h-8 w-8 rounded-xl 
+                                                    bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-800 dark:to-green-800 
+                                                    text-emerald-800 dark:text-emerald-200 font-bold text-sm 
+                                                    shadow-sm border border-emerald-300 dark:border-emerald-700">
+                          {player}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {getTeamDisplayOrder(game.winningTeam).map(player => (
-                      <span key={player} className="inline-flex items-center justify-center h-8 w-8 rounded-xl 
-                                                  bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-800 dark:to-green-800 
-                                                  text-emerald-800 dark:text-emerald-200 font-bold text-sm 
-                                                  shadow-sm border border-emerald-300 dark:border-emerald-700">
-                        {player}
-                      </span>
-                    ))}
+                  
+                  <div className="flex-1 bg-gradient-to-br from-rose-50 to-red-50 dark:from-rose-900/20 dark:to-red-900/20 
+                                rounded-sm p-3 border border-rose-200 dark:border-rose-800">
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <span className="text-xs font-bold text-rose-700 dark:text-rose-400">패배</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {getTeamDisplayOrder(game.losingTeam).map(player => (
+                        <span key={player} className="inline-flex items-center justify-center h-8 w-8 rounded-xl 
+                                                    bg-gradient-to-br from-rose-100 to-red-100 dark:from-rose-800 dark:to-red-800 
+                                                    text-rose-800 dark:text-rose-200 font-bold text-sm 
+                                                    shadow-sm border border-rose-300 dark:border-rose-700">
+                          {player}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
-                
-                <div className="flex-1 bg-gradient-to-br from-rose-50 to-red-50 dark:from-rose-900/20 dark:to-red-900/20 
-                              rounded-sm p-3 border border-rose-200 dark:border-rose-800">
-                  <div className="flex items-center gap-1.5 mb-2">
-                    <span className="text-xs font-bold text-rose-700 dark:text-rose-400">패배</span>
-                  </div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {getTeamDisplayOrder(game.losingTeam).map(player => (
-                      <span key={player} className="inline-flex items-center justify-center h-8 w-8 rounded-xl 
-                                                  bg-gradient-to-br from-rose-100 to-red-100 dark:from-rose-800 dark:to-red-800 
-                                                  text-rose-800 dark:text-rose-200 font-bold text-sm 
-                                                  shadow-sm border border-rose-300 dark:border-rose-700">
-                        {player}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
             </div>
           ))}
         </div>

@@ -47,9 +47,33 @@ export default function HistoryPage() {
     }
   };
 
+  // 30일 지났는지 확인하는 함수
+  const isOlderThan30Days = (dateString: string | Date) => {
+    const gameDate = new Date(dateString);
+    const now = new Date();
+    const daysDiff = Math.floor((now.getTime() - gameDate.getTime()) / (1000 * 60 * 60 * 24));
+    return daysDiff >= 30;
+  };
+
   // 선택된 게임 삭제 함수
   const handleDeleteSelected = async () => {
     if (selectedGames.length === 0) return;
+    
+    // 30일 지난 게임이 있는지 확인
+    const oldGames = games.filter(game => 
+      game._id && selectedGames.includes(game._id) && isOlderThan30Days(game.createdAt)
+    );
+    
+    if (oldGames.length > 0) {
+      alert('30일이 지난 게임 기록은 삭제할 수 없습니다.');
+      // 30일 지나지 않은 게임만 선택 상태로 유지
+      const validGames = games
+        .filter(game => game._id && selectedGames.includes(game._id) && !isOlderThan30Days(game.createdAt))
+        .map(game => game._id || '')
+        .filter(id => id);
+      setSelectedGames(validGames);
+      return;
+    }
     
     if (!confirm(`선택한 ${selectedGames.length}개의 게임 기록을 삭제하시겠습니까?`)) {
       return;
@@ -59,11 +83,16 @@ export default function HistoryPage() {
     
     try {
       // 선택된 각 게임 ID에 대해 삭제 API 호출
-      const deletePromises = selectedGames.map(id => 
-        fetch(`/api/games/${id}`, {
+      const deletePromises = selectedGames.map(async (id) => {
+        const response = await fetch(`/api/games/${id}`, {
           method: 'DELETE',
-        })
-      );
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || '삭제에 실패했습니다.');
+        }
+        return data;
+      });
       
       await Promise.all(deletePromises);
       
@@ -73,11 +102,12 @@ export default function HistoryPage() {
       
     } catch (error: any) {
       console.error('게임 기록 삭제 오류:', error);
-      alert('게임 기록 삭제 중 오류가 발생했습니다.');
+      alert(error.message || '게임 기록 삭제 중 오류가 발생했습니다.');
     } finally {
       setDeleteLoading(false);
     }
   };
+
   
   // 편집 모드 토글
   const toggleEditMode = () => {
