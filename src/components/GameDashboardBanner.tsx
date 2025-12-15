@@ -245,7 +245,7 @@ const GameDashboardBanner: React.FC<GameDashboardBannerProps> = ({ games, single
         events.push({
           type: 'loseStreak',
           player,
-          message: streak.currentStreak >= 5 ? '절망의 연패' : '연패의 늪',
+          message: streak.currentStreak >= 5 ? '절망의 연패' : '연패 감옥',
           subMessage: `${displayName}님, ${streak.currentStreak}연패 중... ㅋㅋ 힘내세요!`,
           icon: streak.currentStreak >= 5 ? '😭' : '😢',
           color: 'text-rose-700 dark:text-rose-300',
@@ -301,7 +301,7 @@ const GameDashboardBanner: React.FC<GameDashboardBannerProps> = ({ games, single
           type: 'teamLoseStreak',
           player: '', // 팀 이벤트는 player 대신 team 사용
           team: team,
-          message: '최악의 궁합',
+          message: '최악의 짝꿍',
           subMessage: `${teamName} 팀 ${streak.currentStreak}연패 중... 이 팀은 안 될 것 같아요 😅`,
           icon: '💔',
           color: 'text-orange-700 dark:text-orange-300',
