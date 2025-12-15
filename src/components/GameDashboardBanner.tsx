@@ -176,6 +176,21 @@ const GameDashboardBanner: React.FC<GameDashboardBannerProps> = ({ games }) => {
 
       const displayName = playerDisplayNames[player] || player;
 
+      // 역전 승리 (연패 후 승리)
+      const comebackLoseStreak = detectComeback(playerGames);
+      if (comebackLoseStreak >= 2 && streak.isWinStreak && streak.currentStreak >= 1) {
+        events.push({
+          type: 'comeback',
+          player,
+          message: '연패 탈출',
+          subMessage: `${displayName}님, ${comebackLoseStreak}연패 후 승리! 반전의 시작인가?!`,
+          icon: '💫',
+          color: 'text-blue-700 dark:text-blue-300',
+          bgColor: 'bg-gradient-to-br from-blue-100 via-cyan-100 to-blue-50 dark:from-blue-900/40 dark:via-cyan-900/40 dark:to-blue-800/40 border-blue-300 dark:border-blue-700',
+          priority: 12
+        });
+      }
+
       // 상위권(1, 2, 3등) 플레이어의 연패 (여왕의 몰락)
       if (total >= 5 && rank <= 3 && streak.isWinStreak === false && streak.currentStreak >= 3) {
         events.push({
@@ -186,7 +201,7 @@ const GameDashboardBanner: React.FC<GameDashboardBannerProps> = ({ games }) => {
           icon: '👑',
           color: 'text-purple-700 dark:text-purple-300',
           bgColor: 'bg-gradient-to-br from-purple-100 via-pink-100 to-purple-50 dark:from-purple-900/40 dark:via-pink-900/40 dark:to-purple-800/40 border-purple-300 dark:border-purple-700',
-          priority: 10,
+          priority: 11,
           streakCount: streak.currentStreak
         });
       }
@@ -201,23 +216,8 @@ const GameDashboardBanner: React.FC<GameDashboardBannerProps> = ({ games }) => {
           icon: '⚡️',
           color: 'text-yellow-700 dark:text-yellow-300',
           bgColor: 'bg-gradient-to-br from-yellow-100 via-orange-100 to-yellow-50 dark:from-yellow-900/40 dark:via-orange-900/40 dark:to-yellow-800/40 border-yellow-300 dark:border-yellow-700',
-          priority: 9,
+          priority: 10,
           streakCount: streak.currentStreak
-        });
-      }
-
-      // 역전 승리 (연패 후 승리)
-      const comebackLoseStreak = detectComeback(playerGames);
-      if (comebackLoseStreak >= 2 && streak.isWinStreak && streak.currentStreak >= 1) {
-        events.push({
-          type: 'comeback',
-          player,
-          message: '연패 탈출',
-          subMessage: `${displayName}님, ${comebackLoseStreak}연패 후 승리! 반전의 시작인가?!`,
-          icon: '💫',
-          color: 'text-blue-700 dark:text-blue-300',
-          bgColor: 'bg-gradient-to-br from-blue-100 via-cyan-100 to-blue-50 dark:from-blue-900/40 dark:via-cyan-900/40 dark:to-blue-800/40 border-blue-300 dark:border-blue-700',
-          priority: 8
         });
       }
 
@@ -233,7 +233,7 @@ const GameDashboardBanner: React.FC<GameDashboardBannerProps> = ({ games }) => {
           bgColor: streak.currentStreak >= 5 
             ? 'bg-gradient-to-br from-emerald-100 via-green-100 to-emerald-50 dark:from-emerald-900/40 dark:via-green-900/40 dark:to-emerald-800/40 border-emerald-300 dark:border-emerald-700'
             : 'bg-gradient-to-br from-emerald-100 to-green-50 dark:from-emerald-900/40 dark:to-green-800/40 border-emerald-300 dark:border-emerald-700',
-          priority: streak.currentStreak >= 5 ? 7 : 5,
+          priority: streak.currentStreak,
           streakCount: streak.currentStreak
         });
       }
@@ -248,7 +248,7 @@ const GameDashboardBanner: React.FC<GameDashboardBannerProps> = ({ games }) => {
           icon: streak.currentStreak >= 5 ? '😭' : '😢',
           color: 'text-rose-700 dark:text-rose-300',
           bgColor: 'bg-gradient-to-br from-rose-100 via-red-100 to-rose-50 dark:from-rose-900/40 dark:via-red-900/40 dark:to-rose-800/40 border-rose-300 dark:border-rose-700',
-          priority: streak.currentStreak >= 5 ? 6 : 4,
+          priority: streak.currentStreak,
           streakCount: streak.currentStreak
         });
       }
@@ -288,7 +288,7 @@ const GameDashboardBanner: React.FC<GameDashboardBannerProps> = ({ games }) => {
           icon: '💎',
           color: 'text-indigo-700 dark:text-indigo-300',
           bgColor: 'bg-gradient-to-br from-indigo-100 via-purple-100 to-indigo-50 dark:from-indigo-900/40 dark:via-purple-900/40 dark:to-indigo-800/40 border-indigo-300 dark:border-indigo-700',
-          priority: 3,
+          priority: streak.currentStreak,
           streakCount: streak.currentStreak
         });
       }
@@ -300,11 +300,11 @@ const GameDashboardBanner: React.FC<GameDashboardBannerProps> = ({ games }) => {
           player: '', // 팀 이벤트는 player 대신 team 사용
           team: team,
           message: '최악의 궁합',
-          subMessage: `${teamName} 팀 ${streak.currentStreak}연패 중... 이 조합은 안 되는 것 같아요 😅`,
+          subMessage: `${teamName} 팀 ${streak.currentStreak}연패 중... 이 팀은 안 될 것 같아요 😅`,
           icon: '💔',
           color: 'text-orange-700 dark:text-orange-300',
           bgColor: 'bg-gradient-to-br from-orange-100 via-red-100 to-orange-50 dark:from-orange-900/40 dark:via-red-900/40 dark:to-orange-800/40 border-orange-300 dark:border-orange-700',
-          priority: 2,
+          priority: streak.currentStreak,
           streakCount: streak.currentStreak
         });
       }
