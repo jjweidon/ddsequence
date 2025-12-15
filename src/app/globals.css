@@ -104,28 +104,6 @@ body {
   }
 }
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
 @keyframes shimmer {
   0% {
     background-position: -1000px 0;
@@ -144,51 +122,6 @@ body {
   }
   100% {
     background-position: 0% 50%;
-  }
-}
-
-@keyframes pulse-slow {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.8;
-  }
-}
-
-@keyframes bounce-subtle {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-2px);
-  }
-}
-
-@keyframes glow {
-  0%, 100% {
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-  }
-  50% {
-    box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
-  }
-}
-
-@keyframes fade-slow {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.9;
-  }
-}
-
-@keyframes spin-slow {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
   }
 }
 
@@ -294,17 +227,6 @@ body {
   }
 }
 
-@keyframes icon-glow-pulse {
-  0%, 100% {
-    filter: drop-shadow(0 0 5px currentColor);
-    transform: scale(1);
-  }
-  50% {
-    filter: drop-shadow(0 0 15px currentColor) drop-shadow(0 0 25px currentColor);
-    transform: scale(1.1);
-  }
-}
-
 @keyframes badge-pulse {
   0%, 100% {
     transform: scale(1);
@@ -320,37 +242,9 @@ body {
   animation: fadeIn 0.3s ease-out;
 }
 
-.animate-slideIn {
-  animation: slideIn 0.4s ease-out;
-}
-
-.animate-scaleIn {
-  animation: scaleIn 0.3s ease-out;
-}
-
 .animate-gradient {
   background-size: 200% 200%;
   animation: gradientShift 6s ease infinite;
-}
-
-.animate-pulse-slow {
-  animation: pulse-slow 3s ease-in-out infinite;
-}
-
-.animate-bounce-subtle {
-  animation: bounce-subtle 2s ease-in-out infinite;
-}
-
-.animate-glow {
-  animation: glow 2s ease-in-out infinite;
-}
-
-.animate-fade-slow {
-  animation: fade-slow 2s ease-in-out infinite;
-}
-
-.animate-spin-slow {
-  animation: spin-slow 3s linear infinite;
 }
 
 .animate-text-glow {
@@ -387,10 +281,6 @@ body {
 
 .animate-icon-wobble {
   animation: icon-wobble 1s ease-in-out infinite;
-}
-
-.animate-icon-glow-pulse {
-  animation: icon-glow-pulse 2s ease-in-out infinite;
 }
 
 /* 스크롤바 스타일링 */

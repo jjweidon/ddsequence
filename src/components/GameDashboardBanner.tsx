@@ -332,27 +332,6 @@ const GameDashboardBanner: React.FC<GameDashboardBannerProps> = ({ games, single
     ? topEvents.slice(singleEventIndex, singleEventIndex + 1)
     : topEvents;
 
-  // 이벤트 타입별 애니메이션 클래스
-  const getAnimationClass = (type: string) => {
-    switch (type) {
-        case 'fallFromGrace':
-            return 'animate-pulse-slow';
-        case 'darkHorse':
-            return 'animate-bounce-subtle';
-        case 'comeback':
-            return 'animate-shimmer';
-        case 'winStreak':
-            return 'animate-glow';
-        case 'loseStreak':
-            return 'animate-fade-slow';
-        case 'teamWinStreak':
-            return 'animate-glow';
-        case 'teamLoseStreak':
-            return 'animate-pulse-slow';
-        default:
-            return '';
-    }
-  };
 
   // 이벤트 타입별 아이콘 애니메이션
   const getIconAnimation = (type: string) => {
@@ -425,16 +404,11 @@ const GameDashboardBanner: React.FC<GameDashboardBannerProps> = ({ games, single
       {displayEvents.map((event, index) => (
         <div
           key={`${event.team ? event.team.join('') : event.player}-${event.type}-${index}`}
-          className={`${event.bgColor} border-x-0 border-y p-4 sm:p-6 shadow-lg relative overflow-hidden ${getAnimationClass(event.type)}`}
+          className={`${event.bgColor} border-x-0 border-y p-4 sm:p-6 shadow-lg relative overflow-hidden`}
           style={{ animationDelay: `${index * 100}ms` }}
         >
-          {/* 배경 그라데이션 오버레이 */}
+          {/* 배경 그라데이션 오버레이 - 고정된 그라데이션 */}
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-50 pointer-events-none"></div>
-          
-          {/* 역전 이벤트의 경우 추가 shimmer 효과 */}
-          {event.type === 'comeback' && (
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer pointer-events-none" style={{ backgroundSize: '200% 100%' }}></div>
-          )}
           
           <div className="flex items-start gap-4 max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
             <div className={`text-4xl sm:text-5xl flex-shrink-0 ${getIconAnimation(event.type)} inline-block`}>
