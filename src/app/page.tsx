@@ -197,6 +197,7 @@ export default function Home() {
   }, []);
 
   return (
+    <>
     <main className="min-h-screen bg-slate-50 dark:bg-slate-900 py-8 px-4 sm:px-6">
       <div className="max-w-2xl mx-auto">
         {/* 헤더 */}
@@ -340,18 +341,6 @@ export default function Home() {
                   <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
                 </svg>
               </Link>
-              <Link 
-                href="/hall-of-fame" 
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 
-                         text-white font-semibold text-sm
-                         transition-all duration-200 shadow-sm hover:shadow-md
-                         focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2"
-              >
-                <span>명예의 전당</span>
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                </svg>
-              </Link>
             </div>
           </div>
           
@@ -430,6 +419,28 @@ export default function Home() {
         </div>
       </div>
       </div>
+      
     </main>
+    
+    {/* 명예의 전당 배너 */}
+    <div className="w-full bg-gradient-to-r from-amber-500/10 to-orange-600/10 
+                 dark:from-amber-500/20 dark:to-orange-600/20">
+      <Link 
+        href="/hall-of-fame" 
+        className="block w-full px-6 py-4 
+                 hover:from-amber-500/20 hover:to-orange-600/20 dark:hover:from-amber-500/30 dark:hover:to-orange-600/30
+                 transition-all duration-200
+                 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2"
+      >
+        <div className="flex items-center justify-center gap-2 text-amber-700 dark:text-amber-400">
+          <span className="text-lg">🏆</span>
+          <span className="font-semibold text-sm">명예의 전당</span>
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+          </svg>
+        </div>
+      </Link>
+    </div>
+    </>
   );
 }

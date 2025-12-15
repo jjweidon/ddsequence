@@ -17,11 +17,19 @@ export default function HistoryPage() {
   const [sortField, setSortField] = useState<SortField>('createdAt');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
-  // 게임 데이터 가져오기
+  // 현재 연도 가져오기 (한국 시간 기준)
+  const getCurrentYear = () => {
+    const now = new Date();
+    const koreaTime = new Date(now.getTime() + (9 * 60 * 60 * 1000));
+    return koreaTime.getFullYear();
+  };
+
+  // 게임 데이터 가져오기 (현재 연도만)
   const fetchGames = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/games');
+      const currentYear = getCurrentYear();
+      const response = await fetch(`/api/games?year=${currentYear}`);
       const data = await response.json();
       
       if (!response.ok) {
@@ -189,7 +197,7 @@ export default function HistoryPage() {
                   게임 기록
                 </h1>
                 <p className="text-sm text-slate-600 dark:text-slate-400 mt-0.5">
-                  전체 {games.length} 게임
+                  {getCurrentYear()}년 기록 {games.length} 게임
                 </p>
               </div>
               <button 

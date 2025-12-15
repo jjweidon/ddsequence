@@ -21,6 +21,18 @@ export default function HallOfFamePage() {
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
 
+  // 현재 연도 가져오기 (한국 시간 기준)
+  const getCurrentYear = () => {
+    const now = new Date();
+    const koreaTime = new Date(now.getTime() + (9 * 60 * 60 * 1000));
+    return koreaTime.getFullYear();
+  };
+
+  // 선택된 연도가 현재 연도인지 확인
+  const isCurrentYear = () => {
+    return selectedYear !== null && selectedYear === getCurrentYear();
+  };
+
   // 사용 가능한 연도 목록 가져오기
   const fetchAvailableYears = async () => {
     try {
@@ -142,8 +154,12 @@ export default function HallOfFamePage() {
     }
   };
 
-  // 편집 모드 토글
+  // 편집 모드 토글 (현재 연도만 가능)
   const toggleEditMode = () => {
+    if (!isCurrentYear()) {
+      alert('이전 연도 기록은 편집할 수 없습니다.');
+      return;
+    }
     setIsEditMode(!isEditMode);
     if (isEditMode) {
       setSelectedGames([]);
@@ -288,7 +304,7 @@ export default function HallOfFamePage() {
                       {selectedYear}년 게임 기록
                     </h2>
                     <div className="flex items-center gap-3">
-                      {isEditMode && games.length > 0 && (
+                      {isEditMode && games.length > 0 && isCurrentYear() && (
                         <button
                           onClick={handleDeleteSelected}
                           disabled={selectedGames.length === 0 || deleteLoading}
@@ -318,7 +334,7 @@ export default function HallOfFamePage() {
                           )}
                         </button>
                       )}
-                      {games.length > 0 && (
+                      {games.length > 0 && isCurrentYear() && (
                         <button 
                           onClick={toggleEditMode}
                           className={`px-4 py-2.5 rounded-xl font-bold text-sm transition-all duration-200 shadow-sm hover:shadow-md
@@ -337,7 +353,7 @@ export default function HallOfFamePage() {
                   {games.length > 0 ? (
                     <GameHistoryList 
                       games={games} 
-                      isEditMode={isEditMode}
+                      isEditMode={isEditMode && isCurrentYear()}
                       selectedGames={selectedGames}
                       setSelectedGames={setSelectedGames}
                       sortField={sortField}
