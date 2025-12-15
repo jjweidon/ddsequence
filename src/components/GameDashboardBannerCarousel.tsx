@@ -55,18 +55,18 @@ export default function GameDashboardBannerCarousel({
   if (games.length === 0) return null;
 
   return (
-    <div className="relative">
+    <div className="relative w-full max-w-full">
       {/* 캐러셀 슬라이드 */}
-      <div className="relative overflow-hidden">
+      <div className="relative overflow-hidden w-full max-w-full">
         <div 
-          className="flex transition-transform duration-500 ease-in-out"
+          className="flex transition-transform duration-500 ease-in-out w-full"
           style={{ transform: `translateX(-${currentIndex * 100}%)` }}
         >
           {[0, 1, 2, 3, 4].map((index) => {
             const banner = <GameDashboardBanner games={games} singleEventIndex={index} />;
             // banner가 null이면 이벤트가 없는 것
             return (
-              <div key={index} className="min-w-full flex-shrink-0">
+              <div key={index} className="min-w-full w-full flex-shrink-0 max-w-full">
                 {banner}
               </div>
             );

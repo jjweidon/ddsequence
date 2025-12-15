@@ -400,35 +400,39 @@ const GameDashboardBanner: React.FC<GameDashboardBannerProps> = ({ games, single
   };
 
   return (
-    <div className={`${singleEventIndex !== undefined ? 'mb-0' : 'mb-6'} space-y-3`}>
+    <div className={`${singleEventIndex !== undefined ? 'mb-0' : 'mb-6'} space-y-3 w-full max-w-full`}>
       {displayEvents.map((event, index) => (
         <div
           key={`${event.team ? event.team.join('') : event.player}-${event.type}-${index}`}
-          className={`${event.bgColor} border-x-0 border-y p-4 sm:p-6 shadow-lg relative overflow-hidden`}
+          className={`${event.bgColor} border-x-0 border-y p-4 sm:p-6 shadow-lg relative overflow-hidden w-full max-w-full`}
           style={{ animationDelay: `${index * 100}ms` }}
         >
           {/* 배경 그라데이션 오버레이 - 고정된 그라데이션 */}
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-50 pointer-events-none"></div>
           
-          <div className="flex items-start gap-4 max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
-            <div className={`text-4xl sm:text-5xl flex-shrink-0 ${getIconAnimation(event.type)} inline-block`}>
-              {event.icon}
-            </div>
-            <div className="flex-1 min-w-0 max-w-2xl">
-              <div className="flex items-center gap-2 mb-2">
-                <h3 className={`font-bold text-xl sm:text-2xl ${event.color} drop-shadow-sm ${getTextAnimation(event.type)}`}>
-                  {event.message}
-                </h3>
-                {event.streakCount && (
-                  <span className={`px-3 py-1 rounded-full text-xs sm:text-sm font-bold ${event.color} bg-white/70 dark:bg-black/30 backdrop-blur-sm shadow-md ${getBadgeAnimation(event.type)}`}>
-                    {event.streakCount}연속
-                  </span>
-                )}
+          <div className="flex flex-col gap-3 w-full max-w-6xl mx-auto relative z-10 items-center">
+            {/* icon과 message가 좌우로 배치되는 상단 영역 */}
+            <div className="flex items-end gap-4 justify-center">
+              <div className={`text-xl sm:text-3xl flex-shrink-0 ${getIconAnimation(event.type)} inline-block`}>
+                {event.icon}
               </div>
-              <p className="text-slate-700 dark:text-slate-200 text-sm sm:text-base font-medium">
-                {event.subMessage}
-              </p>
+              <div className="flex-shrink-0">
+                <div className="flex items-end gap-2">
+                  <h3 className={`font-bold text-xl sm:text-2xl ${event.color} drop-shadow-sm ${getTextAnimation(event.type)}`}>
+                    {event.message}
+                  </h3>
+                  {event.streakCount && (
+                    <span className={`px-3 py-1 rounded-full text-xs sm:text-sm font-bold ${event.color} bg-white/70 dark:bg-black/30 backdrop-blur-sm shadow-md ${getBadgeAnimation(event.type)}`}>
+                      {event.streakCount}연속
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
+            {/* subMessage가 하단에 배치되는 영역 */}
+            <p className="text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-medium text-center">
+              {event.subMessage}
+            </p>
           </div>
         </div>
       ))}
