@@ -9,6 +9,7 @@ import {
   getSortedPlayerStatsByWins,
   calculateWinrate
 } from '@/utils/gameStats';
+import { getTeamName } from '@/utils/teamOrder';
 
 // GET: 게임 통계 데이터 제공
 export async function GET(request: Request) {
@@ -70,13 +71,18 @@ export async function GET(request: Request) {
       total
     }));
     
-    const formattedTeamWinrates = sortedTeamStatsByWinrate.map(([team, [wins, total]], index) => ({
-      rank: index + 1,
-      team,
-      winrate: calculateWinrate(wins, total),
-      wins,
-      total
-    }));
+    const formattedTeamWinrates = sortedTeamStatsByWinrate.map(([teamKey, [wins, total]], index) => {
+      // 팀 키를 플레이어 배열로 변환하여 표시 이름 가져오기
+      const teamPlayers = teamKey.split('');
+      const displayName = getTeamName(teamPlayers);
+      return {
+        rank: index + 1,
+        team: displayName,
+        winrate: calculateWinrate(wins, total),
+        wins,
+        total
+      };
+    });
     
     const formattedPlayerWins = sortedPlayerStatsByWins.map(([player, [wins, total]], index) => ({
       rank: index + 1,

@@ -1,4 +1,5 @@
 import { IGame } from '../models/Game';
+import { getTeamKey } from './teamOrder';
 
 // 플레이어 타입
 export type PlayerStats = {
@@ -53,7 +54,7 @@ export const calculateTeamStats = (games: IGame[]): TeamStats => {
   // 게임 로그를 순회하며 팀 통계 업데이트
   games.forEach(game => {
     // 승리 팀 통계 업데이트
-    const winTeamKey = game.winningTeam.sort().join('');
+    const winTeamKey = getTeamKey(game.winningTeam);
     if (!teamStats[winTeamKey]) {
       teamStats[winTeamKey] = [0, 0];
     }
@@ -61,7 +62,7 @@ export const calculateTeamStats = (games: IGame[]): TeamStats => {
     teamStats[winTeamKey][1] += 1; // 총 경기 수 증가
     
     // 패배 팀 통계 업데이트
-    const loseTeamKey = game.losingTeam.sort().join('');
+    const loseTeamKey = getTeamKey(game.losingTeam);
     if (!teamStats[loseTeamKey]) {
       teamStats[loseTeamKey] = [0, 0];
     }

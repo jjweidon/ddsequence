@@ -5,6 +5,7 @@ import Link from 'next/link';
 import GameHistoryList from '@/components/GameHistoryList';
 import { IGame } from '@/models/Game';
 import { SortField, SortDirection } from '@/components/GameHistoryList';
+import { getTeamName } from '@/utils/teamOrder';
 
 export default function HistoryPage() {
   const [games, setGames] = useState<IGame[]>([]);
@@ -146,8 +147,8 @@ export default function HistoryPage() {
       
       // 해당 날짜의 게임들을 순회
       gamesInDay.forEach(game => {
-        const winTeam = game.winningTeam.join('');
-        const loseTeam = game.losingTeam.join('');
+        const winTeam = getTeamName(game.winningTeam);
+        const loseTeam = getTeamName(game.losingTeam);
         
         // 정렬 방향에 따라 게임 번호 결정
         const gameNumber = sortDirection === 'asc' 

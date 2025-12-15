@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { IGame } from '@/models/Game';
+import { getTeamDisplayOrder } from '@/utils/teamOrder';
 
 export type SortField = 'index' | 'createdAt';
 export type SortDirection = 'asc' | 'desc';
@@ -195,7 +196,7 @@ const GameHistoryList: React.FC<GameHistoryListProps> = ({
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-2">
-                      {game.winningTeam.map(player => (
+                      {getTeamDisplayOrder(game.winningTeam).map(player => (
                         <span key={player} className="inline-flex items-center justify-center h-9 w-9 rounded-xl 
                                                     bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900/40 dark:to-green-900/40 
                                                     text-emerald-800 dark:text-emerald-300 font-bold text-sm 
@@ -207,7 +208,7 @@ const GameHistoryList: React.FC<GameHistoryListProps> = ({
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-2">
-                      {game.losingTeam.map(player => (
+                      {getTeamDisplayOrder(game.losingTeam).map(player => (
                         <span key={player} className="inline-flex items-center justify-center h-9 w-9 rounded-xl 
                                                     bg-gradient-to-br from-rose-100 to-red-100 dark:from-rose-900/40 dark:to-red-900/40 
                                                     text-rose-800 dark:text-rose-300 font-bold text-sm 
@@ -263,7 +264,7 @@ const GameHistoryList: React.FC<GameHistoryListProps> = ({
                     <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">승리</span>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
-                    {game.winningTeam.map(player => (
+                    {getTeamDisplayOrder(game.winningTeam).map(player => (
                       <span key={player} className="inline-flex items-center justify-center h-8 w-8 rounded-xl 
                                                   bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-800 dark:to-green-800 
                                                   text-emerald-800 dark:text-emerald-200 font-bold text-sm 
@@ -280,7 +281,7 @@ const GameHistoryList: React.FC<GameHistoryListProps> = ({
                     <span className="text-xs font-bold text-rose-700 dark:text-rose-400">패배</span>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
-                    {game.losingTeam.map(player => (
+                    {getTeamDisplayOrder(game.losingTeam).map(player => (
                       <span key={player} className="inline-flex items-center justify-center h-8 w-8 rounded-xl 
                                                   bg-gradient-to-br from-rose-100 to-red-100 dark:from-rose-800 dark:to-red-800 
                                                   text-rose-800 dark:text-rose-200 font-bold text-sm 
