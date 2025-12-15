@@ -187,8 +187,16 @@ export default function HistoryPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-slate-50 dark:bg-slate-900 py-6 sm:py-8 px-4 sm:px-6">
-      <div className="max-w-6xl mx-auto">
+    <>
+      {/* 대시보드 배너 - 전체 너비 */}
+      {!loading && !error && (
+        <div className="w-full">
+          <GameDashboardBanner games={games} />
+        </div>
+      )}
+      
+      <main className="min-h-screen bg-slate-50 dark:bg-slate-900 py-6 sm:py-8 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto">
         {/* 헤더 */}
         <div className="mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -311,25 +319,18 @@ export default function HistoryPage() {
             </button>
           </div>
         ) : (
-          <>
-            {/* 대시보드 배너 */}
-            <div className="-mx-4 sm:-mx-6">
-              <GameDashboardBanner games={games} />
-            </div>
-            
-            {/* 게임 기록 목록 */}
-            <GameHistoryList 
-              games={games} 
-              isEditMode={isEditMode}
-              selectedGames={selectedGames}
-              setSelectedGames={setSelectedGames}
-              sortField={sortField}
-              sortDirection={sortDirection}
-              onSortChange={handleSortChange}
-            />
-          </>
+          <GameHistoryList 
+            games={games} 
+            isEditMode={isEditMode}
+            selectedGames={selectedGames}
+            setSelectedGames={setSelectedGames}
+            sortField={sortField}
+            sortDirection={sortDirection}
+            onSortChange={handleSortChange}
+          />
         )}
       </div>
     </main>
+    </>
   );
 } 

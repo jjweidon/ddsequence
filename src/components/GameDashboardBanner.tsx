@@ -162,7 +162,7 @@ const GameDashboardBanner: React.FC<GameDashboardBannerProps> = ({ games }) => {
           type: 'comeback',
           player,
           message: '연패 탈출',
-          subMessage: `${displayName}님, ${comebackLoseStreak}연패 후 승리! 반전의 시작인가?`,
+          subMessage: `${displayName}님, ${comebackLoseStreak}연패 후 승리! 반전의 시작인가?!`,
           icon: '💫',
           color: 'text-blue-700 dark:text-blue-300',
           bgColor: 'bg-gradient-to-br from-blue-100 via-cyan-100 to-blue-50 dark:from-blue-900/40 dark:via-cyan-900/40 dark:to-blue-800/40 border-blue-300 dark:border-blue-700',
@@ -176,7 +176,7 @@ const GameDashboardBanner: React.FC<GameDashboardBannerProps> = ({ games }) => {
           type: 'winStreak',
           player,
           message: streak.currentStreak >= 5 ? '불멸의 연승' : '연승 행진',
-          subMessage: `축하합니다 ${displayName}님, ${streak.currentStreak}연승 중이에요!`,
+          subMessage: `축하합니다 ${displayName}님, ${streak.currentStreak}연승 중이에요~!`,
           icon: streak.currentStreak >= 5 ? '🔥' : '✨',
           color: 'text-emerald-700 dark:text-emerald-300',
           bgColor: streak.currentStreak >= 5 
@@ -193,7 +193,7 @@ const GameDashboardBanner: React.FC<GameDashboardBannerProps> = ({ games }) => {
           type: 'loseStreak',
           player,
           message: streak.currentStreak >= 5 ? '절망의 연패' : '연패의 늪',
-          subMessage: `${displayName}님, ${streak.currentStreak}연패 중... 힘내세요!`,
+          subMessage: `${displayName}님, ${streak.currentStreak}연패 중... ㅋㅋ 힘내세요!`,
           icon: streak.currentStreak >= 5 ? '😭' : '😢',
           color: 'text-rose-700 dark:text-rose-300',
           bgColor: 'bg-gradient-to-br from-rose-100 via-red-100 to-rose-50 dark:from-rose-900/40 dark:via-red-900/40 dark:to-rose-800/40 border-rose-300 dark:border-rose-700',
@@ -308,7 +308,7 @@ const GameDashboardBanner: React.FC<GameDashboardBannerProps> = ({ games }) => {
             <div className={`text-4xl sm:text-5xl flex-shrink-0 ${getIconAnimation(event.type)} inline-block`}>
               {event.icon}
             </div>
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 max-w-2xl">
               <div className="flex items-center gap-2 mb-2">
                 <h3 className={`font-bold text-xl sm:text-2xl ${event.color} drop-shadow-sm ${getTextAnimation(event.type)}`}>
                   {event.message}
