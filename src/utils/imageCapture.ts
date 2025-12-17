@@ -204,7 +204,7 @@ export const captureSlideAsImage = async (
       ignoreElements: (element: HTMLElement) => {
         return element.hasAttribute('data-exclude-from-capture');
       },
-      onclone: (clonedDoc) => {
+      onclone: (clonedDoc: Document) => {
         // 복제된 문서에서 SVG 요소 처리
         const clonedSvgs = clonedDoc.querySelectorAll('svg');
         clonedSvgs.forEach(svg => {
