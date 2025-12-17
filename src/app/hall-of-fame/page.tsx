@@ -268,6 +268,19 @@ export default function HallOfFamePage() {
                     <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
                       {selectedYear}년 통계
                     </h2>
+                    <Link
+                      href={`/recap/${selectedYear}`}
+                      className="px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 
+                               text-white font-bold rounded-sm shadow-lg shadow-red-500/30
+                               transition-all duration-200 transform hover:scale-[1.02]
+                               focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2
+                               flex items-center gap-2"
+                    >
+                      <span>Recap</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </Link>
                   </div>
                   
                   {statsLoading ? (
