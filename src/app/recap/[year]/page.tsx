@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { getPlayerDisplayName } from '@/utils/playerNames';
+import { useSlideImageCapture } from '@/components/SlideImageCapture';
 
 // 기간별 등수 차트 컴포넌트
 const RankChart: React.FC<{
@@ -85,7 +86,7 @@ const RankChart: React.FC<{
 
   return (
     <div className="w-full max-w-5xl mx-auto">
-      <div className="mb-6 flex gap-4 justify-center">
+      <div className="mb-6 flex gap-4 justify-center items-center">
         <button
           onClick={() => setSelectedView('cumulative')}
           className={`px-6 py-2 rounded-lg font-semibold transition-all ${
@@ -93,6 +94,13 @@ const RankChart: React.FC<{
               ? 'bg-white/20 text-white'
               : 'bg-white/10 text-white/70 hover:bg-white/15'
           }`}
+          style={{ 
+            textAlign: 'center',
+            lineHeight: '1.5',
+            display: 'block',
+            width: 'auto',
+            color: selectedView === 'cumulative' ? 'rgb(255, 255, 255)' : 'rgba(255, 255, 255, 0.7)'
+          }}
         >
           누적 등수
         </button>
@@ -103,6 +111,13 @@ const RankChart: React.FC<{
               ? 'bg-white/20 text-white'
               : 'bg-white/10 text-white/70 hover:bg-white/15'
           }`}
+          style={{ 
+            textAlign: 'center',
+            lineHeight: '1.5',
+            display: 'block',
+            width: 'auto',
+            color: selectedView === 'period' ? 'rgb(255, 255, 255)' : 'rgba(255, 255, 255, 0.7)'
+          }}
         >
           기간별 등수
         </button>
@@ -139,10 +154,11 @@ const RankChart: React.FC<{
               <text
                 key={rank}
                 x={padding.left - 20}
-                y={y + 5}
+                y={y}
                 fill="rgba(255,255,255,0.7)"
                 fontSize="14"
                 textAnchor="end"
+                dominantBaseline="middle"
               >
                 {rank}위
               </text>
@@ -202,15 +218,17 @@ const RankChart: React.FC<{
           {sortedPeriodStats.map((stat, index) => {
               const x = padding.left + (index / (sortedPeriodStats.length - 1 || 1)) * graphWidth;
               const label = formatPeriodLabel(stat);
+              const labelY = chartHeight - padding.bottom + 20;
               return (
                 <text
                   key={index}
                   x={x}
-                  y={chartHeight - padding.bottom + 20}
+                  y={labelY}
                   fill="rgba(255,255,255,0.7)"
                   fontSize="12"
                   textAnchor="middle"
-                  transform={`rotate(-45 ${x} ${chartHeight - padding.bottom + 20})`}
+                  dominantBaseline="middle"
+                  transform={`rotate(-45 ${x} ${labelY})`}
                 >
                   {label}
                 </text>
@@ -219,14 +237,22 @@ const RankChart: React.FC<{
         </svg>
 
         {/* 범례 */}
-        <div className="flex flex-wrap gap-4 justify-center mt-6">
+        <div className="flex flex-wrap gap-4 justify-center items-center mt-6">
           {validPlayers.map((player, index) => (
-            <div key={player} className="flex items-center gap-2">
+            <div 
+              key={player} 
+              className="flex items-center gap-2"
+            >
               <div
-                className="w-4 h-4 rounded-full"
+                className="w-4 h-4 rounded-full flex-shrink-0"
                 style={{ backgroundColor: colors[index] }}
               />
-              <span className="text-white/80 text-sm">{getPlayerDisplayName(player)}</span>
+              <span 
+                className="text-white/80 text-sm"
+                style={{ color: 'rgba(255, 255, 255, 0.8)' }}
+              >
+                {getPlayerDisplayName(player)}
+              </span>
             </div>
           ))}
         </div>
@@ -406,10 +432,18 @@ export default function RecapPage() {
   const [error, setError] = useState<string | null>(null);
   const [currentSlide, setCurrentSlide] = useState<number>(0);
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
+  const [showShareMenu, setShowShareMenu] = useState<boolean>(false);
+  const [isCapturing, setIsCapturing] = useState<boolean>(false);
   
   const touchStartX = useRef<number>(0);
   const touchEndX = useRef<number>(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const slideContentRef = useRef<HTMLDivElement>(null);
+  const shareMenuRef = useRef<HTMLDivElement>(null);
+  const captureRef = useRef<HTMLDivElement>(null);
+  
+  // 이미지 캡처 훅 사용
+  const { saveImage: saveImageHandler, shareToKakao: shareToKakaoHandler, shareToInstagram: shareToInstagramHandler } = useSlideImageCapture();
 
   // 슬라이드 데이터 생성
   const generateSlides = (stats: RecapStats): Slide[] => {
@@ -920,6 +954,68 @@ export default function RecapPage() {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [stats]);
 
+  // 공유 메뉴 외부 클릭 시 닫기
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (shareMenuRef.current && !shareMenuRef.current.contains(event.target as Node)) {
+        setShowShareMenu(false);
+      }
+    };
+
+    if (showShareMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showShareMenu]);
+
+  // 이미지 저장 함수
+  const saveImage = async () => {
+    if (!captureRef.current || !slideContentRef.current || !stats) return;
+    
+    await saveImageHandler(
+      captureRef,
+      slideContentRef,
+      `${stats.year}년_Recap_${currentSlide + 1}.png`,
+      setIsCapturing
+    );
+  };
+
+  // SNS 공유 함수
+  const shareToKakao = async () => {
+    if (!captureRef.current || !slideContentRef.current || !stats) return;
+    
+    await shareToKakaoHandler(
+      captureRef,
+      slideContentRef,
+      `${stats.year}년_Recap_${currentSlide + 1}.png`,
+      setIsCapturing,
+      window.location.href
+    );
+  };
+
+  const shareToInstagram = async () => {
+    if (!captureRef.current || !slideContentRef.current || !stats) return;
+    
+    await shareToInstagramHandler(
+      captureRef,
+      slideContentRef,
+      `${stats.year}년_Recap_${currentSlide + 1}.png`,
+      setIsCapturing
+    );
+  };
+
+  const shareToTwitter = async () => {
+    if (!slideContentRef.current || !stats) return;
+    
+    try {
+      const shareUrl = window.location.href;
+      const shareText = `${stats.year}년 Recap을 확인해보세요!`;
+      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`, '_blank');
+    } catch (error) {
+      console.error('트위터 공유 오류:', error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
@@ -958,34 +1054,51 @@ export default function RecapPage() {
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      {/* 움직이는 그라데이션 배경 */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 animate-gradient-xy"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(120,119,198,0.3),transparent_50%)] animate-pulse"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(219,39,119,0.3),transparent_50%)] animate-pulse" style={{ animationDelay: '1s' }}></div>
-      </div>
+      {/* 캡처용 컨테이너 (전체 화면) */}
+      <div
+        ref={captureRef}
+        className="min-h-screen relative"
+        style={{
+          background: 'linear-gradient(to bottom right, #581c87, #1e3a8a, #312e81)',
+        }}
+      >
+        {/* 움직이는 그라데이션 배경 */}
+        <div className={`absolute inset-0 overflow-hidden ${isCapturing ? '' : 'animate-gradient-xy'}`} style={{
+          background: isCapturing 
+            ? 'linear-gradient(to bottom right, #581c87, #1e3a8a, #312e81)'
+            : undefined
+        }}>
+          {!isCapturing && (
+            <>
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 animate-gradient-xy"></div>
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(120,119,198,0.3),transparent_50%)] animate-pulse"></div>
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(219,39,119,0.3),transparent_50%)] animate-pulse" style={{ animationDelay: '1s' }}></div>
+            </>
+          )}
+        </div>
 
-      {/* 네비게이션 버튼 */}
-      <div className="absolute top-4 left-4 z-20">
-        <Link
-          href="/hall-of-fame"
-          className="px-4 py-2 bg-white/10 backdrop-blur-md text-white rounded-lg hover:bg-white/20 transition-colors flex items-center gap-2"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
-          </svg>
-          돌아가기
-        </Link>
-      </div>
+        {/* 네비게이션 버튼 */}
+        <div className="absolute top-4 left-4 z-20" data-exclude-from-capture>
+          <Link
+            href="/hall-of-fame"
+            className="px-4 py-2 bg-white/10 backdrop-blur-md text-white rounded-lg hover:bg-white/20 transition-colors flex items-center gap-2"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+            </svg>
+            돌아가기
+          </Link>
+        </div>
 
-      {/* 슬라이드 컨테이너 */}
-      <div className="relative z-10 min-h-screen flex items-center justify-center p-8">
-        <div
-          key={currentSlide}
-          className={`w-full max-w-4xl text-center text-white transition-all duration-300 ${
-            isAnimating ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
-          }`}
-        >
+        {/* 슬라이드 컨테이너 */}
+        <div className="relative z-10 min-h-screen flex items-center justify-center p-8">
+          <div
+            ref={slideContentRef}
+            key={currentSlide}
+            className={`w-full max-w-4xl text-center text-white transition-all duration-300 ${
+              isAnimating ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
+            }`}
+          >
           {/* 제목 */}
           <h1
             className="text-5xl md:text-6xl font-bold mb-8 opacity-0"
@@ -1006,10 +1119,71 @@ export default function RecapPage() {
             {currentSlideData.content}
           </div>
         </div>
+        </div>
+      </div>
+
+      {/* 공유 및 저장 버튼 */}
+      <div className="absolute top-4 right-4 z-20 flex flex-col gap-2" data-exclude-from-capture>
+        <button
+          onClick={saveImage}
+          className="px-4 py-2 bg-white/10 backdrop-blur-md text-white rounded-lg hover:bg-white/20 transition-colors flex items-center gap-2"
+          title="이미지로 저장"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+          </svg>
+          <span className="text-sm">저장</span>
+        </button>
+        
+        <div className="relative" ref={shareMenuRef}>
+          <button
+            onClick={() => setShowShareMenu(!showShareMenu)}
+            className="px-4 py-2 bg-white/10 backdrop-blur-md text-white rounded-lg hover:bg-white/20 transition-colors flex items-center gap-2"
+            title="공유하기"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
+            </svg>
+            <span className="text-sm">공유</span>
+          </button>
+          
+          {/* 공유 메뉴 */}
+          {showShareMenu && (
+            <div className="absolute right-0 top-full mt-2 bg-white/95 backdrop-blur-md rounded-lg shadow-lg p-2 min-w-[140px] z-30">
+              <button
+                onClick={() => {
+                  shareToKakao();
+                  setShowShareMenu(false);
+                }}
+                className="w-full px-3 py-2 text-left text-sm text-gray-800 hover:bg-gray-100 rounded flex items-center gap-2"
+              >
+                <span>카카오톡</span>
+              </button>
+              <button
+                onClick={() => {
+                  shareToInstagram();
+                  setShowShareMenu(false);
+                }}
+                className="w-full px-3 py-2 text-left text-sm text-gray-800 hover:bg-gray-100 rounded flex items-center gap-2"
+              >
+                <span>인스타그램</span>
+              </button>
+              <button
+                onClick={() => {
+                  shareToTwitter();
+                  setShowShareMenu(false);
+                }}
+                className="w-full px-3 py-2 text-left text-sm text-gray-800 hover:bg-gray-100 rounded flex items-center gap-2"
+              >
+                <span>트위터(X)</span>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* 슬라이드 인디케이터 */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 flex gap-2">
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 flex gap-2" data-exclude-from-capture>
         {slides.map((_, index) => (
           <button
             key={index}
@@ -1034,6 +1208,7 @@ export default function RecapPage() {
           onClick={prevSlide}
           className="absolute left-8 top-1/2 transform -translate-y-1/2 z-20 p-4 bg-white/10 backdrop-blur-md text-white rounded-full hover:bg-white/20 transition-colors"
           aria-label="이전 슬라이드"
+          data-exclude-from-capture
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -1046,6 +1221,7 @@ export default function RecapPage() {
           onClick={nextSlide}
           className="absolute right-8 top-1/2 transform -translate-y-1/2 z-20 p-4 bg-white/10 backdrop-blur-md text-white rounded-full hover:bg-white/20 transition-colors"
           aria-label="다음 슬라이드"
+          data-exclude-from-capture
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
@@ -1054,7 +1230,7 @@ export default function RecapPage() {
       )}
 
       {/* 스와이프 힌트 */}
-      <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2 z-20 text-white/60 text-sm">
+      <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2 z-20 text-white/60 text-sm" data-exclude-from-capture>
         ← 스와이프하여 탐색 →
       </div>
 

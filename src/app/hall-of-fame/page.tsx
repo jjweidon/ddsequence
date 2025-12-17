@@ -274,12 +274,17 @@ export default function HallOfFamePage() {
                                text-white font-bold rounded-sm shadow-lg shadow-red-500/30
                                transition-all duration-200 transform hover:scale-[1.02]
                                focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2
-                               flex items-center gap-2"
+                               flex flex-col items-center gap-1"
                     >
-                      <span>Recap</span>
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                      </svg>
+                      <div className="flex items-center gap-2">
+                        <span>Recap</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <span className="text-xs opacity-90">
+                        {selectedYear}년을 돌아보세요
+                      </span>
                     </Link>
                   </div>
                   
