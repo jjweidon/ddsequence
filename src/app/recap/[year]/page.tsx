@@ -1004,17 +1004,6 @@ export default function RecapPage() {
     );
   };
 
-  const shareToTwitter = async () => {
-    if (!slideContentRef.current || !stats) return;
-    
-    try {
-      const shareUrl = window.location.href;
-      const shareText = `${stats.year}년 Recap을 확인해보세요!`;
-      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`, '_blank');
-    } catch (error) {
-      console.error('트위터 공유 오류:', error);
-    }
-  };
 
   if (loading) {
     return (
@@ -1149,7 +1138,7 @@ export default function RecapPage() {
           
           {/* 공유 메뉴 */}
           {showShareMenu && (
-            <div className="absolute right-0 top-full mt-2 bg-white/95 backdrop-blur-md rounded-lg shadow-lg p-2 min-w-[140px] z-30">
+            <div className="absolute right-0 top-full mt-2 bg-white/95 backdrop-blur-md rounded-lg shadow-lg p-2 min-w-[160px] z-30">
               <button
                 onClick={() => {
                   shareToKakao();
@@ -1157,6 +1146,11 @@ export default function RecapPage() {
                 }}
                 className="w-full px-3 py-2 text-left text-sm text-gray-800 hover:bg-gray-100 rounded flex items-center gap-2"
               >
+                <img 
+                  src="/kakaotalk.png" 
+                  alt="카카오톡" 
+                  className="w-5 h-5"
+                />
                 <span>카카오톡</span>
               </button>
               <button
@@ -1166,16 +1160,12 @@ export default function RecapPage() {
                 }}
                 className="w-full px-3 py-2 text-left text-sm text-gray-800 hover:bg-gray-100 rounded flex items-center gap-2"
               >
+                <img 
+                  src="/instagram.png" 
+                  alt="인스타그램" 
+                  className="w-5 h-5"
+                />
                 <span>인스타그램</span>
-              </button>
-              <button
-                onClick={() => {
-                  shareToTwitter();
-                  setShowShareMenu(false);
-                }}
-                className="w-full px-3 py-2 text-left text-sm text-gray-800 hover:bg-gray-100 rounded flex items-center gap-2"
-              >
-                <span>트위터(X)</span>
               </button>
             </div>
           )}

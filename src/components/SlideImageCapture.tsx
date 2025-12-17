@@ -541,18 +541,63 @@ export const useSlideImageCapture = () => {
       );
       
       if (imageDataUrl) {
-        const blob = await (await fetch(imageDataUrl)).blob();
+        // base64를 Blob으로 변환
+        const response = await fetch(imageDataUrl);
+        const blob = await response.blob();
         const file = new File([blob], fileName, { type: 'image/png' });
         
-        if (navigator.share && navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            title: fileName.replace('.png', ''),
-            text: 'Recap을 확인해보세요!',
-            files: [file],
-          });
-        } else if (shareUrl) {
-          window.open(`https://story.kakao.com/share?url=${encodeURIComponent(shareUrl)}`, '_blank');
+        // Web Share API를 사용하여 이미지 공유 (모바일에서 카카오톡으로 공유 가능)
+        if (navigator.share) {
+          try {
+            // 파일 공유 시도
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+              await navigator.share({
+                title: fileName.replace('.png', ''),
+                text: 'Recap을 확인해보세요!',
+                files: [file],
+              });
+              return;
+            }
+          } catch (shareError: any) {
+            // 파일 공유가 실패하면 텍스트만 공유 시도
+            if (shareError.name !== 'AbortError') {
+              console.log('파일 공유 실패, 텍스트 공유 시도:', shareError);
+            }
+          }
+          
+          // 파일 공유가 불가능한 경우 텍스트와 URL만 공유
+          try {
+            await navigator.share({
+              title: fileName.replace('.png', ''),
+              text: 'Recap을 확인해보세요!',
+              url: shareUrl || window.location.href,
+            });
+            return;
+          } catch (textShareError: any) {
+            if (textShareError.name === 'AbortError') {
+              return; // 사용자가 취소한 경우
+            }
+          }
         }
+        
+        // Web Share API가 없는 경우 (데스크톱 등)
+        // 이미지를 다운로드하고 카카오톡 링크 공유 안내
+        const link = document.createElement('a');
+        link.download = fileName;
+        link.href = imageDataUrl;
+        link.click();
+        
+        // 이미지 다운로드 후 카카오톡 공유 안내
+        setTimeout(() => {
+          if (confirm('이미지가 다운로드되었습니다. 카카오톡으로 공유하시겠습니까?')) {
+            // 카카오톡 링크 공유 (이미지는 다운로드된 파일 사용)
+            if (shareUrl) {
+              window.open(`https://story.kakao.com/share?url=${encodeURIComponent(shareUrl)}`, '_blank');
+            } else {
+              window.open('https://story.kakao.com/', '_blank');
+            }
+          }
+        }, 500);
       }
     } catch (error) {
       console.error('카카오톡 공유 오류:', error);
@@ -575,14 +620,75 @@ export const useSlideImageCapture = () => {
       );
       
       if (imageDataUrl) {
-        const link = document.createElement('a');
-        link.download = fileName;
-        link.href = imageDataUrl;
-        link.click();
+        // base64를 Blob으로 변환
+        const response = await fetch(imageDataUrl);
+        const blob = await response.blob();
+        const file = new File([blob], fileName, { type: 'image/png' });
         
-        setTimeout(() => {
-          alert('이미지가 다운로드되었습니다. 인스타그램 앱에서 이미지를 업로드해주세요.');
-        }, 500);
+        // 모바일에서 인스타그램 스토리로 직접 이동
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        
+        if (isMobile) {
+          // Web Share API를 사용하여 인스타그램으로 공유 시도
+          if (navigator.share) {
+            try {
+              if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                await navigator.share({
+                  title: fileName.replace('.png', ''),
+                  files: [file],
+                });
+                return;
+              }
+            } catch (shareError: any) {
+              if (shareError.name === 'AbortError') {
+                return; // 사용자가 취소한 경우
+              }
+            }
+          }
+          
+          // Web Share API가 실패하거나 없는 경우 인스타그램 앱으로 이동
+          // 인스타그램 스토리 공유를 위한 URL 스킴 시도
+          try {
+            // 먼저 이미지를 클립보드에 복사 시도 (iOS)
+            if (navigator.clipboard && navigator.clipboard.write) {
+              await navigator.clipboard.write([
+                new ClipboardItem({
+                  'image/png': blob
+                })
+              ]);
+              
+              // 클립보드에 복사 후 인스타그램 스토리로 이동
+              setTimeout(() => {
+                window.location.href = 'instagram-stories://share';
+              }, 300);
+              return;
+            }
+          } catch (clipboardError) {
+            console.log('클립보드 복사 실패:', clipboardError);
+          }
+          
+          // 클립보드 복사 실패 시 이미지 다운로드 후 인스타그램 앱으로 이동
+          const link = document.createElement('a');
+          link.download = fileName;
+          link.href = imageDataUrl;
+          link.click();
+          
+          setTimeout(() => {
+            // 인스타그램 스토리로 이동
+            window.location.href = 'instagram-stories://share';
+          }, 500);
+        } else {
+          // 데스크톱의 경우 이미지 다운로드 후 안내
+          const link = document.createElement('a');
+          link.download = fileName;
+          link.href = imageDataUrl;
+          link.click();
+          
+          setTimeout(() => {
+            alert('이미지가 다운로드되었습니다. 인스타그램 웹사이트에서 이미지를 업로드해주세요.');
+            window.open('https://www.instagram.com/', '_blank');
+          }, 500);
+        }
       }
     } catch (error) {
       console.error('인스타그램 공유 오류:', error);
