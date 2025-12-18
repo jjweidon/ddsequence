@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { getPlayerDisplayName } from '@/utils/playerNames';
 import { useSlideImageCapture } from '@/components/SlideImageCapture';
 
@@ -424,8 +424,439 @@ type Slide = {
   content: React.ReactNode;
 };
 
+// 슬라이드 데이터 생성 함수 (컴포넌트 외부로 이동)
+const generateSlides = (stats: RecapStats): Slide[] => {
+  const slides: Slide[] = [];
+
+  // 슬라이드 1: 타이틀
+  slides.push({
+    id: 'title',
+    title: `${stats.year}년 Recap`,
+    content: (
+      <div className="text-center">
+        <div className="text-6xl mb-4">🎮</div>
+        <div className="text-4xl font-bold mb-2">{stats.totalGames}게임</div>
+        <div className="text-xl opacity-80 mb-4">함께한 한 해</div>
+        <div className="text-lg opacity-70 mt-6">
+          올해도 수고 많았어요!<br />
+          함께한 게임들을 돌아볼까요? 😊
+        </div>
+      </div>
+    )
+  });
+
+  // 슬라이드 2: 총 플레이 횟수 및 기간 수
+  const formatDate = (date: Date | null) => {
+    if (!date) return '';
+    const d = typeof date === 'string' ? new Date(date) : date;
+    // 한국 시간 기준으로 변환 (UTC+9)
+    const koreaTime = new Date(d.getTime() + (9 * 60 * 60 * 1000));
+    const month = koreaTime.getUTCMonth() + 1;
+    const day = koreaTime.getUTCDate();
+    return `${month}/${day}`;
+  };
+
+  slides.push({
+    id: 'total-plays',
+    title: `올해는 총 ${stats.totalPeriods}번의 만남이 있었어요`,
+    content: (
+      <div className="text-center">
+        <div className="text-7xl mb-6">📊</div>
+        <div className="text-5xl font-bold mb-4">{stats.totalPeriods}번</div>
+        <div className="text-xl opacity-80 mb-6">
+          {`${stats.totalPeriods}번 만나서 ${stats.totalGames}게임을 했어요!`}
+        </div>
+        <div className="mt-6 max-h-64 overflow-y-auto px-6">
+          <div className="grid grid-cols-1 gap-3">
+            {stats.periodStats
+              .slice()
+              .sort((a, b) => {
+                const dateA = typeof a.startDate === 'string' ? new Date(a.startDate) : a.startDate;
+                const dateB = typeof b.startDate === 'string' ? new Date(b.startDate) : b.startDate;
+                return dateA.getTime() - dateB.getTime();
+              })
+              .map((period, index) => {
+                const startDate = typeof period.startDate === 'string' ? new Date(period.startDate) : period.startDate;
+                const endDate = typeof period.endDate === 'string' ? new Date(period.endDate) : period.endDate;
+                const isSameDay = startDate.getTime() === endDate.getTime();
+                
+                return (
+                  <div 
+                    key={period.periodKey} 
+                    className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-left border border-white/20"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm">
+                          {index + 1}
+                        </div>
+                        <div>
+                          <div className="font-semibold text-lg">
+                            {index + 1}번째 만남
+                          </div>
+                          <div className="text-sm opacity-80">
+                            {isSameDay 
+                              ? formatDate(startDate)
+                              : `${formatDate(startDate)} ~ ${formatDate(endDate)}`
+                            }
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-sm opacity-60">
+                        {period.games.length}게임
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
+        </div>
+      </div>
+    )
+  });
+
+  // 슬라이드 3: 올해의 VIP (승률)
+  if (stats.vipByWinrate) {
+    slides.push({
+      id: 'vip-winrate',
+      title: '올해의 VIP',
+      content: (
+        <div className="text-center">
+          <div className="text-7xl mb-6">👑</div>
+          <div className="text-5xl font-bold mb-4">{getPlayerDisplayName(stats.vipByWinrate.player)}</div>
+          <div className="text-3xl mb-2">{stats.vipByWinrate.winrate.toFixed(1)}%</div>
+          <div className="text-xl opacity-80 mb-4">
+            {stats.vipByWinrate.wins}승 {stats.vipByWinrate.total - stats.vipByWinrate.wins}패
+          </div>
+          <div className="text-lg opacity-70 mt-6">
+            {stats.year}년 최고 승률을 기록했어요!<br />
+            축하드려요~! 🎉
+          </div>
+        </div>
+      )
+    });
+  }
+
+  // 슬라이드 4: 올해의 꼴찌
+  if (stats.worstByWinrate) {
+    slides.push({
+      id: 'worst-winrate',
+      title: '올해의 꼴찌',
+      content: (
+        <div className="text-center">
+          <div className="text-7xl mb-6">😅</div>
+          <div className="text-5xl font-bold mb-4">{getPlayerDisplayName(stats.worstByWinrate.player)}</div>
+          <div className="text-3xl mb-2">{stats.worstByWinrate.winrate.toFixed(1)}%</div>
+          <div className="text-xl opacity-80 mb-4">
+            {stats.worstByWinrate.wins}승 {stats.worstByWinrate.total - stats.worstByWinrate.wins}패
+          </div>
+          <div className="text-lg opacity-70 mt-6">
+            {stats.year}년 승률이 아쉬웠지만...<br />
+            다음엔 더 잘할 수 있을 거예요! 화이팅! 💪
+          </div>
+        </div>
+      )
+    });
+  }
+
+  // 슬라이드 5: 최고 승률 팀 (최강 팀 조합)
+  if (stats.bestWinrateTeam) {
+    slides.push({
+      id: 'best-winrate-team',
+      title: '최강 팀 조합',
+      content: (
+        <div className="text-center">
+          <div className="text-7xl mb-6">👑</div>
+          <div className="text-5xl font-bold mb-4">{stats.bestWinrateTeam.team}</div>
+          <div className="text-3xl mb-2">{stats.bestWinrateTeam.winrate.toFixed(1)}%</div>
+          <div className="text-xl opacity-80 mb-4">
+            {stats.bestWinrateTeam.wins}승 {stats.bestWinrateTeam.total - stats.bestWinrateTeam.wins}패
+          </div>
+          <div className="text-lg opacity-70 mt-6">
+            {stats.year}년 최고 승률을 기록한 팀이에요!<br />
+            정말 완벽한 조합이었네요! 🎯
+          </div>
+        </div>
+      )
+    });
+  }
+
+  // 슬라이드 6: 최대 연승 (플레이어)
+  if (stats.maxWinStreakPlayer.maxWinStreak > 0) {
+    slides.push({
+      id: 'max-win-streak-player',
+      title: '최대 연승',
+      content: (
+        <div className="text-center">
+          <div className="text-7xl mb-6">🔥</div>
+          <div className="text-5xl font-bold mb-4">{getPlayerDisplayName(stats.maxWinStreakPlayer.player)}</div>
+          <div className="text-4xl mb-2">{stats.maxWinStreakPlayer.maxWinStreak}연승</div>
+          <div className="text-xl opacity-80 mb-4">
+            {stats.maxWinStreakPlayer.maxWinStreakPeriod > 0 
+              ? `${stats.maxWinStreakPlayer.maxWinStreakPeriod}번째 만남의 기록`
+              : '개인 최고 기록'}
+          </div>
+          <div className="text-lg opacity-70 mt-6">
+            {stats.year}년 최대 연승했어요!<br />
+            앞으로도 좋은 활약 기대할게요!^^
+          </div>
+        </div>
+      )
+    });
+  }
+
+  // 슬라이드 7: 최장 연승 (팀)
+  if (stats.longestWinStreakTeam.maxWinStreak > 0) {
+    slides.push({
+      id: 'longest-win-streak-team',
+      title: '최장 연승 팀',
+      content: (
+        <div className="text-center">
+          <div className="text-7xl mb-6">⚡</div>
+          <div className="text-5xl font-bold mb-4">{stats.longestWinStreakTeam.team}</div>
+          <div className="text-4xl mb-2">{stats.longestWinStreakTeam.maxWinStreak}연승</div>
+          <div className="text-xl opacity-80 mb-4">
+            {stats.longestWinStreakTeam.maxWinStreakPeriod > 0 
+              ? `${stats.longestWinStreakTeam.maxWinStreakPeriod}번째 만남의 기록`
+              : '팀 최고 기록'}
+          </div>
+          <div className="text-lg opacity-70 mt-6">
+            가장 오래 연승했던 조합이에요!<br />
+            정말 무적이었네요! 🔥
+          </div>
+        </div>
+      )
+    });
+  }
+
+  // 슬라이드 8: 최대 연패
+  if (stats.maxLoseStreakPlayer.maxLoseStreak > 0) {
+    slides.push({
+      id: 'max-lose-streak',
+      title: '최대 연패',
+      content: (
+        <div className="text-center">
+          <div className="text-7xl mb-6">💔</div>
+          <div className="text-5xl font-bold mb-4">{getPlayerDisplayName(stats.maxLoseStreakPlayer.player)}</div>
+          <div className="text-4xl mb-2">{stats.maxLoseStreakPlayer.maxLoseStreak}연패</div>
+          <div className="text-xl opacity-80 mb-4">
+            {stats.maxLoseStreakPlayer.maxLoseStreakPeriod > 0 
+              ? `${stats.maxLoseStreakPlayer.maxLoseStreakPeriod}번째 만남의 기록`
+              : '아쉬운 순간이었지만...'}
+          </div>
+          <div className="text-lg opacity-70 mt-6">
+            다음엔 더 잘할 수 있어요!<br />
+            실패는 성공의 어머니니까요! 💪
+          </div>
+        </div>
+      )
+    });
+  }
+
+  // 슬라이드 9: 등수 변동 (기간별 순서대로 비교)
+  const rankChangeEntries = Object.entries(stats.rankChanges)
+    .filter(([_, data]) => data.bestPeriod && data.worstPeriod && data.change !== 0)
+    .map(([player, data]) => ({
+      player,
+      ...data,
+      // change는 이전 등수 - 이후 등수
+      // 양수면 상승 (예: 3위 -> 1위, change = 3-1 = 2)
+      // 음수면 하락 (예: 1위 -> 3위, change = 1-3 = -2)
+    }));
+
+  // 날짜 포맷팅 함수 (등수 변동용)
+  const formatPeriodRangeForRank = (period: typeof stats.rankChangeData.firstPeriod) => {
+    if (!period) return '';
+    const startDate = typeof period.startDate === 'string' ? new Date(period.startDate) : period.startDate;
+    const endDate = typeof period.endDate === 'string' ? new Date(period.endDate) : period.endDate;
+    
+    // 한국 시간 기준으로 변환 (UTC+9)
+    const startKoreaTime = new Date(startDate.getTime() + (9 * 60 * 60 * 1000));
+    const endKoreaTime = new Date(endDate.getTime() + (9 * 60 * 60 * 1000));
+    
+    const startMonth = startKoreaTime.getUTCMonth() + 1;
+    const startDay = startKoreaTime.getUTCDate();
+    const endMonth = endKoreaTime.getUTCMonth() + 1;
+    const endDay = endKoreaTime.getUTCDate();
+    
+    if (startDate.getTime() === endDate.getTime()) {
+      return `${startMonth}/${startDay}`;
+    }
+    return `${startMonth}/${startDay} ~ ${endMonth}/${endDay}`;
+  };
+
+  // 기간 번호 찾기
+  const getPeriodNumber = (period: typeof stats.rankChangeData.firstPeriod) => {
+    if (!period) return 0;
+    const sortedPeriods = stats.periodStats
+      .slice()
+      .sort((a, b) => {
+        const dateA = typeof a.startDate === 'string' ? new Date(a.startDate) : a.startDate;
+        const dateB = typeof b.startDate === 'string' ? new Date(b.startDate) : b.startDate;
+        return dateA.getTime() - dateB.getTime();
+      });
+    const index = sortedPeriods.findIndex(p => p.periodKey === period.periodKey);
+    return index + 1;
+  };
+
+  // 순위 상승: change가 양수인 경우 (이전 등수 > 이후 등수, 예: 3위 -> 1위)
+  const risers = rankChangeEntries
+    .filter(entry => entry.change > 0)
+    .sort((a, b) => b.change - a.change); // change가 큰 순서대로
+
+  // 순위 하락: change가 음수인 경우 (이전 등수 < 이후 등수, 예: 1위 -> 3위)
+  const fallers = rankChangeEntries
+    .filter(entry => entry.change < 0)
+    .sort((a, b) => a.change - b.change); // change가 작은 순서대로 (절댓값이 큰 순서)
+
+  // 순위 상승 슬라이드 (동일한 change 값을 가진 플레이어 모두 표시)
+  if (risers.length > 0) {
+    const maxRiseChange = risers[0].change;
+    const biggestRisers = risers.filter(r => r.change === maxRiseChange);
+
+    biggestRisers.forEach((riser, index) => {
+      const fromPeriodNum = getPeriodNumber(riser.worstPeriod);
+      const toPeriodNum = getPeriodNumber(riser.bestPeriod);
+      const fromPeriodRange = formatPeriodRangeForRank(riser.worstPeriod);
+      const toPeriodRange = formatPeriodRangeForRank(riser.bestPeriod);
+
+      slides.push({
+        id: `rank-rise-${index}`,
+        title: biggestRisers.length > 1 ? '순위 상승' : '순위 상승',
+        content: (
+          <div className="text-center">
+            <div className="text-7xl mb-6">📈</div>
+            <div className="text-5xl font-bold mb-4">{getPlayerDisplayName(riser.player)}</div>
+            <div className="text-3xl mb-2">
+              {riser.worst}위 → {riser.best}위
+            </div>
+            <div className="text-xl opacity-80 mb-4">
+              {riser.change}단계 상승
+            </div>
+            <div className="text-lg opacity-70 mt-6">
+              {fromPeriodNum}번째 만남({fromPeriodRange})에는 {riser.worst}위였는데<br />
+              {toPeriodNum}번째 만남({toPeriodRange})에는 {riser.best}위로 올라갔어요!<br />
+              정말 대단한 성장이에요! 🚀
+            </div>
+          </div>
+        )
+      });
+    });
+  }
+
+  // 순위 하락 슬라이드 (동일한 change 값을 가진 플레이어 모두 표시)
+  if (fallers.length > 0) {
+    const maxFallChange = fallers[0].change;
+    const biggestFallers = fallers.filter(f => f.change === maxFallChange);
+
+    biggestFallers.forEach((faller, index) => {
+      const fromPeriodNum = getPeriodNumber(faller.bestPeriod);
+      const toPeriodNum = getPeriodNumber(faller.worstPeriod);
+      const fromPeriodRange = formatPeriodRangeForRank(faller.bestPeriod);
+      const toPeriodRange = formatPeriodRangeForRank(faller.worstPeriod);
+
+      slides.push({
+        id: `rank-fall-${index}`,
+        title: biggestFallers.length > 1 ? '순위 하락' : '순위 하락',
+        content: (
+          <div className="text-center">
+            <div className="text-7xl mb-6">📉</div>
+            <div className="text-5xl font-bold mb-4">{getPlayerDisplayName(faller.player)}</div>
+            <div className="text-3xl mb-2">
+              {faller.best}위 → {faller.worst}위
+            </div>
+            <div className="text-xl opacity-80 mb-4">
+              {Math.abs(faller.change)}단계 하락
+            </div>
+            <div className="text-lg opacity-70 mt-6">
+              {fromPeriodNum}번째 만남({fromPeriodRange})에는 {faller.best}위였는데<br />
+              {toPeriodNum}번째 만남({toPeriodRange})에는 {faller.worst}위로 내려갔어요.<br />
+              다음엔 다시 올라갈 수 있을 거예요! 💪
+            </div>
+          </div>
+        )
+      });
+    });
+  }
+
+  // 슬라이드 10: 가장 많이 플레이한 팀
+  if (stats.mostPlayedTeam) {
+    slides.push({
+      id: 'most-played-team',
+      title: '인기 팀 조합',
+      content: (
+        <div className="text-center">
+          <div className="text-7xl mb-6">🎯</div>
+          <div className="text-5xl font-bold mb-4">{stats.mostPlayedTeam.team}</div>
+          <div className="text-3xl mb-2">{stats.mostPlayedTeam.total}게임</div>
+          <div className="text-xl opacity-80 mb-4">
+            승률 {stats.mostPlayedTeam.winrate.toFixed(1)}%
+          </div>
+          <div className="text-lg opacity-70 mt-6">
+            가장 많이 함께 플레이한 조합이에요!<br />
+            이 조합이면 안심이 되죠? 😊
+          </div>
+        </div>
+      )
+    });
+  }
+
+  // 슬라이드 11: 가장 활발한 월
+  if (stats.mostActiveMonth.count > 0) {
+    const monthNames = ['', '1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
+    slides.push({
+      id: 'most-active-month',
+      title: '가장 활발한 달',
+      content: (
+        <div className="text-center">
+          <div className="text-7xl mb-6">📅</div>
+          <div className="text-5xl font-bold mb-4">{monthNames[stats.mostActiveMonth.month]}</div>
+          <div className="text-4xl mb-2">{stats.mostActiveMonth.count}게임</div>
+          <div className="text-xl opacity-80 mb-4">가장 많은 게임을 한 달</div>
+          <div className="text-lg opacity-70 mt-6">
+            {monthNames[stats.mostActiveMonth.month]}에 정말 열심히 놀았네요!<br />
+            그때가 가장 즐거웠을 거예요! 🎮
+          </div>
+        </div>
+      )
+    });
+  }
+
+  // 슬라이드 12: 기간별 등수 차트
+  if (stats.periodStats && stats.periodStats.length > 0) {
+    slides.push({
+      id: 'rank-chart',
+      title: '기간별 등수 변화',
+      content: <RankChart periodStats={stats.periodStats} />
+    });
+  }
+
+  // 슬라이드 11: 마무리
+  slides.push({
+    id: 'ending',
+    title: '마무리',
+    content: (
+      <div className="text-center">
+        <div className="text-7xl mb-6">🎉</div>
+        <div className="text-4xl font-bold mb-4">수고 많았어요!</div>
+        <div className="text-xl opacity-80 mb-6">
+          {stats.year}년도 함께 즐겁게 보냈네요
+        </div>
+        <div className="text-lg opacity-70 mt-6">
+          내년에도 싸우지 말고<br />
+          좋은 게임 즐겨봐요! 😊<br />
+          <span className="text-base opacity-60 mt-4 block">다음 년도에도 함께해요!</span>
+        </div>
+      </div>
+    )
+  });
+
+  return slides;
+};
+
 export default function RecapPage() {
   const params = useParams();
+  const router = useRouter();
   const year = parseInt(params.year as string);
   const [stats, setStats] = useState<RecapStats | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -434,6 +865,8 @@ export default function RecapPage() {
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
   const [showShareMenu, setShowShareMenu] = useState<boolean>(false);
   const [isCapturing, setIsCapturing] = useState<boolean>(false);
+  const [slideProgress, setSlideProgress] = useState<number>(0); // 현재 슬라이드 진행률 (0-100)
+  const [isPaused, setIsPaused] = useState<boolean>(false); // 자동 슬라이드 일시정지
   
   const touchStartX = useRef<number>(0);
   const touchEndX = useRef<number>(0);
@@ -441,439 +874,28 @@ export default function RecapPage() {
   const slideContentRef = useRef<HTMLDivElement>(null);
   const shareMenuRef = useRef<HTMLDivElement>(null);
   const captureRef = useRef<HTMLDivElement>(null);
+  const progressTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const currentSlideRef = useRef<number>(0);
+  const slidesLengthRef = useRef<number>(0);
+  const isTransitioningRef = useRef<boolean>(false);
   
   // 이미지 캡처 훅 사용
   const { saveImage: saveImageHandler, shareToKakao: shareToKakaoHandler, shareToInstagram: shareToInstagramHandler } = useSlideImageCapture();
 
-  // 슬라이드 데이터 생성
-  const generateSlides = (stats: RecapStats): Slide[] => {
-    const slides: Slide[] = [];
+  // 슬라이드 데이터 메모이제이션
+  const slides = useMemo(() => {
+    if (!stats) return [];
+    const generatedSlides = generateSlides(stats);
+    slidesLengthRef.current = generatedSlides.length;
+    return generatedSlides;
+  }, [stats]);
 
-    // 슬라이드 1: 타이틀
-    slides.push({
-      id: 'title',
-      title: `${stats.year}년 Recap`,
-      content: (
-        <div className="text-center">
-          <div className="text-6xl mb-4">🎮</div>
-          <div className="text-4xl font-bold mb-2">{stats.totalGames}게임</div>
-          <div className="text-xl opacity-80 mb-4">함께한 한 해</div>
-          <div className="text-lg opacity-70 mt-6">
-            올해도 수고 많았어요!<br />
-            함께한 게임들을 돌아볼까요? 😊
-          </div>
-        </div>
-      )
-    });
-
-    // 슬라이드 2: 총 플레이 횟수 및 기간 수
-    const formatDate = (date: Date | null) => {
-      if (!date) return '';
-      const d = typeof date === 'string' ? new Date(date) : date;
-      // 한국 시간 기준으로 변환 (UTC+9)
-      const koreaTime = new Date(d.getTime() + (9 * 60 * 60 * 1000));
-      const month = koreaTime.getUTCMonth() + 1;
-      const day = koreaTime.getUTCDate();
-      return `${month}/${day}`;
-    };
-
-    slides.push({
-      id: 'total-plays',
-      title: `올해는 총 ${stats.totalPeriods}번의 만남이 있었어요`,
-      content: (
-        <div className="text-center">
-          <div className="text-7xl mb-6">📊</div>
-          <div className="text-5xl font-bold mb-4">{stats.totalPeriods}번</div>
-          <div className="text-xl opacity-80 mb-6">
-            {`${stats.totalPeriods}번 만나서 ${stats.totalGames}게임을 했어요!`}
-          </div>
-          <div className="mt-6 max-h-64 overflow-y-auto px-6">
-            <div className="grid grid-cols-1 gap-3">
-              {stats.periodStats
-                .slice()
-                .sort((a, b) => {
-                  const dateA = typeof a.startDate === 'string' ? new Date(a.startDate) : a.startDate;
-                  const dateB = typeof b.startDate === 'string' ? new Date(b.startDate) : b.startDate;
-                  return dateA.getTime() - dateB.getTime();
-                })
-                .map((period, index) => {
-                  const startDate = typeof period.startDate === 'string' ? new Date(period.startDate) : period.startDate;
-                  const endDate = typeof period.endDate === 'string' ? new Date(period.endDate) : period.endDate;
-                  const isSameDay = startDate.getTime() === endDate.getTime();
-                  
-                  return (
-                    <div 
-                      key={period.periodKey} 
-                      className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-left border border-white/20"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm">
-                            {index + 1}
-                          </div>
-                          <div>
-                            <div className="font-semibold text-lg">
-                              {index + 1}번째 만남
-                            </div>
-                            <div className="text-sm opacity-80">
-                              {isSameDay 
-                                ? formatDate(startDate)
-                                : `${formatDate(startDate)} ~ ${formatDate(endDate)}`
-                              }
-                            </div>
-                          </div>
-                        </div>
-                        <div className="text-sm opacity-60">
-                          {period.games.length}게임
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-            </div>
-          </div>
-        </div>
-      )
-    });
-
-    // 슬라이드 3: 올해의 VIP (승률)
-    if (stats.vipByWinrate) {
-      slides.push({
-        id: 'vip-winrate',
-        title: '올해의 VIP',
-        content: (
-          <div className="text-center">
-            <div className="text-7xl mb-6">👑</div>
-            <div className="text-5xl font-bold mb-4">{getPlayerDisplayName(stats.vipByWinrate.player)}</div>
-            <div className="text-3xl mb-2">{stats.vipByWinrate.winrate.toFixed(1)}%</div>
-            <div className="text-xl opacity-80 mb-4">
-              {stats.vipByWinrate.wins}승 {stats.vipByWinrate.total - stats.vipByWinrate.wins}패
-            </div>
-            <div className="text-lg opacity-70 mt-6">
-              {stats.year}년 최고 승률을 기록했어요!<br />
-              축하드려요~! 🎉
-            </div>
-          </div>
-        )
-      });
-    }
-
-    // 슬라이드 4: 올해의 꼴찌
-    if (stats.worstByWinrate) {
-      slides.push({
-        id: 'worst-winrate',
-        title: '올해의 꼴찌',
-        content: (
-          <div className="text-center">
-            <div className="text-7xl mb-6">😅</div>
-            <div className="text-5xl font-bold mb-4">{getPlayerDisplayName(stats.worstByWinrate.player)}</div>
-            <div className="text-3xl mb-2">{stats.worstByWinrate.winrate.toFixed(1)}%</div>
-            <div className="text-xl opacity-80 mb-4">
-              {stats.worstByWinrate.wins}승 {stats.worstByWinrate.total - stats.worstByWinrate.wins}패
-            </div>
-            <div className="text-lg opacity-70 mt-6">
-              {stats.year}년 승률이 아쉬웠지만...<br />
-              다음엔 더 잘할 수 있을 거예요! 화이팅! 💪
-            </div>
-          </div>
-        )
-      });
-    }
-
-    // 슬라이드 5: 최고 승률 팀 (최강 팀 조합)
-    if (stats.bestWinrateTeam) {
-      slides.push({
-        id: 'best-winrate-team',
-        title: '최강 팀 조합',
-        content: (
-          <div className="text-center">
-            <div className="text-7xl mb-6">👑</div>
-            <div className="text-5xl font-bold mb-4">{stats.bestWinrateTeam.team}</div>
-            <div className="text-3xl mb-2">{stats.bestWinrateTeam.winrate.toFixed(1)}%</div>
-            <div className="text-xl opacity-80 mb-4">
-              {stats.bestWinrateTeam.wins}승 {stats.bestWinrateTeam.total - stats.bestWinrateTeam.wins}패
-            </div>
-            <div className="text-lg opacity-70 mt-6">
-              {stats.year}년 최고 승률을 기록한 팀이에요!<br />
-              정말 완벽한 조합이었네요! 🎯
-            </div>
-          </div>
-        )
-      });
-    }
-
-    // 슬라이드 6: 최대 연승 (플레이어)
-    if (stats.maxWinStreakPlayer.maxWinStreak > 0) {
-      slides.push({
-        id: 'max-win-streak-player',
-        title: '최대 연승',
-        content: (
-          <div className="text-center">
-            <div className="text-7xl mb-6">🔥</div>
-            <div className="text-5xl font-bold mb-4">{getPlayerDisplayName(stats.maxWinStreakPlayer.player)}</div>
-            <div className="text-4xl mb-2">{stats.maxWinStreakPlayer.maxWinStreak}연승</div>
-            <div className="text-xl opacity-80 mb-4">
-              {stats.maxWinStreakPlayer.maxWinStreakPeriod > 0 
-                ? `${stats.maxWinStreakPlayer.maxWinStreakPeriod}번째 만남의 기록`
-                : '개인 최고 기록'}
-            </div>
-            <div className="text-lg opacity-70 mt-6">
-              {stats.year}년 최대 연승했어요!<br />
-              앞으로도 좋은 활약 기대할게요!^^
-            </div>
-          </div>
-        )
-      });
-    }
-
-    // 슬라이드 7: 최장 연승 (팀)
-    if (stats.longestWinStreakTeam.maxWinStreak > 0) {
-      slides.push({
-        id: 'longest-win-streak-team',
-        title: '최장 연승 팀',
-        content: (
-          <div className="text-center">
-            <div className="text-7xl mb-6">⚡</div>
-            <div className="text-5xl font-bold mb-4">{stats.longestWinStreakTeam.team}</div>
-            <div className="text-4xl mb-2">{stats.longestWinStreakTeam.maxWinStreak}연승</div>
-            <div className="text-xl opacity-80 mb-4">
-              {stats.longestWinStreakTeam.maxWinStreakPeriod > 0 
-                ? `${stats.longestWinStreakTeam.maxWinStreakPeriod}번째 만남의 기록`
-                : '팀 최고 기록'}
-            </div>
-            <div className="text-lg opacity-70 mt-6">
-              가장 오래 연승했던 조합이에요!<br />
-              정말 무적이었네요! 🔥
-            </div>
-          </div>
-        )
-      });
-    }
-
-    // 슬라이드 8: 최대 연패
-    if (stats.maxLoseStreakPlayer.maxLoseStreak > 0) {
-      slides.push({
-        id: 'max-lose-streak',
-        title: '최대 연패',
-        content: (
-          <div className="text-center">
-            <div className="text-7xl mb-6">💔</div>
-            <div className="text-5xl font-bold mb-4">{getPlayerDisplayName(stats.maxLoseStreakPlayer.player)}</div>
-            <div className="text-4xl mb-2">{stats.maxLoseStreakPlayer.maxLoseStreak}연패</div>
-            <div className="text-xl opacity-80 mb-4">
-              {stats.maxLoseStreakPlayer.maxLoseStreakPeriod > 0 
-                ? `${stats.maxLoseStreakPlayer.maxLoseStreakPeriod}번째 만남의 기록`
-                : '아쉬운 순간이었지만...'}
-            </div>
-            <div className="text-lg opacity-70 mt-6">
-              다음엔 더 잘할 수 있어요!<br />
-              실패는 성공의 어머니니까요! 💪
-            </div>
-          </div>
-        )
-      });
-    }
-
-    // 슬라이드 9: 등수 변동 (기간별 순서대로 비교)
-    const rankChangeEntries = Object.entries(stats.rankChanges)
-      .filter(([_, data]) => data.bestPeriod && data.worstPeriod && data.change !== 0)
-      .map(([player, data]) => ({
-        player,
-        ...data,
-        // change는 이전 등수 - 이후 등수
-        // 양수면 상승 (예: 3위 -> 1위, change = 3-1 = 2)
-        // 음수면 하락 (예: 1위 -> 3위, change = 1-3 = -2)
-      }));
-
-    // 날짜 포맷팅 함수 (등수 변동용)
-    const formatPeriodRangeForRank = (period: typeof stats.rankChangeData.firstPeriod) => {
-      if (!period) return '';
-      const startDate = typeof period.startDate === 'string' ? new Date(period.startDate) : period.startDate;
-      const endDate = typeof period.endDate === 'string' ? new Date(period.endDate) : period.endDate;
-      
-      // 한국 시간 기준으로 변환 (UTC+9)
-      const startKoreaTime = new Date(startDate.getTime() + (9 * 60 * 60 * 1000));
-      const endKoreaTime = new Date(endDate.getTime() + (9 * 60 * 60 * 1000));
-      
-      const startMonth = startKoreaTime.getUTCMonth() + 1;
-      const startDay = startKoreaTime.getUTCDate();
-      const endMonth = endKoreaTime.getUTCMonth() + 1;
-      const endDay = endKoreaTime.getUTCDate();
-      
-      if (startDate.getTime() === endDate.getTime()) {
-        return `${startMonth}/${startDay}`;
-      }
-      return `${startMonth}/${startDay} ~ ${endMonth}/${endDay}`;
-    };
-
-    // 기간 번호 찾기
-    const getPeriodNumber = (period: typeof stats.rankChangeData.firstPeriod) => {
-      if (!period) return 0;
-      const sortedPeriods = stats.periodStats
-        .slice()
-        .sort((a, b) => {
-          const dateA = typeof a.startDate === 'string' ? new Date(a.startDate) : a.startDate;
-          const dateB = typeof b.startDate === 'string' ? new Date(b.startDate) : b.startDate;
-          return dateA.getTime() - dateB.getTime();
-        });
-      const index = sortedPeriods.findIndex(p => p.periodKey === period.periodKey);
-      return index + 1;
-    };
-
-    // 순위 상승: change가 양수인 경우 (이전 등수 > 이후 등수, 예: 3위 -> 1위)
-    const risers = rankChangeEntries
-      .filter(entry => entry.change > 0)
-      .sort((a, b) => b.change - a.change); // change가 큰 순서대로
-
-    // 순위 하락: change가 음수인 경우 (이전 등수 < 이후 등수, 예: 1위 -> 3위)
-    const fallers = rankChangeEntries
-      .filter(entry => entry.change < 0)
-      .sort((a, b) => a.change - b.change); // change가 작은 순서대로 (절댓값이 큰 순서)
-
-    // 순위 상승 슬라이드 (동일한 change 값을 가진 플레이어 모두 표시)
-    if (risers.length > 0) {
-      const maxRiseChange = risers[0].change;
-      const biggestRisers = risers.filter(r => r.change === maxRiseChange);
-
-      biggestRisers.forEach((riser, index) => {
-        const fromPeriodNum = getPeriodNumber(riser.worstPeriod);
-        const toPeriodNum = getPeriodNumber(riser.bestPeriod);
-        const fromPeriodRange = formatPeriodRangeForRank(riser.worstPeriod);
-        const toPeriodRange = formatPeriodRangeForRank(riser.bestPeriod);
-
-        slides.push({
-          id: `rank-rise-${index}`,
-          title: biggestRisers.length > 1 ? '순위 상승' : '순위 상승',
-          content: (
-            <div className="text-center">
-              <div className="text-7xl mb-6">📈</div>
-              <div className="text-5xl font-bold mb-4">{getPlayerDisplayName(riser.player)}</div>
-              <div className="text-3xl mb-2">
-                {riser.worst}위 → {riser.best}위
-              </div>
-              <div className="text-xl opacity-80 mb-4">
-                {riser.change}단계 상승
-              </div>
-              <div className="text-lg opacity-70 mt-6">
-                {fromPeriodNum}번째 만남({fromPeriodRange})에는 {riser.worst}위였는데<br />
-                {toPeriodNum}번째 만남({toPeriodRange})에는 {riser.best}위로 올라갔어요!<br />
-                정말 대단한 성장이에요! 🚀
-              </div>
-            </div>
-          )
-        });
-      });
-    }
-
-    // 순위 하락 슬라이드 (동일한 change 값을 가진 플레이어 모두 표시)
-    if (fallers.length > 0) {
-      const maxFallChange = fallers[0].change;
-      const biggestFallers = fallers.filter(f => f.change === maxFallChange);
-
-      biggestFallers.forEach((faller, index) => {
-        const fromPeriodNum = getPeriodNumber(faller.bestPeriod);
-        const toPeriodNum = getPeriodNumber(faller.worstPeriod);
-        const fromPeriodRange = formatPeriodRangeForRank(faller.bestPeriod);
-        const toPeriodRange = formatPeriodRangeForRank(faller.worstPeriod);
-
-        slides.push({
-          id: `rank-fall-${index}`,
-          title: biggestFallers.length > 1 ? '순위 하락' : '순위 하락',
-          content: (
-            <div className="text-center">
-              <div className="text-7xl mb-6">📉</div>
-              <div className="text-5xl font-bold mb-4">{getPlayerDisplayName(faller.player)}</div>
-              <div className="text-3xl mb-2">
-                {faller.best}위 → {faller.worst}위
-              </div>
-              <div className="text-xl opacity-80 mb-4">
-                {Math.abs(faller.change)}단계 하락
-              </div>
-              <div className="text-lg opacity-70 mt-6">
-                {fromPeriodNum}번째 만남({fromPeriodRange})에는 {faller.best}위였는데<br />
-                {toPeriodNum}번째 만남({toPeriodRange})에는 {faller.worst}위로 내려갔어요.<br />
-                다음엔 다시 올라갈 수 있을 거예요! 💪
-              </div>
-            </div>
-          )
-        });
-      });
-    }
-
-    // 슬라이드 10: 가장 많이 플레이한 팀
-    if (stats.mostPlayedTeam) {
-      slides.push({
-        id: 'most-played-team',
-        title: '인기 팀 조합',
-        content: (
-          <div className="text-center">
-            <div className="text-7xl mb-6">🎯</div>
-            <div className="text-5xl font-bold mb-4">{stats.mostPlayedTeam.team}</div>
-            <div className="text-3xl mb-2">{stats.mostPlayedTeam.total}게임</div>
-            <div className="text-xl opacity-80 mb-4">
-              승률 {stats.mostPlayedTeam.winrate.toFixed(1)}%
-            </div>
-            <div className="text-lg opacity-70 mt-6">
-              가장 많이 함께 플레이한 조합이에요!<br />
-              이 조합이면 안심이 되죠? 😊
-            </div>
-          </div>
-        )
-      });
-    }
-
-    // 슬라이드 11: 가장 활발한 월
-    if (stats.mostActiveMonth.count > 0) {
-      const monthNames = ['', '1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
-      slides.push({
-        id: 'most-active-month',
-        title: '가장 활발한 달',
-        content: (
-          <div className="text-center">
-            <div className="text-7xl mb-6">📅</div>
-            <div className="text-5xl font-bold mb-4">{monthNames[stats.mostActiveMonth.month]}</div>
-            <div className="text-4xl mb-2">{stats.mostActiveMonth.count}게임</div>
-            <div className="text-xl opacity-80 mb-4">가장 많은 게임을 한 달</div>
-            <div className="text-lg opacity-70 mt-6">
-              {monthNames[stats.mostActiveMonth.month]}에 정말 열심히 놀았네요!<br />
-              그때가 가장 즐거웠을 거예요! 🎮
-            </div>
-          </div>
-        )
-      });
-    }
-
-    // 슬라이드 12: 기간별 등수 차트
-    if (stats.periodStats && stats.periodStats.length > 0) {
-      slides.push({
-        id: 'rank-chart',
-        title: '기간별 등수 변화',
-        content: <RankChart periodStats={stats.periodStats} />
-      });
-    }
-
-    // 슬라이드 11: 마무리
-    slides.push({
-      id: 'ending',
-      title: '마무리',
-      content: (
-        <div className="text-center">
-          <div className="text-7xl mb-6">🎉</div>
-          <div className="text-4xl font-bold mb-4">수고 많았어요!</div>
-          <div className="text-xl opacity-80 mb-6">
-            {stats.year}년도 함께 즐겁게 보냈네요
-          </div>
-          <div className="text-lg opacity-70 mt-6">
-            내년에도 싸우지 말고<br />
-            좋은 게임 즐겨봐요! 😊<br />
-            <span className="text-base opacity-60 mt-4 block">다음 년도에도 함께해요!</span>
-          </div>
-        </div>
-      )
-    });
-
-    return slides;
-  };
+  // currentSlide 변경 시 ref 및 플래그 업데이트
+  useEffect(() => {
+    currentSlideRef.current = currentSlide;
+    setSlideProgress(0);
+    isTransitioningRef.current = false;
+  }, [currentSlide]);
 
   // 데이터 로드
   useEffect(() => {
@@ -907,38 +929,111 @@ export default function RecapPage() {
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
-    touchEndX.current = e.changedTouches[0].clientX;
-    handleSwipe();
-  };
-
-  const handleSwipe = () => {
     if (isAnimating) return;
     
+    touchEndX.current = e.changedTouches[0].clientX;
     const diff = touchStartX.current - touchEndX.current;
     const minSwipeDistance = 50;
 
     if (Math.abs(diff) > minSwipeDistance) {
       setIsAnimating(true);
       if (diff > 0) {
-        // 왼쪽으로 스와이프 (다음 슬라이드)
         nextSlide();
       } else {
-        // 오른쪽으로 스와이프 (이전 슬라이드)
         prevSlide();
       }
       setTimeout(() => setIsAnimating(false), 300);
     }
   };
 
-  const nextSlide = () => {
-    if (!stats) return;
-    const slides = generateSlides(stats);
-    setCurrentSlide((prev) => (prev < slides.length - 1 ? prev + 1 : prev));
+  // 타이머 정리 헬퍼 함수
+  const clearProgressTimer = useCallback(() => {
+    if (progressTimerRef.current) {
+      clearInterval(progressTimerRef.current);
+      progressTimerRef.current = null;
+    }
+  }, []);
+
+  const nextSlide = useCallback(() => {
+    if (slides.length === 0) return;
+    setCurrentSlide((prev) => Math.min(prev + 1, slides.length - 1));
+  }, [slides.length]);
+
+  const prevSlide = useCallback(() => {
+    if (slides.length === 0) return;
+    setCurrentSlide((prev) => Math.max(prev - 1, 0));
+  }, [slides.length]);
+
+  // 화면 클릭 핸들러 (좌우 분할)
+  const handleScreenClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (isAnimating || isCapturing) return;
+    
+    const clickX = e.clientX;
+    const screenWidth = window.innerWidth;
+    const leftHalf = screenWidth / 2;
+    
+    // 상단 버튼 영역이나 인디케이터 영역 클릭은 무시
+    const target = e.target as HTMLElement;
+    if (target.closest('[data-exclude-from-capture]') || 
+        target.closest('button') || 
+        target.closest('a')) {
+      return;
+    }
+    
+    if (clickX < leftHalf) {
+      // 왼쪽 클릭 - 이전 슬라이드
+      prevSlide();
+    } else {
+      // 오른쪽 클릭 - 다음 슬라이드
+      nextSlide();
+    }
   };
 
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev > 0 ? prev - 1 : 0));
-  };
+  // 자동 슬라이드 및 진행률 업데이트
+  useEffect(() => {
+    if (isTransitioningRef.current) return;
+    
+    setSlideProgress(0);
+    clearProgressTimer();
+    
+    if (slides.length === 0 || isPaused || isCapturing) {
+      return;
+    }
+    
+    const updateProgress = () => {
+      if (isTransitioningRef.current) return;
+      
+      setSlideProgress((prev) => {
+        const increment = 1; // 100ms마다 1% 증가 (10초 = 100%)
+        const newProgress = prev + increment;
+        
+        if (newProgress >= 100) {
+          if (isTransitioningRef.current) return 0;
+          
+          isTransitioningRef.current = true;
+          clearProgressTimer();
+          
+          const currentSlideIndex = currentSlideRef.current;
+          const totalSlides = slidesLengthRef.current;
+          
+          if (currentSlideIndex < totalSlides - 1) {
+            const nextSlideIndex = currentSlideIndex + 1;
+            currentSlideRef.current = nextSlideIndex;
+            setCurrentSlide(nextSlideIndex);
+            setSlideProgress(0);
+          } else {
+            setTimeout(() => router.push('/hall-of-fame'), 500);
+          }
+          return 0;
+        }
+        return newProgress;
+      });
+    };
+    
+    progressTimerRef.current = setInterval(updateProgress, 100);
+    
+    return clearProgressTimer;
+  }, [slides.length, currentSlide, isPaused, isCapturing, router, clearProgressTimer]);
 
   // 키보드 이벤트 핸들러
   useEffect(() => {
@@ -947,12 +1042,46 @@ export default function RecapPage() {
         prevSlide();
       } else if (e.key === 'ArrowRight') {
         nextSlide();
+      } else if (e.key === ' ') {
+        // 스페이스바로 일시정지/재생
+        e.preventDefault();
+        setIsPaused((prev) => !prev);
       }
     };
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [stats]);
+  }, [prevSlide, nextSlide]);
+
+  // 전체 화면 및 주소창 숨김 처리
+  useEffect(() => {
+    const hideAddressBar = () => {
+      setTimeout(() => window.scrollTo(0, 1), 100);
+    };
+
+    hideAddressBar();
+    window.addEventListener('resize', hideAddressBar);
+    window.addEventListener('orientationchange', () => setTimeout(hideAddressBar, 200));
+
+    // 전체 화면 스타일 적용
+    Object.assign(document.body.style, {
+      overflow: 'hidden',
+      height: '100dvh',
+      position: 'fixed',
+      width: '100%',
+    });
+
+    return () => {
+      window.removeEventListener('resize', hideAddressBar);
+      window.removeEventListener('orientationchange', hideAddressBar);
+      Object.assign(document.body.style, {
+        overflow: '',
+        height: '',
+        position: '',
+        width: '',
+      });
+    };
+  }, []);
 
   // 공유 메뉴 외부 클릭 시 닫기
   useEffect(() => {
@@ -1033,15 +1162,27 @@ export default function RecapPage() {
     );
   }
 
-  const slides = generateSlides(stats);
-  const currentSlideData = slides[currentSlide];
+  const currentSlideData = slides[currentSlide] || null;
+
+  if (!currentSlideData) {
+    return null;
+  }
 
   return (
     <div
       ref={containerRef}
-      className="min-h-screen relative overflow-hidden bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900"
+      className="min-h-screen relative overflow-hidden bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 cursor-pointer"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
+      onClick={handleScreenClick}
+      style={{
+        height: '100dvh', // 동적 뷰포트 높이 사용
+        overflow: 'hidden',
+        position: 'fixed',
+        width: '100%',
+        top: 0,
+        left: 0,
+      }}
     >
       {/* 캡처용 컨테이너 (전체 화면) */}
       <div
@@ -1172,57 +1313,41 @@ export default function RecapPage() {
         </div>
       </div>
 
-      {/* 슬라이드 인디케이터 */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 flex gap-2" data-exclude-from-capture>
-        {slides.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => {
-              setIsAnimating(true);
-              setCurrentSlide(index);
-              setTimeout(() => setIsAnimating(false), 300);
-            }}
-            className={`h-2 rounded-full transition-all duration-300 ${
-              index === currentSlide
-                ? 'w-8 bg-white'
-                : 'w-2 bg-white/50 hover:bg-white/75'
-            }`}
-            aria-label={`슬라이드 ${index + 1}`}
-          />
-        ))}
+      {/* 슬라이드 인디케이터 - 게이지바 형식 */}
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 w-4/5 max-w-2xl px-4" data-exclude-from-capture>
+        <div className="flex gap-1.5 items-center">
+          {slides.map((_, index) => {
+            const isActive = index === currentSlide;
+            const progress = isActive ? slideProgress : index < currentSlide ? 100 : 0;
+            
+            return (
+              <div
+                key={index}
+                className="flex-1 h-1.5 bg-white/20 rounded-full overflow-hidden relative cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsAnimating(true);
+                  setCurrentSlide(index);
+                  setSlideProgress(0);
+                  setTimeout(() => setIsAnimating(false), 300);
+                }}
+                aria-label={`슬라이드 ${index + 1}`}
+              >
+                {/* 배경 (항상 표시) */}
+                <div className="absolute inset-0 bg-white/20 rounded-full" />
+                {/* 진행률 바 */}
+                <div
+                  className="absolute inset-0 bg-white rounded-full transition-all duration-100 ease-linear origin-left"
+                  style={{
+                    width: `${progress}%`,
+                  }}
+                />
+              </div>
+            );
+          })}
+        </div>
       </div>
 
-      {/* 이전/다음 버튼 */}
-      {currentSlide > 0 && (
-        <button
-          onClick={prevSlide}
-          className="absolute left-8 top-1/2 transform -translate-y-1/2 z-20 p-4 bg-white/10 backdrop-blur-md text-white rounded-full hover:bg-white/20 transition-colors"
-          aria-label="이전 슬라이드"
-          data-exclude-from-capture
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
-          </svg>
-        </button>
-      )}
-
-      {currentSlide < slides.length - 1 && (
-        <button
-          onClick={nextSlide}
-          className="absolute right-8 top-1/2 transform -translate-y-1/2 z-20 p-4 bg-white/10 backdrop-blur-md text-white rounded-full hover:bg-white/20 transition-colors"
-          aria-label="다음 슬라이드"
-          data-exclude-from-capture
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-          </svg>
-        </button>
-      )}
-
-      {/* 스와이프 힌트 */}
-      <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2 z-20 text-white/60 text-sm" data-exclude-from-capture>
-        ← 스와이프하여 탐색 →
-      </div>
 
     </div>
   );
