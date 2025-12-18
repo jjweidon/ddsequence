@@ -868,6 +868,8 @@ export default function RecapPage() {
   const [slideProgress, setSlideProgress] = useState<number>(0); // 현재 슬라이드 진행률 (0-100)
   const [isPaused, setIsPaused] = useState<boolean>(false); // 자동 슬라이드 일시정지
   const [viewportHeight, setViewportHeight] = useState<string>('100dvh'); // 동적 뷰포트 높이
+  const [isMuted, setIsMuted] = useState<boolean>(false); // BGM 음소거 상태
+  const [bgmVolume, setBgmVolume] = useState<number>(0.3); // BGM 볼륨 (0-1)
   
   const touchStartX = useRef<number>(0);
   const touchEndX = useRef<number>(0);
@@ -879,9 +881,70 @@ export default function RecapPage() {
   const currentSlideRef = useRef<number>(0);
   const slidesLengthRef = useRef<number>(0);
   const isTransitioningRef = useRef<boolean>(false);
+  const bgmAudioRef = useRef<HTMLAudioElement | null>(null);
   
   // 이미지 캡처 훅 사용
   const { saveImage: saveImageHandler, shareToKakao: shareToKakaoHandler, shareToInstagram: shareToInstagramHandler } = useSlideImageCapture();
+
+  // BGM 초기화 및 재생
+  useEffect(() => {
+    // 외부 음원 URL 또는 public 폴더의 파일 경로
+    // 예시: 무료 게임 BGM URL 또는 '/bgm.mp3' (public 폴더에 파일이 있는 경우)
+    const bgmUrl = '/bgm/jingle_bells.mp3'; // public 폴더에 bgm.mp3 파일을 넣으면 됩니다
+    
+    // Audio 객체 생성
+    const audio = new Audio(bgmUrl);
+    audio.loop = true; // 반복 재생
+    audio.volume = bgmVolume;
+    
+    // 오류 처리
+    audio.addEventListener('error', (e) => {
+      console.warn('BGM 로드 실패:', e);
+      // BGM 파일이 없어도 페이지는 정상 작동하도록 함
+    });
+    
+    bgmAudioRef.current = audio;
+    
+    // 사용자 상호작용 후 재생 (브라우저 정책)
+    const playBGM = async () => {
+      try {
+        await audio.play();
+      } catch (error) {
+        console.log('BGM 자동 재생 실패 (사용자 상호작용 필요):', error);
+      }
+    };
+    
+    // 페이지 로드 후 약간의 지연을 두고 재생 시도
+    const timer = setTimeout(() => {
+      playBGM();
+    }, 500);
+    
+    return () => {
+      clearTimeout(timer);
+      if (audio) {
+        audio.pause();
+        audio.src = '';
+      }
+    };
+  }, []); // 최초 한 번만 실행
+
+  // 볼륨 변경 시 적용
+  useEffect(() => {
+    if (bgmAudioRef.current) {
+      bgmAudioRef.current.volume = isMuted ? 0 : bgmVolume;
+    }
+  }, [bgmVolume, isMuted]);
+
+  // 음소거 토글
+  const toggleMute = useCallback(() => {
+    setIsMuted((prev) => {
+      const newMuted = !prev;
+      if (bgmAudioRef.current) {
+        bgmAudioRef.current.volume = newMuted ? 0 : bgmVolume;
+      }
+      return newMuted;
+    });
+  }, [bgmVolume]);
 
   // 슬라이드 데이터 메모이제이션
   const slides = useMemo(() => {
@@ -1449,6 +1512,35 @@ export default function RecapPage() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* BGM 컨트롤 버튼 */}
+      <div 
+        className="absolute top-4 right-4 z-20" 
+        data-exclude-from-capture
+        style={{ display: 'none' }}
+      >
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleMute();
+          }}
+          className="px-4 py-2 bg-white/10 backdrop-blur-md text-white rounded-lg hover:bg-white/20 transition-colors flex items-center gap-2"
+          title={isMuted ? 'BGM 켜기' : 'BGM 끄기'}
+          aria-label={isMuted ? 'BGM 켜기' : 'BGM 끄기'}
+        >
+          {isMuted ? (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.793L4.617 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.617l3.766-3.793a1 1 0 011.617.793zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z" clipRule="evenodd" />
+              <path d="M2.293 2.293a1 1 0 011.414 0l14 14a1 1 0 01-1.414 1.414l-14-14a1 1 0 010-1.414z" />
+            </svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.793L4.617 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.617l3.766-3.793a1 1 0 011.617.793zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z" clipRule="evenodd" />
+            </svg>
+          )}
+          <span className="text-sm hidden sm:inline">{isMuted ? 'BGM 켜기' : 'BGM 끄기'}</span>
+        </button>
       </div>
 
       {/* 슬라이드 인디케이터 - 게이지바 형식 */}
