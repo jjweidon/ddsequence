@@ -462,8 +462,8 @@ const generateSlides = (stats: RecapStats): Slide[] => {
     content: (
       <div className="text-center">
         <div className="text-7xl mb-6">📊</div>
-        <div className="text-5xl font-bold mb-4">{stats.totalPeriods}번</div>
-        <div className="text-xl opacity-80 mb-6">
+        <div className="text-4xl font-bold mb-4">{stats.totalPeriods}번</div>
+        <div className="text-lg opacity-80 mb-6">
           {`${stats.totalPeriods}번 만나서 ${stats.totalGames}게임을 했어요!`}
         </div>
         <div className="mt-6 max-h-64 overflow-y-auto px-6">
@@ -1053,33 +1053,93 @@ export default function RecapPage() {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [prevSlide, nextSlide]);
 
-  // 전체 화면 및 주소창 숨김 처리
+  // 모바일 전체화면 및 주소창 숨김 처리
   useEffect(() => {
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    
+    if (!isMobile) {
+      return;
+    }
+
+    // 주소창 숨기기 함수
     const hideAddressBar = () => {
-      setTimeout(() => window.scrollTo(0, 1), 100);
+      // 스크롤을 약간 내려서 주소창 숨기기
+      window.scrollTo(0, 1);
+      
+      // 추가로 약간의 딜레이 후 다시 시도
+      setTimeout(() => {
+        window.scrollTo(0, 1);
+      }, 100);
     };
 
+    // 초기 실행
     hideAddressBar();
-    window.addEventListener('resize', hideAddressBar);
-    window.addEventListener('orientationchange', () => setTimeout(hideAddressBar, 200));
 
     // 전체 화면 스타일 적용
+    const originalBodyStyle = {
+      overflow: document.body.style.overflow,
+      height: document.body.style.height,
+      position: document.body.style.position,
+      width: document.body.style.width,
+      top: document.body.style.top,
+      left: document.body.style.left,
+    };
+
     Object.assign(document.body.style, {
       overflow: 'hidden',
       height: '100dvh',
       position: 'fixed',
       width: '100%',
+      top: '0',
+      left: '0',
     });
 
+    // HTML 요소도 스타일 적용
+    const originalHtmlStyle = {
+      height: document.documentElement.style.height,
+      overflow: document.documentElement.style.overflow,
+    };
+
+    Object.assign(document.documentElement.style, {
+      height: '100dvh',
+      overflow: 'hidden',
+    });
+
+    // 이벤트 리스너
+    const handleResize = () => {
+      hideAddressBar();
+    };
+
+    const handleOrientationChange = () => {
+      setTimeout(() => {
+        hideAddressBar();
+        // 방향 변경 후 뷰포트 높이 재조정
+        document.body.style.height = '100dvh';
+        document.documentElement.style.height = '100dvh';
+      }, 300);
+    };
+
+    // 터치 이벤트로 주소창 숨기기 (스크롤 트리거)
+    const handleTouchStart = () => {
+      hideAddressBar();
+    };
+
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleOrientationChange);
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    
+    // 페이지 로드 후 추가 시도
+    window.addEventListener('load', hideAddressBar);
+
     return () => {
-      window.removeEventListener('resize', hideAddressBar);
-      window.removeEventListener('orientationchange', hideAddressBar);
-      Object.assign(document.body.style, {
-        overflow: '',
-        height: '',
-        position: '',
-        width: '',
-      });
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleOrientationChange);
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('load', hideAddressBar);
+      
+      // 원래 스타일 복원
+      Object.assign(document.body.style, originalBodyStyle);
+      Object.assign(document.documentElement.style, originalHtmlStyle);
     };
   }, []);
 
@@ -1176,12 +1236,15 @@ export default function RecapPage() {
       onTouchEnd={handleTouchEnd}
       onClick={handleScreenClick}
       style={{
-        height: '100dvh', // 동적 뷰포트 높이 사용
+        height: '100dvh',
+        minHeight: '100dvh',
+        maxHeight: '100dvh',
         overflow: 'hidden',
         position: 'fixed',
         width: '100%',
         top: 0,
         left: 0,
+        touchAction: 'none',
       }}
     >
       {/* 캡처용 컨테이너 (전체 화면) */}
@@ -1207,11 +1270,15 @@ export default function RecapPage() {
           )}
         </div>
 
-        {/* 네비게이션 버튼 */}
-        <div className="absolute top-4 left-4 z-20" data-exclude-from-capture>
+        {/* 네비게이션 버튼 - 현재 숨김 처리 (로직은 유지) */}
+        <div 
+          className="absolute top-4 left-4 z-20" 
+          data-exclude-from-capture
+          style={{ display: 'none' }}
+        >
           <Link
             href="/hall-of-fame"
-            className="px-4 py-2 bg-white/10 backdrop-blur-md text-white rounded-lg hover:bg-white/20 transition-colors flex items-center gap-2"
+            className="px-4 py-2 bg-white/10 backdrop-blur-md text-white rounded-lg hover:bg-white/20 transition-colors flex items-center gap-2 pointer-events-none"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -1231,7 +1298,7 @@ export default function RecapPage() {
           >
           {/* 제목 */}
           <h1
-            className="text-5xl md:text-6xl font-bold mb-8 opacity-0"
+            className="text-4xl md:text-5xl font-bold mb-8 opacity-0"
             style={{ 
               animation: 'fade-in-up 0.8s ease-out 0.1s forwards'
             }}
@@ -1252,10 +1319,15 @@ export default function RecapPage() {
         </div>
       </div>
 
-      {/* 공유 및 저장 버튼 */}
-      <div className="absolute top-4 right-4 z-20 flex flex-col gap-2" data-exclude-from-capture>
+      {/* 공유 및 저장 버튼 - 현재 숨김 처리 (로직은 유지) */}
+      <div 
+        className="absolute top-4 right-4 z-20 flex flex-col gap-2" 
+        data-exclude-from-capture
+        style={{ display: 'none' }}
+      >
         <button
           onClick={saveImage}
+          disabled
           className="px-4 py-2 bg-white/10 backdrop-blur-md text-white rounded-lg hover:bg-white/20 transition-colors flex items-center gap-2"
           title="이미지로 저장"
         >
@@ -1268,6 +1340,7 @@ export default function RecapPage() {
         <div className="relative" ref={shareMenuRef}>
           <button
             onClick={() => setShowShareMenu(!showShareMenu)}
+            disabled
             className="px-4 py-2 bg-white/10 backdrop-blur-md text-white rounded-lg hover:bg-white/20 transition-colors flex items-center gap-2"
             title="공유하기"
           >
