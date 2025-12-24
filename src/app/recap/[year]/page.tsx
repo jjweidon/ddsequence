@@ -867,7 +867,7 @@ export default function RecapPage() {
   const [isCapturing, setIsCapturing] = useState<boolean>(false);
   const [slideProgress, setSlideProgress] = useState<number>(0); // 현재 슬라이드 진행률 (0-100)
   const [isPaused, setIsPaused] = useState<boolean>(false); // 자동 슬라이드 일시정지
-  const [viewportHeight, setViewportHeight] = useState<string>('100dvh'); // 동적 뷰포트 높이
+  const [viewportHeight, setViewportHeight] = useState<string>('100vh'); // 동적 뷰포트 높이
   const [isMuted, setIsMuted] = useState<boolean>(false); // BGM 음소거 상태
   const [bgmVolume, setBgmVolume] = useState<number>(0.3); // BGM 볼륨 (0-1)
   
@@ -1122,47 +1122,30 @@ export default function RecapPage() {
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     
     if (!isMobile) {
+      setViewportHeight('100vh');
       return;
     }
 
     // 실제 뷰포트 높이 계산 (visualViewport API 사용)
     const getViewportHeight = () => {
+      // visualViewport가 있으면 사용 (주소창이 숨겨진 상태의 높이)
       if (window.visualViewport) {
         return window.visualViewport.height;
       }
+      // fallback: window.innerHeight 사용
       return window.innerHeight;
     };
 
-    // 주소창 숨기기 함수 (더 강력한 방법)
+    // 주소창 숨기기 함수 (효과적인 방법)
     const hideAddressBar = () => {
-      // 여러 방법으로 시도
-      const scrollAttempts = [
-        () => window.scrollTo(0, 1),
-        () => window.scrollTo(0, 0),
-        () => window.scrollTo(0, 1),
-      ];
-
-      scrollAttempts.forEach((attempt, index) => {
-        setTimeout(() => {
-          attempt();
-        }, index * 50);
-      });
-
-      // 추가로 강제 스크롤
+      // 1px 스크롤로 주소창 숨기기
+      window.scrollTo(0, 1);
+      
+      // 즉시 다시 0으로 스크롤 (화면은 그대로, 주소창만 숨김)
       setTimeout(() => {
-        const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
-        if (currentScroll === 0) {
-          window.scrollTo(0, 1);
-          setTimeout(() => window.scrollTo(0, 0), 10);
-        }
-      }, 200);
+        window.scrollTo(0, 0);
+      }, 0);
     };
-
-    // 초기 실행 (여러 번 시도)
-    hideAddressBar();
-    setTimeout(hideAddressBar, 100);
-    setTimeout(hideAddressBar, 300);
-    setTimeout(hideAddressBar, 500);
 
     // 전체 화면 스타일 적용
     const originalBodyStyle = {
@@ -1174,6 +1157,11 @@ export default function RecapPage() {
       left: document.body.style.left,
     };
 
+    const originalHtmlStyle = {
+      height: document.documentElement.style.height,
+      overflow: document.documentElement.style.overflow,
+    };
+
     const setFullScreenStyles = () => {
       const vh = getViewportHeight();
       const vhPx = `${vh}px`;
@@ -1181,6 +1169,7 @@ export default function RecapPage() {
       // state 업데이트로 컨테이너 높이도 동기화
       setViewportHeight(vhPx);
 
+      // body 스타일 설정
       Object.assign(document.body.style, {
         overflow: 'hidden',
         height: vhPx,
@@ -1188,17 +1177,29 @@ export default function RecapPage() {
         width: '100%',
         top: '0',
         left: '0',
+        touchAction: 'none',
       });
 
+      // html 스타일 설정
       Object.assign(document.documentElement.style, {
         height: vhPx,
         overflow: 'hidden',
+        position: 'fixed',
+        width: '100%',
       });
     };
 
+    // 초기 설정
     setFullScreenStyles();
+    
+    // 주소창 숨기기 시도 (여러 번)
+    hideAddressBar();
+    setTimeout(hideAddressBar, 100);
+    setTimeout(hideAddressBar, 300);
+    setTimeout(hideAddressBar, 500);
+    setTimeout(hideAddressBar, 1000);
 
-    // 이벤트 리스너
+    // 이벤트 핸들러들
     const handleResize = () => {
       setFullScreenStyles();
       hideAddressBar();
@@ -1208,7 +1209,7 @@ export default function RecapPage() {
       setTimeout(() => {
         setFullScreenStyles();
         hideAddressBar();
-      }, 300);
+      }, 100);
     };
 
     // visualViewport 변경 감지 (주소창 표시/숨김 감지)
@@ -1217,7 +1218,7 @@ export default function RecapPage() {
       hideAddressBar();
     };
 
-    // 터치 이벤트로 주소창 숨기기 (스크롤 트리거)
+    // 터치 이벤트로 주소창 숨기기
     const handleTouchStart = () => {
       hideAddressBar();
     };
@@ -1230,7 +1231,8 @@ export default function RecapPage() {
       hideAddressBar();
     };
 
-    window.addEventListener('resize', handleResize);
+    // 이벤트 리스너 등록
+    window.addEventListener('resize', handleResize, { passive: true });
     window.addEventListener('orientationchange', handleOrientationChange);
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', handleVisualViewportResize);
@@ -1240,19 +1242,18 @@ export default function RecapPage() {
     window.addEventListener('scroll', handleScroll, { passive: true });
     
     // 페이지 로드 후 추가 시도
-    window.addEventListener('load', () => {
+    if (document.readyState === 'complete') {
       setTimeout(hideAddressBar, 100);
       setTimeout(hideAddressBar, 500);
-    });
-
-    // DOMContentLoaded 후에도 시도
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => {
+    } else {
+      window.addEventListener('load', () => {
         setTimeout(hideAddressBar, 100);
+        setTimeout(hideAddressBar, 500);
       });
     }
 
     return () => {
+      // 이벤트 리스너 제거
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('orientationchange', handleOrientationChange);
       if (window.visualViewport) {
@@ -1264,10 +1265,7 @@ export default function RecapPage() {
       
       // 원래 스타일 복원
       Object.assign(document.body.style, originalBodyStyle);
-      Object.assign(document.documentElement.style, {
-        height: '',
-        overflow: '',
-      });
+      Object.assign(document.documentElement.style, originalHtmlStyle);
     };
   }, []);
 
@@ -1373,6 +1371,7 @@ export default function RecapPage() {
         top: 0,
         left: 0,
         touchAction: 'none',
+        WebkitOverflowScrolling: 'touch',
       }}
     >
       {/* 캡처용 컨테이너 (전체 화면) */}

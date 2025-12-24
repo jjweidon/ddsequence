@@ -16,6 +16,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
+  themeColor: "#581c87",
 };
 
 export default function RecapLayout({
