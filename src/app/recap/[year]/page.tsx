@@ -460,14 +460,21 @@ const generateSlides = (stats: RecapStats): Slide[] => {
     id: 'total-plays',
     title: `올해는 총 ${stats.totalPeriods}번의 만남이 있었어요`,
     content: (
-      <div className="text-center">
-        <div className="text-7xl mb-6">📊</div>
-        <div className="text-4xl font-bold mb-4">{stats.totalPeriods}번</div>
-        <div className="text-lg opacity-80 mb-6">
+      <div className="text-center w-full">
+        <div className="text-5xl md:text-7xl mb-4 md:mb-6">📊</div>
+        <div className="text-3xl md:text-4xl font-bold mb-3 md:mb-4">{stats.totalPeriods}번</div>
+        <div className="text-base md:text-lg opacity-80 mb-4 md:mb-6 px-4">
           {`${stats.totalPeriods}번 만나서 ${stats.totalGames}게임을 했어요!`}
         </div>
-        <div className="mt-6 max-h-64 overflow-y-auto px-6">
-          <div className="grid grid-cols-1 gap-3">
+        <div className="mt-4 md:mt-6 px-4 md:px-6 pb-20 md:pb-24">
+          <div 
+            className="grid grid-cols-1 gap-1.5 md:gap-2 mx-auto max-w-2xl"
+            style={{
+              maxHeight: 'calc(100vh - 300px)',
+              overflowY: 'auto',
+              WebkitOverflowScrolling: 'touch',
+            }}
+          >
             {stats.periodStats
               .slice()
               .sort((a, b) => {
@@ -483,18 +490,18 @@ const generateSlides = (stats: RecapStats): Slide[] => {
                 return (
                   <div 
                     key={period.periodKey} 
-                    className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-left border border-white/20"
+                    className="bg-white/10 backdrop-blur-sm rounded-lg p-2 md:p-2.5 text-left border border-white/20 hover:bg-white/15 transition-colors"
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-1.5 md:gap-2 flex-1 min-w-0">
+                        <div className="w-6 h-6 md:w-7 md:h-7 rounded-full bg-white/20 flex items-center justify-center font-bold text-xs flex-shrink-0">
                           {index + 1}
                         </div>
-                        <div>
-                          <div className="font-semibold text-lg">
+                        <div className="min-w-0 flex-1">
+                          <div className="font-semibold text-sm md:text-base truncate leading-tight">
                             {index + 1}번째 만남
                           </div>
-                          <div className="text-sm opacity-80">
+                          <div className="text-xs opacity-80 leading-tight mt-0.5">
                             {isSameDay 
                               ? formatDate(startDate)
                               : `${formatDate(startDate)} ~ ${formatDate(endDate)}`
@@ -502,7 +509,7 @@ const generateSlides = (stats: RecapStats): Slide[] => {
                           </div>
                         </div>
                       </div>
-                      <div className="text-sm opacity-60">
+                      <div className="text-xs opacity-60 font-medium flex-shrink-0">
                         {period.games.length}게임
                       </div>
                     </div>
@@ -1415,7 +1422,7 @@ export default function RecapPage() {
         </div>
 
         {/* 슬라이드 컨테이너 */}
-        <div className="relative z-10 min-h-screen flex items-center justify-center p-8">
+        <div className="relative z-10 min-h-screen flex items-center justify-center p-4 md:p-8">
           <div
             ref={slideContentRef}
             key={currentSlide}
