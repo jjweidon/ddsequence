@@ -170,7 +170,16 @@ export default function Home() {
   const getStatsAsText = () => {
     if (!stats) return '';
     
+    // 한국 시간 기준 현재 날짜 포맷팅
+    const now = new Date();
+    const koreaTime = new Date(now.getTime() + (9 * 60 * 60 * 1000));
+    const year = koreaTime.getUTCFullYear();
+    const month = String(koreaTime.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(koreaTime.getUTCDate()).padStart(2, '0');
+    const formattedDate = `${year}-${month}-${day}`;
+    
     let text = `https://ddsequence.vercel.app\n\n`;
+    text += `날짜: ${formattedDate}\n`;
     
     if (dateRangeMode === 'custom' && dateRange) {
       text += `기간: ${dateRange.startDate} ~ ${dateRange.endDate}\n`;
