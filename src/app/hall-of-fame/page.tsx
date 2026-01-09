@@ -45,11 +45,15 @@ export default function HallOfFamePage() {
       
       // 게임 데이터에서 연도 추출 (한국 시간 기준)
       const yearsSet = new Set<number>();
+      const currentYear = getCurrentYear();
       data.data.forEach((game: IGame) => {
         const date = new Date(game.createdAt);
         const koreaTime = new Date(date.getTime() + (9 * 60 * 60 * 1000));
         const year = koreaTime.getFullYear();
-        yearsSet.add(year);
+        // 현재 연도는 제외하고 지나간 연도만 추가
+        if (year < currentYear) {
+          yearsSet.add(year);
+        }
       });
       
       const years = Array.from(yearsSet).sort((a, b) => b - a); // 내림차순 정렬
