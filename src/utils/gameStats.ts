@@ -76,7 +76,7 @@ export const calculateTeamStats = (games: IGame[]): TeamStats => {
 export const getSortedPlayerStats = (playerStats: PlayerStats): [string, [number, number]][] => {
   return Object.entries(playerStats)
     .sort((a, b) => {
-      // 승률로 정렬 (동률 시 경기 수로 정렬)
+      // 승률로 정렬 (소수점까지 완전히 동일한 경우)
       const winrateA = calculateWinrate(a[1][0], a[1][1]);
       const winrateB = calculateWinrate(b[1][0], b[1][1]);
       
@@ -84,7 +84,20 @@ export const getSortedPlayerStats = (playerStats: PlayerStats): [string, [number
         return winrateB - winrateA;
       }
       
-      return b[1][1] - a[1][1];
+      // 승률이 완전히 동일하면 승리 횟수가 더 높은 쪽이 순위가 높음
+      if (a[1][0] !== b[1][0]) {
+        return b[1][0] - a[1][0];
+      }
+      
+      // 승리 횟수까지 같으면 패배 횟수가 더 높은 쪽이 순위가 낮음
+      const lossesA = a[1][1] - a[1][0];
+      const lossesB = b[1][1] - b[1][0];
+      if (lossesA !== lossesB) {
+        return lossesA - lossesB; // 패배가 적은 쪽이 순위가 높음
+      }
+      
+      // 모든 값이 같으면 동위 (0 반환)
+      return 0;
     });
 };
 
@@ -92,7 +105,7 @@ export const getSortedPlayerStats = (playerStats: PlayerStats): [string, [number
 export const getSortedTeamStats = (teamStats: TeamStats): [string, [number, number]][] => {
   return Object.entries(teamStats)
     .sort((a, b) => {
-      // 승률로 정렬 (동률 시 경기 수로 정렬)
+      // 승률로 정렬 (소수점까지 완전히 동일한 경우)
       const winrateA = calculateWinrate(a[1][0], a[1][1]);
       const winrateB = calculateWinrate(b[1][0], b[1][1]);
       
@@ -100,7 +113,20 @@ export const getSortedTeamStats = (teamStats: TeamStats): [string, [number, numb
         return winrateB - winrateA;
       }
       
-      return b[1][1] - a[1][1];
+      // 승률이 완전히 동일하면 승리 횟수가 더 높은 쪽이 순위가 높음
+      if (a[1][0] !== b[1][0]) {
+        return b[1][0] - a[1][0];
+      }
+      
+      // 승리 횟수까지 같으면 패배 횟수가 더 높은 쪽이 순위가 낮음
+      const lossesA = a[1][1] - a[1][0];
+      const lossesB = b[1][1] - b[1][0];
+      if (lossesA !== lossesB) {
+        return lossesA - lossesB; // 패배가 적은 쪽이 순위가 높음
+      }
+      
+      // 모든 값이 같으면 동위 (0 반환)
+      return 0;
     });
 };
 
