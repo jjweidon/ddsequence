@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import GameHistoryList from '@/components/GameHistoryList';
-import GameDashboardBanner from '@/components/GameDashboardBanner';
+import GameDashboardBannerCarousel from '@/components/GameDashboardBannerCarousel';
 import { IGame } from '@/models/Game';
 import { SortField, SortDirection } from '@/components/GameHistoryList';
 import { getTeamName } from '@/utils/teamOrder';
@@ -18,6 +18,8 @@ export default function HistoryPage() {
   const [isCopied, setIsCopied] = useState<boolean>(false);
   const [sortField, setSortField] = useState<SortField>('createdAt');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [currentBannerIndex, setCurrentBannerIndex] = useState<number>(0);
+  const [eventCount, setEventCount] = useState<number>(0);
 
   // 현재 연도 가져오기 (한국 시간 기준)
   const getCurrentYear = () => {
@@ -218,10 +220,15 @@ export default function HistoryPage() {
 
   return (
     <>
-      {/* 대시보드 배너 - 전체 너비 */}
-      {!loading && !error && (
+      {/* 대시보드 배너 캐러셀 - 전체 너비 */}
+      {!loading && !error && games.length > 0 && (
         <div className="w-full">
-          <GameDashboardBanner games={games} />
+          <GameDashboardBannerCarousel 
+            games={games} 
+            onEventCountChange={setEventCount}
+            currentIndex={currentBannerIndex}
+            onIndexChange={setCurrentBannerIndex}
+          />
         </div>
       )}
       
