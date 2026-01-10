@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import GameHistoryList from '@/components/GameHistoryList';
 import GameDashboardBannerCarousel from '@/components/GameDashboardBannerCarousel';
+import PlayerSelect from '@/components/PlayerSelect';
 import { IGame } from '@/models/Game';
 import { SortField, SortDirection } from '@/components/GameHistoryList';
-import { getTeamName } from '@/utils/teamOrder';
+import { getTeamName, getTeamKey } from '@/utils/teamOrder';
 
 export default function HistoryPage() {
   const [games, setGames] = useState<IGame[]>([]);
@@ -20,6 +21,10 @@ export default function HistoryPage() {
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [currentBannerIndex, setCurrentBannerIndex] = useState<number>(0);
   const [eventCount, setEventCount] = useState<number>(0);
+  
+  // 팀 필터링 관련 상태
+  const [filterTeam1, setFilterTeam1] = useState<string[]>([]);
+  const [filterTeam2, setFilterTeam2] = useState<string[]>([]);
 
   // 현재 연도 가져오기 (한국 시간 기준)
   const getCurrentYear = () => {
@@ -131,9 +136,97 @@ export default function HistoryPage() {
     return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
   };
 
+  // 팀 필터링된 게임 가져오기
+  const getFilteredGames = useMemo(() => {
+    if (filterTeam1.length !== 2 && filterTeam2.length !== 2) {
+      return games;
+    }
+    
+    const team1Key = filterTeam1.length === 2 ? getTeamKey(filterTeam1) : null;
+    const team2Key = filterTeam2.length === 2 ? getTeamKey(filterTeam2) : null;
+    
+    return games.filter(game => {
+      const winningTeamKey = getTeamKey(game.winningTeam);
+      const losingTeamKey = getTeamKey(game.losingTeam);
+      
+      // 두 팀 모두 선택된 경우: 정확히 해당 조합인 게임만
+      if (team1Key && team2Key) {
+        return (winningTeamKey === team1Key && losingTeamKey === team2Key) ||
+               (winningTeamKey === team2Key && losingTeamKey === team1Key);
+      }
+      
+      // 팀1만 선택된 경우: 팀1이 포함된 게임
+      if (team1Key && !team2Key) {
+        return winningTeamKey === team1Key || losingTeamKey === team1Key;
+      }
+      
+      // 팀2만 선택된 경우: 팀2가 포함된 게임
+      if (!team1Key && team2Key) {
+        return winningTeamKey === team2Key || losingTeamKey === team2Key;
+      }
+      
+      return true;
+    });
+  }, [games, filterTeam1, filterTeam2]);
+
+  // 필터링된 게임 통계 계산
+  const getFilteredStats = useMemo(() => {
+    if (filterTeam1.length !== 2 && filterTeam2.length !== 2) {
+      return null;
+    }
+    
+    const team1Key = filterTeam1.length === 2 ? getTeamKey(filterTeam1) : null;
+    const team2Key = filterTeam2.length === 2 ? getTeamKey(filterTeam2) : null;
+    
+    if (!team1Key && !team2Key) {
+      return null;
+    }
+    
+    let wins = 0;
+    let losses = 0;
+    
+    getFilteredGames.forEach(game => {
+      const winningTeamKey = getTeamKey(game.winningTeam);
+      const losingTeamKey = getTeamKey(game.losingTeam);
+      
+      if (team1Key && team2Key) {
+        // 두 팀 모두 선택된 경우
+        if (winningTeamKey === team1Key && losingTeamKey === team2Key) {
+          wins++;
+        } else if (winningTeamKey === team2Key && losingTeamKey === team1Key) {
+          losses++;
+        }
+      } else if (team1Key) {
+        // 팀1만 선택된 경우
+        if (winningTeamKey === team1Key) {
+          wins++;
+        } else if (losingTeamKey === team1Key) {
+          losses++;
+        }
+      } else if (team2Key) {
+        // 팀2만 선택된 경우
+        if (winningTeamKey === team2Key) {
+          wins++;
+        } else if (losingTeamKey === team2Key) {
+          losses++;
+        }
+      }
+    });
+    
+    const total = wins + losses;
+    const winrate = total > 0 ? ((wins / total) * 100).toFixed(2) : '0.00';
+    
+    return {
+      total,
+      wins,
+      losses,
+      winrate
+    };
+  }, [getFilteredGames, filterTeam1, filterTeam2]);
+
   // 현재 정렬 설정에 따라 게임 정렬
   const getSortedGames = () => {
-    return [...games].sort((a, b) => {
+    return [...getFilteredGames].sort((a, b) => {
       const aTime = new Date(a.createdAt).getTime();
       const bTime = new Date(b.createdAt).getTime();
       
@@ -162,6 +255,30 @@ export default function HistoryPage() {
     });
     
     return groupedGames;
+  };
+
+  // 필터 초기화 함수
+  const handleResetFilter = () => {
+    setFilterTeam1([]);
+    setFilterTeam2([]);
+  };
+
+  // 팀1 플레이어 선택 핸들러
+  const handleSelectTeam1Player = (player: string) => {
+    if (filterTeam1.includes(player)) {
+      setFilterTeam1(filterTeam1.filter(p => p !== player));
+    } else if (filterTeam1.length < 2 && !filterTeam2.includes(player)) {
+      setFilterTeam1([...filterTeam1, player]);
+    }
+  };
+
+  // 팀2 플레이어 선택 핸들러
+  const handleSelectTeam2Player = (player: string) => {
+    if (filterTeam2.includes(player)) {
+      setFilterTeam2(filterTeam2.filter(p => p !== player));
+    } else if (filterTeam2.length < 2 && !filterTeam1.includes(player)) {
+      setFilterTeam2([...filterTeam2, player]);
+    }
   };
 
   // 게임 기록을 텍스트로 변환
@@ -244,7 +361,8 @@ export default function HistoryPage() {
                   게임 기록
                 </h1>
                 <p className="text-sm text-slate-600 dark:text-slate-400 mt-0.5">
-                  {getCurrentYear()}년 기록 {games.length} 게임
+                  {getCurrentYear()}년 기록 {getFilteredGames.length} 게임
+                  {getFilteredStats && ` (${getFilteredStats.wins}승 ${getFilteredStats.losses}패, 승률 ${getFilteredStats.winrate}%)`}
                 </p>
               </div>
               <button 
@@ -329,6 +447,92 @@ export default function HistoryPage() {
           </div>
         </div>
 
+        {/* 팀 필터링 섹션 */}
+        <div className="mb-4 sm:mb-6 bg-white dark:bg-slate-800 rounded-sm shadow-md border border-slate-200 dark:border-slate-700 p-2 sm:p-6">
+          <div className="flex items-center justify-between mb-2 sm:mb-4">
+            <h2 className="text-sm sm:text-xl font-bold text-slate-800 dark:text-slate-100">
+              팀 필터링
+            </h2>
+            {(filterTeam1.length > 0 || filterTeam2.length > 0) && (
+              <button
+                onClick={handleResetFilter}
+                className="px-2 py-1 text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400 
+                         hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 
+                         rounded-sm transition-all duration-200
+                         focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2"
+              >
+                초기화
+              </button>
+            )}
+          </div>
+          
+          <div className="flex flex-row items-center justify-center gap-2 sm:gap-6">
+            <div className="flex-1 min-w-0">
+              <PlayerSelect
+                label="팀1"
+                selectedPlayers={filterTeam1}
+                oppositeTeamPlayers={filterTeam2}
+                onSelectPlayer={handleSelectTeam1Player}
+                compact={true}
+              />
+            </div>
+            
+            <div className="flex items-center justify-center">
+              <div className="w-px h-8 sm:h-12 bg-slate-200 dark:bg-slate-700"></div>
+            </div>
+            
+            <div className="flex-1 min-w-0">
+              <PlayerSelect
+                label="팀2"
+                selectedPlayers={filterTeam2}
+                oppositeTeamPlayers={filterTeam1}
+                onSelectPlayer={handleSelectTeam2Player}
+                compact={true}
+              />
+            </div>
+          </div>
+          
+          {/* 필터링 통계 표시 */}
+          {getFilteredStats && (
+            <div className="mt-3 sm:mt-6 pt-3 sm:pt-4 border-t border-slate-200 dark:border-slate-700">
+              <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6">
+                <div className="text-center">
+                  <div className="text-lg sm:text-3xl font-bold text-slate-800 dark:text-slate-100">
+                    {getFilteredStats.total}
+                  </div>
+                  <div className="text-[10px] sm:text-sm text-slate-600 dark:text-slate-400 mt-0.5 sm:mt-1">
+                    총 게임
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="text-lg sm:text-3xl font-bold text-emerald-600 dark:text-emerald-400">
+                    {getFilteredStats.wins}
+                  </div>
+                  <div className="text-[10px] sm:text-sm text-slate-600 dark:text-slate-400 mt-0.5 sm:mt-1">
+                    승리
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="text-lg sm:text-3xl font-bold text-rose-600 dark:text-rose-400">
+                    {getFilteredStats.losses}
+                  </div>
+                  <div className="text-[10px] sm:text-sm text-slate-600 dark:text-slate-400 mt-0.5 sm:mt-1">
+                    패배
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="text-lg sm:text-3xl font-bold text-blue-600 dark:text-blue-400">
+                    {getFilteredStats.winrate}%
+                  </div>
+                  <div className="text-[10px] sm:text-sm text-slate-600 dark:text-slate-400 mt-0.5 sm:mt-1">
+                    승률
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* 컨텐츠 */}
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-slate-800 rounded-sm 
@@ -357,7 +561,7 @@ export default function HistoryPage() {
           </div>
         ) : (
           <GameHistoryList 
-            games={games} 
+            games={getFilteredGames} 
             isEditMode={isEditMode}
             selectedGames={selectedGames}
             setSelectedGames={setSelectedGames}
