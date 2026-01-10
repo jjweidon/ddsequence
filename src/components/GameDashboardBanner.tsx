@@ -438,7 +438,7 @@ export const calculateDashboardEvents = (games: IGame[]): DashboardEvent[] => {
     }
 
     // 일반 연승
-    if (streak.isWinStreak === true && streak.currentStreak >= 3) {
+    if (streak.isWinStreak === true && streak.currentStreak >= 3 && !(total >= 5 && rank >= 4)) {
       events.push({
         type: 'winStreak',
         player,
@@ -454,7 +454,7 @@ export const calculateDashboardEvents = (games: IGame[]): DashboardEvent[] => {
     }
 
     // 일반 연패
-    if (streak.isWinStreak === false && streak.currentStreak >= 3) {
+    if (streak.isWinStreak === false && streak.currentStreak >= 3 && !(total >= 5 && rank <= 2)) {
       events.push({
         type: 'loseStreak',
         player,
