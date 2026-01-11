@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
+import RankUpConditionsModal from './RankUpConditionsModal';
+import { calculateRankUpConditions } from '@/utils/rankUpConditions';
 
 interface PlayerWinrateData {
   rank: number;
@@ -38,12 +40,19 @@ const StatsList: React.FC<StatsListProps> = ({
   playerWins,
   dateRange
 }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
   // 날짜에서 요일을 가져오는 함수
   const getDayOfWeek = (dateString: string) => {
     const date = new Date(dateString);
     const days = ['일', '월', '화', '수', '목', '금', '토'];
     return days[date.getDay()];
   };
+
+  // 순위 상승 조건 계산
+  const rankUpConditions = calculateRankUpConditions(
+    playerWinrates as PlayerWinrateData[]
+  );
 
   return (
     <div className="flex flex-col w-full gap-4">
@@ -64,8 +73,28 @@ const StatsList: React.FC<StatsListProps> = ({
       
       {/* 개인 승률 테이블 */}
       <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-sm overflow-hidden">
-        <div className="px-4 py-3 bg-slate-100 dark:bg-slate-700 border-b border-slate-200 dark:border-slate-600">
+        <div className="px-4 py-3 bg-slate-100 dark:bg-slate-700 border-b border-slate-200 dark:border-slate-600 flex items-center justify-between">
           <h3 className="font-bold text-slate-800 dark:text-slate-100">개인 승률</h3>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="text-xs px-2 py-1 bg-slate-200 hover:bg-slate-300 dark:bg-slate-600 dark:hover:bg-slate-500 text-slate-700 dark:text-slate-200 rounded transition-colors flex items-center gap-1"
+            title="순위 상승 조건 보기"
+          >
+            <svg
+              className="w-3 h-3"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            순위 상승 조건
+          </button>
         </div>
         <table className="w-full table-fixed">
           <thead>
@@ -215,6 +244,13 @@ const StatsList: React.FC<StatsListProps> = ({
           </tbody>
         </table>
       </div>
+
+      {/* 순위 상승 조건 모달 */}
+      <RankUpConditionsModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        conditions={rankUpConditions}
+      />
     </div>
   );
 };
