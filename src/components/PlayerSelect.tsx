@@ -31,7 +31,7 @@ const PlayerSelect: React.FC<PlayerSelectProps> = ({
     return compact ? player : playerDisplayNames[player];
   };
   
-  const isFilterMode = label === '팀1' || label === '팀2';
+  const isFilterMode = label === '기준' || label === '비교';
   
   return (
     <div className={`flex flex-col items-center ${compact ? 'gap-1' : 'gap-2'}`}>

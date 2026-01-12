@@ -155,12 +155,12 @@ export default function HistoryPage() {
                (winningTeamKey === team2Key && losingTeamKey === team1Key);
       }
       
-      // 팀1만 선택된 경우: 팀1이 포함된 게임
+      // 기준 팀만 선택된 경우: 기준 팀이 포함된 게임
       if (team1Key && !team2Key) {
         return winningTeamKey === team1Key || losingTeamKey === team1Key;
       }
       
-      // 팀2만 선택된 경우: 팀2가 포함된 게임
+      // 비교 팀만 선택된 경우: 비교 팀가 포함된 게임
       if (!team1Key && team2Key) {
         return winningTeamKey === team2Key || losingTeamKey === team2Key;
       }
@@ -197,14 +197,14 @@ export default function HistoryPage() {
           losses++;
         }
       } else if (team1Key) {
-        // 팀1만 선택된 경우
+        // 기준 팀만 선택된 경우
         if (winningTeamKey === team1Key) {
           wins++;
         } else if (losingTeamKey === team1Key) {
           losses++;
         }
       } else if (team2Key) {
-        // 팀2만 선택된 경우
+        // 비교 팀만 선택된 경우
         if (winningTeamKey === team2Key) {
           wins++;
         } else if (losingTeamKey === team2Key) {
@@ -263,7 +263,7 @@ export default function HistoryPage() {
     setFilterTeam2([]);
   };
 
-  // 팀1 플레이어 선택 핸들러
+  // 기준 팀 플레이어 선택 핸들러
   const handleSelectTeam1Player = (player: string) => {
     if (filterTeam1.includes(player)) {
       setFilterTeam1(filterTeam1.filter(p => p !== player));
@@ -272,7 +272,7 @@ export default function HistoryPage() {
     }
   };
 
-  // 팀2 플레이어 선택 핸들러
+  // 비교 팀 플레이어 선택 핸들러
   const handleSelectTeam2Player = (player: string) => {
     if (filterTeam2.includes(player)) {
       setFilterTeam2(filterTeam2.filter(p => p !== player));
@@ -469,7 +469,7 @@ export default function HistoryPage() {
           <div className="flex flex-row items-center justify-center gap-2 sm:gap-6">
             <div className="flex-1 min-w-0">
               <PlayerSelect
-                label="팀1"
+                label="기준 팀"
                 selectedPlayers={filterTeam1}
                 oppositeTeamPlayers={filterTeam2}
                 onSelectPlayer={handleSelectTeam1Player}
@@ -483,7 +483,7 @@ export default function HistoryPage() {
             
             <div className="flex-1 min-w-0">
               <PlayerSelect
-                label="팀2"
+                label="비교 팀"
                 selectedPlayers={filterTeam2}
                 oppositeTeamPlayers={filterTeam1}
                 onSelectPlayer={handleSelectTeam2Player}
