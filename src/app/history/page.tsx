@@ -478,7 +478,7 @@ export default function HistoryPage() {
             </div>
             
             <div className="flex items-center justify-center">
-              <div className="w-px h-8 sm:h-12 bg-slate-200 dark:bg-slate-700"></div>
+              <span className="text-sm sm:text-lg font-bold text-slate-600 dark:text-slate-400 px-2 sm:px-4">vs</span>
             </div>
             
             <div className="flex-1 min-w-0">
