@@ -1093,6 +1093,21 @@ export default function RecapPage() {
             setCurrentSlide(nextSlideIndex);
             setSlideProgress(0);
           } else {
+            // Recap 종료 시 스타일 복원 후 라우터 이동
+            // body와 html 스타일 명시적으로 초기화
+            document.body.style.overflow = '';
+            document.body.style.height = '';
+            document.body.style.position = '';
+            document.body.style.width = '';
+            document.body.style.top = '';
+            document.body.style.left = '';
+            document.body.style.touchAction = '';
+            
+            document.documentElement.style.height = '';
+            document.documentElement.style.overflow = '';
+            document.documentElement.style.position = '';
+            document.documentElement.style.width = '';
+            
             setTimeout(() => router.push('/hall-of-fame'), 500);
           }
           return 0;
@@ -1162,11 +1177,32 @@ export default function RecapPage() {
       width: document.body.style.width,
       top: document.body.style.top,
       left: document.body.style.left,
+      touchAction: document.body.style.touchAction,
     };
 
     const originalHtmlStyle = {
       height: document.documentElement.style.height,
       overflow: document.documentElement.style.overflow,
+      position: document.documentElement.style.position,
+      width: document.documentElement.style.width,
+    };
+
+    // 스타일 복원 함수
+    const restoreStyles = () => {
+      // body 스타일 복원
+      document.body.style.overflow = originalBodyStyle.overflow || '';
+      document.body.style.height = originalBodyStyle.height || '';
+      document.body.style.position = originalBodyStyle.position || '';
+      document.body.style.width = originalBodyStyle.width || '';
+      document.body.style.top = originalBodyStyle.top || '';
+      document.body.style.left = originalBodyStyle.left || '';
+      document.body.style.touchAction = originalBodyStyle.touchAction || '';
+
+      // html 스타일 복원
+      document.documentElement.style.height = originalHtmlStyle.height || '';
+      document.documentElement.style.overflow = originalHtmlStyle.overflow || '';
+      document.documentElement.style.position = originalHtmlStyle.position || '';
+      document.documentElement.style.width = originalHtmlStyle.width || '';
     };
 
     const setFullScreenStyles = () => {
@@ -1270,9 +1306,8 @@ export default function RecapPage() {
       window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('scroll', handleScroll);
       
-      // 원래 스타일 복원
-      Object.assign(document.body.style, originalBodyStyle);
-      Object.assign(document.documentElement.style, originalHtmlStyle);
+      // 스타일 복원
+      restoreStyles();
     };
   }, []);
 
