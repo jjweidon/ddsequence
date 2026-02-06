@@ -54,16 +54,26 @@ export async function GET(request: Request) {
     const games = await Game.find(query).sort({ createdAt: -1 });
     
     // 통계 계산
-    const playerStats = calculatePlayerStats(games);
-    const teamStats = calculateTeamStats(games);
+    let playerStats, teamStats, sortedPlayerStatsByWinrate, sortedTeamStatsByWinrate, sortedPlayerStatsByWins;
     
-    // 정렬된 통계
-    const sortedPlayerStatsByWinrate = getSortedPlayerStats(playerStats);
-    const sortedTeamStatsByWinrate = getSortedTeamStats(teamStats);
-    const sortedPlayerStatsByWins = getSortedPlayerStatsByWins(playerStats);
+    try {
+      playerStats = calculatePlayerStats(games);
+      teamStats = calculateTeamStats(games);
+      
+      // 정렬된 통계
+      sortedPlayerStatsByWinrate = getSortedPlayerStats(playerStats);
+      sortedTeamStatsByWinrate = getSortedTeamStats(teamStats);
+      sortedPlayerStatsByWins = getSortedPlayerStatsByWins(playerStats);
+    } catch (statsError) {
+      console.error('통계 계산 오류:', statsError);
+      throw new Error(`통계 계산 중 오류 발생: ${statsError instanceof Error ? statsError.message : String(statsError)}`);
+    }
     
     // 포맷팅된 통계 데이터 (동위 처리 포함)
-    const formattedPlayerWinrates = sortedPlayerStatsByWinrate.reduce((acc, [player, [wins, total]], index) => {
+    let formattedPlayerWinrates, formattedTeamWinrates, formattedPlayerWins;
+    
+    try {
+      formattedPlayerWinrates = sortedPlayerStatsByWinrate.reduce((acc, [player, [wins, total]], index) => {
       let rank = index + 1;
       
       // 동위 처리: 이전 항목과 비교하여 같은 값이면 같은 순위 부여
@@ -93,10 +103,17 @@ export async function GET(request: Request) {
       return acc;
     }, [] as Array<{ rank: number; player: string; winrate: number; wins: number; total: number }>);
     
-    const formattedTeamWinrates = sortedTeamStatsByWinrate.reduce((acc, [teamKey, [wins, total]], index) => {
+    formattedTeamWinrates = sortedTeamStatsByWinrate.reduce((acc, [teamKey, [wins, total]], index) => {
       // 팀 키를 플레이어 배열로 변환하여 표시 이름 가져오기
-      const teamPlayers = teamKey.split('');
-      const displayName = getTeamName(teamPlayers);
+      const teamPlayers = teamKey.split('').filter(p => p.trim() !== '');
+      let displayName: string;
+      if (teamPlayers.length !== 2) {
+        console.error(`잘못된 팀 키 형식: ${teamKey}, 플레이어: ${teamPlayers}`);
+        // 잘못된 형식이면 팀 키를 그대로 사용
+        displayName = teamKey;
+      } else {
+        displayName = getTeamName(teamPlayers);
+      }
       
       // 동위 처리: 이전 항목과 비교하여 같은 값이면 같은 순위 부여
       let rank = index + 1;
@@ -126,12 +143,16 @@ export async function GET(request: Request) {
       return acc;
     }, [] as Array<{ rank: number; team: string; winrate: number; wins: number; total: number }>);
     
-    const formattedPlayerWins = sortedPlayerStatsByWins.map(([player, [wins, total]], index) => ({
-      rank: index + 1,
-      player,
-      wins,
-      winrate: calculateWinrate(wins, total)
-    }));
+      formattedPlayerWins = sortedPlayerStatsByWins.map(([player, [wins, total]], index) => ({
+        rank: index + 1,
+        player,
+        wins,
+        winrate: calculateWinrate(wins, total)
+      }));
+    } catch (formatError) {
+      console.error('통계 포맷팅 오류:', formatError);
+      throw new Error(`통계 포맷팅 중 오류 발생: ${formatError instanceof Error ? formatError.message : String(formatError)}`);
+    }
     
     return NextResponse.json({
       success: true,
@@ -145,7 +166,10 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error('통계 데이터 조회 오류:', error);
     return NextResponse.json(
-      { success: false, error: '통계 데이터를 조회하는 중 오류가 발생했습니다.' },
+      { 
+        success: false, 
+        error: '통계 데이터를 조회하는 중 오류가 발생했습니다.'
+      },
       { status: 500 }
     );
   }
