@@ -1,4 +1,5 @@
 import { IGame } from '../models/Game';
+import { IPenalty } from '../models/Penalty';
 import { getTeamKey } from './teamOrder';
 
 // 플레이어 타입
@@ -16,8 +17,8 @@ export const calculateWinrate = (wins: number, total: number): number => {
   return total > 0 ? (wins / total) * 100 : 0;
 };
 
-// 플레이어 통계 계산 함수
-export const calculatePlayerStats = (games: IGame[]): PlayerStats => {
+// 플레이어 통계 계산 함수 (패널티 포함)
+export const calculatePlayerStats = (games: IGame[], penalties: IPenalty[] = []): PlayerStats => {
   const playerStats: PlayerStats = {};
   const validPlayers = ['잡', '큐', '지', '머', '웅'];
   
@@ -42,6 +43,13 @@ export const calculatePlayerStats = (games: IGame[]): PlayerStats => {
         playerStats[player][1] += 1; // 총 경기 수만 증가
       }
     });
+  });
+  
+  // 패널티를 개인 승률에만 반영 (총 경기 수만 증가, 승리 수는 증가하지 않음)
+  penalties.forEach(penalty => {
+    if (playerStats[penalty.player]) {
+      playerStats[penalty.player][1] += 1; // 총 경기 수만 증가 (패널티 패배)
+    }
   });
   
   return playerStats;

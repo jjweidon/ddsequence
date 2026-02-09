@@ -6,6 +6,7 @@ import PlayerSelect from '@/components/PlayerSelect';
 import StatsList from '@/components/StatsList';
 import DateRangeSelector from '@/components/DateRangeSelector';
 import GameDashboardBannerCarousel from '@/components/GameDashboardBannerCarousel';
+import PenaltyModal from '@/components/PenaltyModal';
 import { useStatsStore } from '@/lib/statsStore';
 import { IGame } from '@/models/Game';
 
@@ -22,6 +23,10 @@ export default function Home() {
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [isCopied, setIsCopied] = useState<boolean>(false);
+  
+  // 패널티 모달 상태
+  const [isPenaltyModalOpen, setIsPenaltyModalOpen] = useState<boolean>(false);
+  const [penaltyLoading, setPenaltyLoading] = useState<boolean>(false);
   
   // 기간별 통계 관련 상태
   const [dateRangeMode, setDateRangeMode] = useState<'all' | 'custom'>('all');
@@ -150,6 +155,48 @@ export default function Home() {
       }, 3000);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // 패널티 기록 제출
+  const handlePenaltySubmit = async (player: string, reason?: string) => {
+    setPenaltyLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch('/api/penalties', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          player,
+          reason,
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || '패널티 데이터 저장 중 오류가 발생했습니다.');
+      }
+
+      setSuccess('패널티가 성공적으로 기록되었습니다.');
+      setIsPenaltyModalOpen(false);
+      fetchAllStats(); // 통계 다시 가져오기
+      
+      // 3초 후 성공 메시지 자동 제거
+      setTimeout(() => {
+        setSuccess(null);
+      }, 3000);
+    } catch (error: any) {
+      setError(error.message || '패널티 데이터 저장 중 오류가 발생했습니다.');
+      // 3초 후 에러 메시지 자동 제거
+      setTimeout(() => {
+        setError(null);
+      }, 3000);
+    } finally {
+      setPenaltyLoading(false);
     }
   };
 
@@ -291,6 +338,17 @@ export default function Home() {
       </div>
     )}
     
+    {/* 성공 팝업 */}
+    {success && (
+      <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 animate-fadeIn w-[calc(100%-2rem)] max-w-2xl">
+        <div className="bg-emerald-50 dark:bg-emerald-900/50 border-2 border-emerald-200 dark:border-emerald-800 
+                      text-emerald-700 dark:text-emerald-300 px-6 py-3 shadow-lg w-full flex items-center justify-center gap-2">
+          <span className="text-xl flex-shrink-0">✅</span>
+          <span className="text-sm font-medium text-center">{success}</span>
+        </div>
+      </div>
+    )}
+    
     <main className="min-h-screen bg-slate-50 dark:bg-slate-900 py-8 px-4 sm:px-6">
       <div className="max-w-2xl mx-auto">
         {/* 헤더 */}
@@ -338,14 +396,18 @@ export default function Home() {
             {/* 버튼 영역 */}
             <div className="grid grid-cols-2 gap-4">
               <button
-                className="bg-white dark:bg-slate-700 border-2 border-slate-300 dark:border-slate-600 
-                         text-slate-700 dark:text-slate-200 font-bold px-6 py-3 rounded-xl
-                         transition-all duration-200 transform hover:bg-slate-50 dark:hover:bg-slate-600 
+                onClick={() => setIsPenaltyModalOpen(true)}
+                className="bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 
+                         text-slate-700 dark:text-slate-200 font-semibold px-6 py-3 rounded-xl
+                         transition-all duration-200 transform hover:bg-slate-200 dark:hover:bg-slate-600 
                          hover:scale-[1.02] hover:shadow-md active:scale-95
-                         focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
-                onClick={handleReset}
+                         focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2
+                         flex items-center justify-center gap-2"
               >
-                초기화
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                패널티 기록
               </button>
               <button
                 className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 
@@ -369,15 +431,6 @@ export default function Home() {
                 ) : '등록하기'}
               </button>
             </div>
-            
-            {/* 성공 메시지 */}
-            {success && (
-              <div className="bg-emerald-50 dark:bg-emerald-900/20 border-2 border-emerald-200 dark:border-emerald-800 
-                            text-emerald-700 dark:text-emerald-300 px-4 py-3 rounded-sm animate-fadeIn flex items-start gap-3">
-                <span className="text-xl flex-shrink-0">✅</span>
-                <span className="text-sm font-medium">{success}</span>
-              </div>
-            )}
           </div>
         </div>
 
@@ -514,6 +567,14 @@ export default function Home() {
       </div>
       
     </main>
+    
+    {/* 패널티 모달 */}
+    <PenaltyModal
+      isOpen={isPenaltyModalOpen}
+      onClose={() => setIsPenaltyModalOpen(false)}
+      onSubmit={handlePenaltySubmit}
+      loading={penaltyLoading}
+    />
     
     {/* 명예의 전당 배너 */}
     <div className="w-full bg-gradient-to-r from-amber-500/10 to-orange-600/10 

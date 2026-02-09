@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Game from '@/models/Game';
+import Penalty from '@/models/Penalty';
 import { 
   calculatePlayerStats, 
   calculateTeamStats, 
@@ -53,11 +54,14 @@ export async function GET(request: Request) {
     
     const games = await Game.find(query).sort({ createdAt: -1 });
     
+    // 패널티 데이터 가져오기 (같은 기간 필터 적용)
+    const penalties = await Penalty.find(query).sort({ createdAt: -1 });
+    
     // 통계 계산
     let playerStats, teamStats, sortedPlayerStatsByWinrate, sortedTeamStatsByWinrate, sortedPlayerStatsByWins;
     
     try {
-      playerStats = calculatePlayerStats(games);
+      playerStats = calculatePlayerStats(games, penalties);
       teamStats = calculateTeamStats(games);
       
       // 정렬된 통계
