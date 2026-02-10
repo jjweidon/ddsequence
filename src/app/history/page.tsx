@@ -58,28 +58,28 @@ export default function HistoryPage() {
     }
   };
 
-  // 30일 지났는지 확인하는 함수
-  const isOlderThan30Days = (dateString: string | Date) => {
+  // 7일 지났는지 확인하는 함수
+  const isOlderThan7Days = (dateString: string | Date) => {
     const gameDate = new Date(dateString);
     const now = new Date();
     const daysDiff = Math.floor((now.getTime() - gameDate.getTime()) / (1000 * 60 * 60 * 24));
-    return daysDiff >= 30;
+    return daysDiff >= 7;
   };
 
   // 선택된 게임 삭제 함수
   const handleDeleteSelected = async () => {
     if (selectedGames.length === 0) return;
     
-    // 30일 지난 게임이 있는지 확인
+    // 7일 지난 게임이 있는지 확인
     const oldGames = games.filter(game => 
-      game._id && selectedGames.includes(game._id) && isOlderThan30Days(game.createdAt)
+      game._id && selectedGames.includes(game._id) && isOlderThan7Days(game.createdAt)
     );
     
     if (oldGames.length > 0) {
-      alert('30일이 지난 게임 기록은 삭제할 수 없습니다.');
-      // 30일 지나지 않은 게임만 선택 상태로 유지
+      alert('7일이 지난 게임 기록은 삭제할 수 없습니다.');
+      // 7일 지나지 않은 게임만 선택 상태로 유지
       const validGames = games
-        .filter(game => game._id && selectedGames.includes(game._id) && !isOlderThan30Days(game.createdAt))
+        .filter(game => game._id && selectedGames.includes(game._id) && !isOlderThan7Days(game.createdAt))
         .map(game => game._id || '')
         .filter(id => id);
       setSelectedGames(validGames);

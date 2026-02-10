@@ -55,8 +55,8 @@ const GameHistoryList: React.FC<GameHistoryListProps> = ({
     const game = games.find(g => g._id === gameId);
     if (!game) return;
     
-    // 30일 지난 기록은 선택할 수 없음
-    if (isOlderThan30Days(game.createdAt)) {
+    // 7일 지난 기록은 선택할 수 없음
+    if (isOlderThan7Days(game.createdAt)) {
       return;
     }
     
@@ -75,9 +75,9 @@ const GameHistoryList: React.FC<GameHistoryListProps> = ({
       // 모두 선택된 상태면 모두 해제
       setSelectedGames([]);
     } else {
-      // 일부만 선택되었거나 아무것도 선택되지 않았으면 모두 선택 (30일 지난 기록 제외)
+      // 일부만 선택되었거나 아무것도 선택되지 않았으면 모두 선택 (7일 지난 기록 제외)
       const selectableGames = games
-        .filter(game => !isOlderThan30Days(game.createdAt))
+        .filter(game => !isOlderThan7Days(game.createdAt))
         .map(game => game._id || '')
         .filter(id => id);
       setSelectedGames(selectableGames);
@@ -99,12 +99,12 @@ const GameHistoryList: React.FC<GameHistoryListProps> = ({
     }
   });
 
-  // 30일 지났는지 확인하는 함수
-  const isOlderThan30Days = (dateString: string | Date) => {
+  // 7일 지났는지 확인하는 함수
+  const isOlderThan7Days = (dateString: string | Date) => {
     const gameDate = new Date(dateString);
     const now = new Date();
     const daysDiff = Math.floor((now.getTime() - gameDate.getTime()) / (1000 * 60 * 60 * 24));
-    return daysDiff >= 30;
+    return daysDiff >= 7;
   };
 
   // 날짜 포맷팅 함수 (yyyy-mm-dd HH:mm 형식)
@@ -197,14 +197,14 @@ const GameHistoryList: React.FC<GameHistoryListProps> = ({
                         type="checkbox"
                         className={`h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 
                                  focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 ${
-                          isOlderThan30Days(game.createdAt) 
+                          isOlderThan7Days(game.createdAt) 
                             ? 'cursor-not-allowed opacity-50' 
                             : 'cursor-pointer'
                         }`}
                         checked={selectedGames.includes(game._id || '')}
                         onChange={() => game._id && toggleGameSelection(game._id)}
-                        disabled={isOlderThan30Days(game.createdAt)}
-                        title={isOlderThan30Days(game.createdAt) ? '30일이 지난 기록은 삭제할 수 없습니다' : ''}
+                        disabled={isOlderThan7Days(game.createdAt)}
+                        title={isOlderThan7Days(game.createdAt) ? '7일이 지난 기록은 삭제할 수 없습니다' : ''}
                       />
                     </td>
                   )}
@@ -265,14 +265,14 @@ const GameHistoryList: React.FC<GameHistoryListProps> = ({
                       type="checkbox"
                       className={`h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 
                                focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 ${
-                        isOlderThan30Days(game.createdAt) 
+                        isOlderThan7Days(game.createdAt) 
                           ? 'cursor-not-allowed opacity-50' 
                           : 'cursor-pointer'
                       }`}
                       checked={selectedGames.includes(game._id || '')}
                       onChange={() => game._id && toggleGameSelection(game._id)}
-                      disabled={isOlderThan30Days(game.createdAt)}
-                      title={isOlderThan30Days(game.createdAt) ? '30일이 지난 기록은 삭제할 수 없습니다' : ''}
+                      disabled={isOlderThan7Days(game.createdAt)}
+                      title={isOlderThan7Days(game.createdAt) ? '7일이 지난 기록은 삭제할 수 없습니다' : ''}
                     />
                   )}
                   <span className="inline-flex items-center justify-center min-w-[32px] h-7 px-2 rounded-sm 

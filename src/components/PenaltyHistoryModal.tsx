@@ -52,9 +52,33 @@ const PenaltyHistoryModal: React.FC<PenaltyHistoryModalProps> = ({
     }
   };
 
+  // 7일 지났는지 확인하는 함수
+  const isOlderThan7Days = (dateString: string | Date) => {
+    const penaltyDate = new Date(dateString);
+    const now = new Date();
+    const daysDiff = Math.floor((now.getTime() - penaltyDate.getTime()) / (1000 * 60 * 60 * 24));
+    return daysDiff >= 7;
+  };
+
   // 선택된 패널티 삭제 함수
   const handleDeleteSelected = async () => {
     if (selectedPenalties.length === 0) return;
+    
+    // 7일 지난 패널티가 있는지 확인
+    const oldPenalties = penalties.filter(penalty => 
+      penalty._id && selectedPenalties.includes(penalty._id) && isOlderThan7Days(penalty.createdAt)
+    );
+    
+    if (oldPenalties.length > 0) {
+      alert('7일이 지난 패널티 기록은 삭제할 수 없습니다.');
+      // 7일 지나지 않은 패널티만 선택 상태로 유지
+      const validPenalties = penalties
+        .filter(penalty => penalty._id && selectedPenalties.includes(penalty._id) && !isOlderThan7Days(penalty.createdAt))
+        .map(penalty => penalty._id || '')
+        .filter(id => id);
+      setSelectedPenalties(validPenalties);
+      return;
+    }
     
     if (!confirm(`선택한 ${selectedPenalties.length}개의 패널티 기록을 삭제하시겠습니까?`)) {
       return;

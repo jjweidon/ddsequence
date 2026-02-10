@@ -31,14 +31,14 @@ export async function DELETE(
       );
     }
     
-    // 30일 지난 기록인지 확인
+    // 7일 지난 기록인지 확인
     const gameDate = new Date(game.createdAt);
     const now = new Date();
     const daysDiff = Math.floor((now.getTime() - gameDate.getTime()) / (1000 * 60 * 60 * 24));
     
-    if (daysDiff >= 30) {
+    if (daysDiff >= 7) {
       return NextResponse.json(
-        { error: '30일이 지난 게임 기록은 삭제할 수 없습니다.' },
+        { error: '7일이 지난 게임 기록은 삭제할 수 없습니다.' },
         { status: 403 }
       );
     }
