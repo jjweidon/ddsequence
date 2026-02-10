@@ -390,74 +390,81 @@ export default function HistoryPage() {
               </button>
             </div>
             
-            {/* 우측: 액션 버튼들 */}
-            <div className="flex items-center gap-3">
+            {/* 우측: 홈으로/편집 버튼(좌측 정렬) + 패널티 히스토리 버튼(우측) */}
+            <div className="flex items-center justify-between gap-3">
+              {/* 좌측: 홈으로, 편집 버튼 */}
+              <div className="flex items-center gap-3">
+                <Link 
+                  href="/" 
+                  className="flex items-center gap-2 px-4 py-2.5 text-slate-700 dark:text-slate-300 font-semibold text-sm
+                           hover:bg-slate-100 dark:hover:bg-slate-800 rounded-sm
+                           transition-all duration-200
+                           focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  <span>홈으로</span>
+                </Link>
+                
+                {isEditMode && (
+                  <button
+                    onClick={handleDeleteSelected}
+                    disabled={selectedGames.length === 0 || deleteLoading}
+                    className={`flex items-center gap-2 px-4 py-2.5 font-bold text-sm
+                             transition-all duration-200 shadow-sm hover:shadow-md
+                             focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
+                      selectedGames.length === 0 || deleteLoading
+                        ? 'bg-slate-300 dark:bg-slate-700 text-slate-500 dark:text-slate-500 cursor-not-allowed'
+                        : 'bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 text-white shadow-rose-500/30 hover:scale-[1.02] focus-visible:ring-rose-400'
+                    }`}
+                  >
+                    {deleteLoading ? (
+                      <>
+                        <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        삭제 중...
+                      </>
+                    ) : (
+                      <>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                        삭제 {selectedGames.length > 0 && `(${selectedGames.length})`}
+                      </>
+                    )}
+                  </button>
+                )}
+                
+                <button 
+                  onClick={toggleEditMode}
+                  className={`px-4 py-2.5 font-semibold text-sm rounded-sm transition-all duration-200
+                           focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 ${
+                    isEditMode 
+                      ? 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800' 
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  }`}
+                >
+                  {isEditMode ? '완료' : '편집'}
+                </button>
+              </div>
+              
+              {/* 우측: 패널티 히스토리 버튼 */}
               <button
                 onClick={() => setIsPenaltyModalOpen(true)}
-                className="flex items-center gap-2 px-4 py-2.5 text-rose-600 dark:text-rose-400 font-semibold text-sm
-                         hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-sm
+                className="flex items-center gap-1.5 px-3 py-1.5 text-orange-600 dark:text-orange-400 font-medium text-xs
+                         bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800/50 rounded-md
+                         hover:bg-orange-100 dark:hover:bg-orange-900/30
                          transition-all duration-200
-                         focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:ring-offset-2"
+                         focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2
+                         whitespace-nowrap"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                 </svg>
                 <span>패널티 히스토리</span>
-              </button>
-              <Link 
-                href="/" 
-                className="flex items-center gap-2 px-4 py-2.5 text-slate-700 dark:text-slate-300 font-semibold text-sm
-                         hover:bg-slate-100 dark:hover:bg-slate-800 rounded-sm
-                         transition-all duration-200
-                         focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-                <span>홈으로</span>
-              </Link>
-              
-              {isEditMode && (
-                <button
-                  onClick={handleDeleteSelected}
-                  disabled={selectedGames.length === 0 || deleteLoading}
-                  className={`flex items-center gap-2 px-4 py-2.5 font-bold text-sm
-                           transition-all duration-200 shadow-sm hover:shadow-md
-                           focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
-                    selectedGames.length === 0 || deleteLoading
-                      ? 'bg-slate-300 dark:bg-slate-700 text-slate-500 dark:text-slate-500 cursor-not-allowed'
-                      : 'bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 text-white shadow-rose-500/30 hover:scale-[1.02] focus-visible:ring-rose-400'
-                  }`}
-                >
-                  {deleteLoading ? (
-                    <>
-                      <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      삭제 중...
-                    </>
-                  ) : (
-                    <>
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                      </svg>
-                      삭제 {selectedGames.length > 0 && `(${selectedGames.length})`}
-                    </>
-                  )}
-                </button>
-              )}
-              
-              <button 
-                onClick={toggleEditMode}
-                className={`px-4 py-2.5 font-semibold text-sm rounded-sm transition-all duration-200
-                         focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 ${
-                  isEditMode 
-                    ? 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800' 
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-                }`}
-              >
-                {isEditMode ? '완료' : '편집'}
               </button>
             </div>
           </div>

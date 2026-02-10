@@ -92,7 +92,7 @@ const PenaltyModal: React.FC<PenaltyModalProps> = ({
                   type="button"
                   onClick={() => setSelectedPlayer(player)}
                   disabled={loading}
-                  className={`px-4 py-3 rounded-lg font-bold text-sm transition-all duration-200
+                  className={`px-2 py-3 rounded-lg font-bold text-xs transition-all duration-200
                     ${
                       selectedPlayer === player
                         ? 'bg-gradient-to-r from-rose-500 to-red-600 text-white shadow-lg shadow-rose-500/30 scale-105'

@@ -397,17 +397,17 @@ export default function Home() {
             <div className="grid grid-cols-2 gap-4">
               <button
                 onClick={() => setIsPenaltyModalOpen(true)}
-                className="bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 
-                         text-slate-700 dark:text-slate-200 font-semibold px-6 py-3 rounded-xl
-                         transition-all duration-200 transform hover:bg-slate-200 dark:hover:bg-slate-600 
+                className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800/50 
+                         text-orange-700 dark:text-orange-300 font-semibold px-4 sm:px-6 py-3 rounded-xl
+                         transition-all duration-200 transform hover:bg-orange-100 dark:hover:bg-orange-900/30 
                          hover:scale-[1.02] hover:shadow-md active:scale-95
-                         focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2
-                         flex items-center justify-center gap-2"
+                         focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2
+                         flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap text-xs sm:text-sm"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                 </svg>
-                패널티 기록
+                <span>패널티 기록</span>
               </button>
               <button
                 className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 
