@@ -48,18 +48,18 @@ const PenaltyModal: React.FC<PenaltyModalProps> = ({
       onClick={handleClose}
     >
       <div
-        className="bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-md w-full mx-4"
+        className="bg-surface rounded-lg shadow-xl max-w-md w-full mx-4"
         onClick={(e) => e.stopPropagation()}
       >
         {/* 헤더 */}
-        <div className="border-b border-slate-200 dark:border-slate-700 px-6 py-4 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">
+        <div className="border-b border-border px-6 py-4 flex items-center justify-between">
+          <h2 className="text-xl font-semibold text-foreground">
             패널티 기록 추가
           </h2>
           <button
             onClick={handleClose}
             disabled={loading}
-            className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors disabled:opacity-50"
+            className="text-muted hover:text-foreground transition-colors disabled:opacity-50"
             aria-label="닫기"
           >
             <svg
@@ -82,8 +82,8 @@ const PenaltyModal: React.FC<PenaltyModalProps> = ({
         <div className="p-6 space-y-6">
           {/* 플레이어 선택 */}
           <div>
-            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">
-              플레이어 선택 <span className="text-rose-500">*</span>
+            <label className="block text-sm font-semibold text-foreground mb-3">
+              플레이어 선택 <span className="text-muted">*</span>
             </label>
             <div className="grid grid-cols-5 gap-2">
               {validPlayers.map((player) => (
@@ -95,11 +95,11 @@ const PenaltyModal: React.FC<PenaltyModalProps> = ({
                   className={`px-2 py-3 rounded-lg font-bold text-xs transition-all duration-200
                     ${
                       selectedPlayer === player
-                        ? 'bg-gradient-to-r from-rose-500 to-red-600 text-white shadow-lg shadow-rose-500/30 scale-105'
-                        : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600'
+                        ? 'bg-lose text-white'
+                        : 'bg-surface-hover text-foreground hover:bg-border'
                     }
                     disabled:opacity-50 disabled:cursor-not-allowed
-                    focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:ring-offset-2`}
+                    focus:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2`}
                 >
                   {getPlayerDisplayName(player)}
                 </button>
@@ -109,7 +109,7 @@ const PenaltyModal: React.FC<PenaltyModalProps> = ({
 
           {/* 사유 입력 */}
           <div>
-            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">
+            <label className="block text-sm font-semibold text-foreground mb-3">
               사유 (선택)
             </label>
             <textarea
@@ -119,27 +119,23 @@ const PenaltyModal: React.FC<PenaltyModalProps> = ({
               placeholder="패널티 사유를 입력하세요 (선택사항)"
               maxLength={200}
               rows={3}
-              className="w-full px-4 py-3 border-2 border-slate-300 dark:border-slate-600 
-                       rounded-lg bg-white dark:bg-slate-700 
-                       text-slate-800 dark:text-slate-200
-                       placeholder-slate-400 dark:placeholder-slate-500
-                       focus:outline-none focus:ring-2 focus:ring-rose-400 focus:border-transparent
+              className="w-full px-4 py-3 border border-border rounded-lg bg-surface text-foreground
+                       placeholder-muted focus:outline-none focus:ring-2 focus:ring-focus focus:border-transparent
                        disabled:opacity-50 disabled:cursor-not-allowed
                        resize-none"
             />
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 text-right">
+            <p className="text-xs text-muted mt-1 text-right">
               {reason.length}/200
             </p>
           </div>
         </div>
 
         {/* 푸터 */}
-        <div className="border-t border-slate-200 dark:border-slate-700 px-6 py-4 flex justify-end gap-3">
+        <div className="border-t border-border px-6 py-4 flex justify-end gap-3">
           <button
             onClick={handleClose}
             disabled={loading}
-            className="px-4 py-2 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 
-                     text-slate-700 dark:text-slate-200 rounded-lg transition-colors font-medium
+            className="px-4 py-2 bg-surface-hover hover:bg-border text-foreground rounded-lg transition-colors font-medium
                      disabled:opacity-50 disabled:cursor-not-allowed"
           >
             취소
@@ -147,10 +143,9 @@ const PenaltyModal: React.FC<PenaltyModalProps> = ({
           <button
             onClick={handleSubmit}
             disabled={loading || !selectedPlayer}
-            className="px-4 py-2 bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 
-                     text-white rounded-lg transition-all duration-200 font-medium shadow-lg shadow-rose-500/30
-                     disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none
-                     focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:ring-offset-2"
+            className="px-4 py-2 bg-accent-gradient hover:brightness-110 text-white rounded-lg font-medium
+                     transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed
+                     focus:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2"
           >
             {loading ? (
               <span className="flex items-center gap-2">

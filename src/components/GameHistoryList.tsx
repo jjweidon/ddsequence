@@ -132,71 +132,69 @@ const GameHistoryList: React.FC<GameHistoryListProps> = ({
   return (
     <div className="w-full">
       {/* 데스크탑 테이블 뷰 - 모바일에서는 숨김 */}
-      <div className="hidden sm:block bg-white dark:bg-slate-800 rounded-sm shadow-md border border-slate-200 dark:border-slate-700 overflow-hidden">
+      <div className="hidden sm:block bg-surface rounded-lg border border-border overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
+          <table className="min-w-full divide-y divide-border">
             <thead>
-              <tr className="bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-900 dark:to-gray-900">
+              <tr className="bg-surface-hover">
                 {isEditMode && (
                   <th className="px-4 py-4 w-12">
                     <input
                       type="checkbox"
-                      className="h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 
-                               focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 cursor-pointer"
+                      className="h-4 w-4 rounded border-border-strong text-accent focus:ring-2 focus:ring-focus cursor-pointer"
                       checked={games.length > 0 && selectedGames.length === games.length}
                       onChange={toggleSelectAll}
                     />
                   </th>
                 )}
                 <th 
-                  className="px-4 py-4 text-left text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider 
-                           cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-200 select-none"
+                  className="px-4 py-4 text-left text-xs font-semibold text-muted uppercase tracking-wider 
+                           cursor-pointer hover:bg-surface-hover transition-colors duration-200 select-none"
                   onClick={() => toggleSort('index')}
                 >
                   <div className="flex items-center gap-2">
                     No.
                     {localSortField === 'index' && (
-                      <span className="text-blue-600 dark:text-blue-400 font-bold">
+                      <span className="text-foreground font-semibold">
                         {localSortDirection === 'asc' ? '↑' : '↓'}
                       </span>
                     )}
                   </div>
                 </th>
                 <th 
-                  className="px-4 py-4 text-left text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider 
-                           cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-200 select-none"
+                  className="px-4 py-4 text-left text-xs font-semibold text-muted uppercase tracking-wider 
+                           cursor-pointer hover:bg-surface-hover transition-colors duration-200 select-none"
                   onClick={() => toggleSort('createdAt')}
                 >
                   <div className="flex items-center gap-2">
                     날짜/시간
                     {localSortField === 'createdAt' && (
-                      <span className="text-blue-600 dark:text-blue-400 font-bold">
+                      <span className="text-foreground font-semibold">
                         {localSortDirection === 'asc' ? '↑' : '↓'}
                       </span>
                     )}
                   </div>
                 </th>
-                <th className="px-4 py-4 text-left text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                <th className="px-4 py-4 text-left text-xs font-semibold text-muted uppercase tracking-wider">
                   승리팀
                 </th>
-                <th className="px-4 py-4 text-left text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                <th className="px-4 py-4 text-left text-xs font-semibold text-muted uppercase tracking-wider">
                   패배팀
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+            <tbody className="divide-y divide-border">
               {sortedGames.map((game, index) => (
                 <tr 
                   key={game._id || index} 
-                  className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors duration-150 animate-fadeIn"
+                  className="hover:bg-surface-hover transition-colors duration-150 animate-fadeIn"
                   style={{ animationDelay: `${index * 20}ms` }}
                 >
                   {isEditMode && (
                     <td className="px-4 py-4 whitespace-nowrap w-12">
                       <input
                         type="checkbox"
-                        className={`h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 
-                                 focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 ${
+                        className={`h-4 w-4 rounded border-border-strong text-accent focus:ring-2 focus:ring-focus ${
                           isOlderThan7Days(game.createdAt) 
                             ? 'cursor-not-allowed opacity-50' 
                             : 'cursor-pointer'
@@ -209,21 +207,20 @@ const GameHistoryList: React.FC<GameHistoryListProps> = ({
                     </td>
                   )}
                   <td className="px-4 py-4 whitespace-nowrap">
-                    <span className="inline-flex items-center justify-center w-8 h-8 rounded-sm bg-slate-100 dark:bg-slate-700 
-                                   text-slate-700 dark:text-slate-300 text-sm font-bold">
+                    <span className="inline-flex items-center justify-center w-8 h-8 rounded-md bg-surface-hover text-foreground text-sm font-semibold">
                       {localSortDirection === 'asc' ? index + 1 : games.length - index}
                     </span>
                   </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-slate-600 dark:text-slate-400 font-medium">
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-muted font-medium">
                     {formatDate(game.createdAt)}
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-2">
                       {getTeamDisplayOrder(game.winningTeam).map(player => (
-                        <span key={player} className="inline-flex items-center justify-center h-9 w-9 rounded-xl 
-                                                    bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900/40 dark:to-green-900/40 
-                                                    text-emerald-800 dark:text-emerald-300 font-bold text-sm 
-                                                    shadow-sm border border-emerald-200 dark:border-emerald-800">
+                        <span key={player} className="inline-flex items-center justify-center h-9 w-9 rounded-lg 
+                                                    bg-emerald-50 dark:bg-emerald-900/30 
+                                                    text-emerald-800 dark:text-emerald-200 font-semibold text-sm 
+                                                    border border-emerald-200 dark:border-emerald-800">
                           {player}
                         </span>
                       ))}
@@ -232,10 +229,10 @@ const GameHistoryList: React.FC<GameHistoryListProps> = ({
                   <td className="px-4 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-2">
                       {getTeamDisplayOrder(game.losingTeam).map(player => (
-                        <span key={player} className="inline-flex items-center justify-center h-9 w-9 rounded-xl 
-                                                    bg-gradient-to-br from-rose-100 to-red-100 dark:from-rose-900/40 dark:to-red-900/40 
-                                                    text-rose-800 dark:text-rose-300 font-bold text-sm 
-                                                    shadow-sm border border-rose-200 dark:border-rose-800">
+                        <span key={player} className="inline-flex items-center justify-center h-9 w-9 rounded-lg 
+                                                    bg-rose-50 dark:bg-rose-900/30 
+                                                    text-rose-800 dark:text-rose-200 font-semibold text-sm 
+                                                    border border-rose-200 dark:border-rose-800">
                           {player}
                         </span>
                       ))}
@@ -254,17 +251,15 @@ const GameHistoryList: React.FC<GameHistoryListProps> = ({
           {sortedGames.map((game, index) => (
             <div 
               key={game._id || index} 
-              className="bg-white dark:bg-slate-800 rounded-sm shadow-md border border-slate-200 dark:border-slate-700 
-                       p-4 transition-all duration-200 hover:shadow-lg animate-fadeIn"
+              className="bg-surface rounded-lg border border-border p-4 transition-colors duration-200 hover:border-border-strong animate-fadeIn"
               style={{ animationDelay: `${index * 30}ms` }}
             >
               <div className="flex justify-between items-center mb-3">
                 <div className="flex items-center gap-2">
                   {isEditMode && (
-                    <input
-                      type="checkbox"
-                      className={`h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 
-                               focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 ${
+                      <input
+                        type="checkbox"
+                        className={`h-4 w-4 rounded border-border-strong text-accent focus:ring-2 focus:ring-focus ${
                         isOlderThan7Days(game.createdAt) 
                           ? 'cursor-not-allowed opacity-50' 
                           : 'cursor-pointer'
@@ -275,46 +270,45 @@ const GameHistoryList: React.FC<GameHistoryListProps> = ({
                       title={isOlderThan7Days(game.createdAt) ? '7일이 지난 기록은 삭제할 수 없습니다' : ''}
                     />
                   )}
-                  <span className="inline-flex items-center justify-center min-w-[32px] h-7 px-2 rounded-sm 
-                                 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 
-                                 text-xs font-bold">
+                  <span className="inline-flex items-center justify-center min-w-[32px] h-7 px-2 rounded-md 
+                                 bg-surface-hover text-foreground text-xs font-semibold">
                     #{localSortDirection === 'asc' ? index + 1 : games.length - index}
                   </span>
                 </div>
-                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                <span className="text-xs text-muted font-medium">
                   {formatMobileDate(game.createdAt)}
                 </span>
               </div>
               
               <div className="flex items-stretch gap-3">
-                  <div className="flex-1 bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 
-                                rounded-sm p-3 border border-emerald-200 dark:border-emerald-800">
+                  <div className="flex-1 bg-emerald-50 dark:bg-emerald-900/20 
+                                rounded-lg p-3 border border-emerald-200 dark:border-emerald-800">
                     <div className="flex items-center gap-1.5 mb-2">
-                      <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">승리</span>
+                      <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">승리</span>
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                       {getTeamDisplayOrder(game.winningTeam).map(player => (
-                        <span key={player} className="inline-flex items-center justify-center h-8 w-8 rounded-xl 
-                                                    bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-800 dark:to-green-800 
-                                                    text-emerald-800 dark:text-emerald-200 font-bold text-sm 
-                                                    shadow-sm border border-emerald-300 dark:border-emerald-700">
+                        <span key={player} className="inline-flex items-center justify-center h-8 w-8 rounded-lg 
+                                                    bg-emerald-100 dark:bg-emerald-800 
+                                                    text-emerald-800 dark:text-emerald-200 font-semibold text-sm 
+                                                    border border-emerald-300 dark:border-emerald-700">
                           {player}
                         </span>
                       ))}
                     </div>
                   </div>
                   
-                  <div className="flex-1 bg-gradient-to-br from-rose-50 to-red-50 dark:from-rose-900/20 dark:to-red-900/20 
-                                rounded-sm p-3 border border-rose-200 dark:border-rose-800">
+                  <div className="flex-1 bg-rose-50 dark:bg-rose-900/20 
+                                rounded-lg p-3 border border-rose-200 dark:border-rose-800">
                     <div className="flex items-center gap-1.5 mb-2">
-                      <span className="text-xs font-bold text-rose-700 dark:text-rose-400">패배</span>
+                      <span className="text-xs font-semibold text-rose-700 dark:text-rose-300">패배</span>
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                       {getTeamDisplayOrder(game.losingTeam).map(player => (
-                        <span key={player} className="inline-flex items-center justify-center h-8 w-8 rounded-xl 
-                                                    bg-gradient-to-br from-rose-100 to-red-100 dark:from-rose-800 dark:to-red-800 
-                                                    text-rose-800 dark:text-rose-200 font-bold text-sm 
-                                                    shadow-sm border border-rose-300 dark:border-rose-700">
+                        <span key={player} className="inline-flex items-center justify-center h-8 w-8 rounded-lg 
+                                                    bg-rose-100 dark:bg-rose-800 
+                                                    text-rose-800 dark:text-rose-200 font-semibold text-sm 
+                                                    border border-rose-300 dark:border-rose-700">
                           {player}
                         </span>
                       ))}
@@ -327,9 +321,9 @@ const GameHistoryList: React.FC<GameHistoryListProps> = ({
       </div>
       
       {games.length === 0 && (
-        <div className="text-center py-12 bg-white dark:bg-slate-800 rounded-sm shadow-md border border-slate-200 dark:border-slate-700">
+        <div className="text-center py-12 bg-surface rounded-lg border border-border">
           <div className="text-5xl mb-4 opacity-40">🎮</div>
-          <p className="text-slate-500 dark:text-slate-400 font-medium">기록된 게임이 없습니다.</p>
+          <p className="text-muted font-medium">기록된 게임이 없습니다.</p>
         </div>
       )}
     </div>

@@ -1,0 +1,82 @@
+/**
+ * 디자인 토큰 - 유지보수 용이
+ * 색상 변경 시 이 파일만 수정하면 전체 앱에 반영됨
+ * 
+ * 컨셉: 라이트 - 에디토리얼 차콜 / 다크 - 블랙 배경 + 형광 시안 포인트
+ */
+
+:root {
+  /* === 배경 === */
+  --token-page: #fafafa;
+  --token-surface: #ffffff;
+  --token-surface-hover: #f0f0f0;
+  
+  /* === 텍스트 - 세련된 차콜 톤 === */
+  --token-foreground: #0a0a0a;
+  --token-muted: #525252;
+  --token-muted-light: #6b6b6b;
+  
+  /* === 테두리 === */
+  --token-border: #e8e8e8;
+  --token-border-strong: #d1d1d1;
+  
+  /* === 포인트/액센트 - 검정에 가까운 차콜 (에디토리얼 미니멀) === */
+  --token-accent: #141414;
+  --token-accent-hover: #262626;
+  --token-accent-muted: #1a1a1a;
+  
+  /* === 시맨틱 === */
+  --token-success: #059669;
+  --token-success-muted: #10b981;
+  --token-danger: #b91c1c;
+  --token-danger-muted: #dc2626;
+  --token-warning: #b45309;
+  
+  /* === 승/패 구분 === */
+  --token-win: #047857;
+  --token-win-bg: #d1fae5;
+  --token-lose: #b91c1c;
+  --token-lose-bg: #fee2e2;
+  
+  /* === 포커스 링 === */
+  --token-focus: #141414;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* === 배경 - 진한 블랙 === */
+    --token-page: #000000;
+    --token-surface: #0a0a0a;
+    --token-surface-hover: #141414;
+    
+    /* === 텍스트 - 세련된 그레이 === */
+    --token-foreground: #fafafa;
+    --token-muted: #a1a1a1;
+    --token-muted-light: #737373;
+    
+    /* === 테두리 - 차콜 === */
+    --token-border: #262626;
+    --token-border-strong: #404040;
+    
+    /* === 포인트/액센트 - 형광 시안 (블랙에서 빛나는, 흰 글자 가독성 확보) === */
+    --token-accent: #06b6d4;
+    --token-accent-hover: #22d3ee;
+    --token-accent-muted: #0891b2;
+    
+    /* === 시맨틱 === */
+    --token-success: #34d399;
+    --token-success-muted: #6ee7b7;
+    --token-danger: #f87171;
+    --token-danger-muted: #fca5a5;
+    --token-warning: #fbbf24;
+    
+    /* === 승/패 - 다크에서도 형광감 === */
+    --token-win: #34d399;
+    --token-win-bg: rgba(52, 211, 153, 0.15);
+    --token-lose: #f87171;
+    --token-lose-bg: rgba(248, 113, 113, 0.15);
+    
+    /* === 포커스 링 === */
+    --token-focus: #06b6d4;
+  }
+}

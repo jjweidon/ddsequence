@@ -148,7 +148,7 @@ const PenaltyHistoryModal: React.FC<PenaltyHistoryModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-4xl w-full mx-2 sm:mx-4 max-h-[90vh] overflow-hidden flex flex-col relative"
+        className="bg-surface rounded-lg shadow-xl max-w-4xl w-full mx-2 sm:mx-4 max-h-[90vh] overflow-hidden flex flex-col relative"
         onClick={(e) => e.stopPropagation()}
       >
         {/* 최상단 우측 버튼들 */}
@@ -157,10 +157,10 @@ const PenaltyHistoryModal: React.FC<PenaltyHistoryModalProps> = ({
           <button
             onClick={toggleEditMode}
             className={`px-3 sm:px-4 py-1.5 sm:py-2 font-semibold text-xs sm:text-sm rounded-sm transition-all duration-200 whitespace-nowrap
-                     focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 ${
+                     focus:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 ${
               isEditMode 
-                ? 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800' 
-                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                ? 'text-foreground hover:bg-surface-hover' 
+                : 'text-muted hover:bg-surface-hover'
             }`}
           >
             {isEditMode ? '완료' : '편집'}
@@ -169,7 +169,7 @@ const PenaltyHistoryModal: React.FC<PenaltyHistoryModalProps> = ({
           {/* 닫기 버튼 */}
           <button
             onClick={onClose}
-            className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-sm"
+            className="text-muted hover:text-foreground transition-colors p-1.5 hover:bg-surface-hover rounded-lg"
             aria-label="닫기"
           >
             <svg
@@ -189,12 +189,12 @@ const PenaltyHistoryModal: React.FC<PenaltyHistoryModalProps> = ({
         </div>
 
         {/* 헤더 */}
-        <div className="border-b border-slate-200 dark:border-slate-700 px-3 sm:px-6 py-3 sm:py-4 pr-24 sm:pr-28 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 flex-shrink-0">
+        <div className="border-b border-border px-3 sm:px-6 py-3 sm:py-4 pr-24 sm:pr-28 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 flex-shrink-0">
           <div className="flex-1 min-w-0">
-            <h2 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100">
+            <h2 className="text-lg sm:text-xl font-semibold text-foreground">
               패널티 히스토리
             </h2>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-0.5">
+            <p className="text-xs sm:text-sm text-muted mt-0.5">
               {getCurrentYear()}년 기록 ({penalties.length}건)
             </p>
           </div>
@@ -207,8 +207,8 @@ const PenaltyHistoryModal: React.FC<PenaltyHistoryModalProps> = ({
                          transition-all duration-200 shadow-sm hover:shadow-md
                          focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
                   selectedPenalties.length === 0 || deleteLoading
-                    ? 'bg-slate-300 dark:bg-slate-700 text-slate-500 dark:text-slate-500 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 text-white shadow-rose-500/30 hover:scale-[1.02] focus-visible:ring-rose-400'
+                    ? 'bg-surface-hover text-muted cursor-not-allowed opacity-70'
+                    : 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white focus-visible:ring-red-400'
                 }`}
               >
                 {deleteLoading ? (
@@ -237,22 +237,20 @@ const PenaltyHistoryModal: React.FC<PenaltyHistoryModalProps> = ({
         <div className="flex-1 overflow-y-auto p-3 sm:p-6">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20">
-              <svg className="animate-spin h-10 w-10 sm:h-12 sm:w-12 text-blue-600 dark:text-blue-400 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <svg className="animate-spin h-10 w-10 sm:h-12 sm:w-12 text-muted mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              <p className="text-slate-600 dark:text-slate-400 font-medium text-base sm:text-lg">로딩 중...</p>
+              <p className="text-muted font-medium text-base sm:text-lg">로딩 중...</p>
             </div>
           ) : error ? (
             <div className="flex flex-col items-center justify-center py-20 px-4">
               <div className="text-5xl sm:text-6xl mb-4 opacity-40">⚠️</div>
-              <p className="text-rose-600 dark:text-rose-400 font-medium text-base sm:text-lg mb-4 text-center">{error}</p>
+              <p className="text-foreground font-medium text-base sm:text-lg mb-4 text-center">{error}</p>
               <button 
-                className="px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 
-                         dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800
-                         text-white font-bold text-sm sm:text-base shadow-lg shadow-blue-500/30
-                         transition-all duration-200 transform hover:scale-[1.02]
-                         focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2"
+                className="px-4 sm:px-6 py-2.5 sm:py-3 bg-accent-gradient hover:brightness-110 text-white font-semibold text-sm sm:text-base
+                         transition-colors duration-200
+                         focus:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2"
                 onClick={fetchPenalties}
               >
                 다시 시도
@@ -261,18 +259,17 @@ const PenaltyHistoryModal: React.FC<PenaltyHistoryModalProps> = ({
           ) : penalties.length === 0 ? (
             <div className="text-center py-12">
               <div className="text-4xl sm:text-5xl mb-4 opacity-40">⚠️</div>
-              <p className="text-slate-500 dark:text-slate-400 font-medium text-sm sm:text-base">패널티 기록이 없습니다.</p>
+              <p className="text-muted font-medium text-sm sm:text-base">패널티 기록이 없습니다.</p>
             </div>
           ) : (
             <div className="space-y-2 sm:space-y-3">
               {penalties.map((penalty) => (
                 <div
                   key={penalty._id}
-                  className={`bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-3 sm:p-4
-                            transition-all duration-200 ${
+                  className={`bg-surface-hover border border-border rounded-lg p-3 sm:p-4 transition-colors duration-200 ${
                     isEditMode && selectedPenalties.includes(penalty._id || '')
-                      ? 'ring-2 ring-rose-500 bg-rose-50 dark:bg-rose-900/20'
-                      : 'hover:bg-slate-100 dark:hover:bg-slate-800'
+                      ? 'ring-2 ring-accent bg-surface'
+                      : 'hover:bg-surface'
                     }`}
                 >
                   <div className="flex items-start gap-2 sm:gap-4">
@@ -289,20 +286,20 @@ const PenaltyHistoryModal: React.FC<PenaltyHistoryModalProps> = ({
                             }
                           }
                         }}
-                        className="mt-0.5 sm:mt-1 w-4 h-4 sm:w-5 sm:h-5 text-rose-600 border-slate-300 rounded focus:ring-rose-500 flex-shrink-0"
+                        className="mt-0.5 sm:mt-1 w-4 h-4 sm:w-5 sm:h-5 text-accent border-border-strong rounded focus:ring-focus flex-shrink-0"
                       />
                     )}
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mb-1 sm:mb-2">
-                        <span className="text-xl sm:text-2xl font-bold text-rose-600 dark:text-rose-400 whitespace-nowrap">
+                        <span className="text-xl sm:text-2xl font-semibold text-foreground whitespace-nowrap">
                           {getPlayerDisplayName(penalty.player)}
                         </span>
-                        <span className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                        <span className="text-xs sm:text-sm text-muted whitespace-nowrap">
                           {formatDate(penalty.createdAt)}
                         </span>
                       </div>
                       {penalty.reason && (
-                        <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 mt-1 sm:mt-2 break-words">
+                        <p className="text-xs sm:text-sm text-muted mt-1 sm:mt-2 break-words">
                           {penalty.reason}
                         </p>
                       )}

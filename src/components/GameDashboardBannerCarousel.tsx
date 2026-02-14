@@ -210,8 +210,8 @@ export default function GameDashboardBannerCarousel({
                 onClick={() => onIndexChange(indicatorIndex)}
                 className={`h-2 rounded-full transition-all duration-300 ${
                   currentIndex === indicatorIndex
-                    ? 'w-8 bg-blue-600 dark:bg-blue-400'
-                    : 'w-2 bg-slate-300 dark:bg-slate-600'
+                    ? 'w-8 bg-accent-gradient'
+                    : 'w-2 bg-border-strong'
                 }`}
                 aria-label={`배너 ${indicatorIndex + 1}로 이동`}
               />

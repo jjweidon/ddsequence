@@ -35,19 +35,19 @@ const PlayerSelect: React.FC<PlayerSelectProps> = ({
   
   return (
     <div className={`flex flex-col items-center ${compact ? 'gap-1' : 'gap-2'}`}>
-      <div className={`flex items-center gap-1 ${compact ? 'px-2 py-0.5' : 'px-3 py-1.5'} rounded-full ${
+      <div className={`flex items-center gap-1 ${compact ? 'px-2 py-0.5' : 'px-3 py-1.5'} rounded-lg ${
         label === '승' 
-          ? 'bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/30 dark:to-green-900/30' 
+          ? 'bg-emerald-50 dark:bg-emerald-900/30' 
           : label === '패'
-          ? 'bg-gradient-to-r from-rose-50 to-red-50 dark:from-rose-900/30 dark:to-red-900/30'
-          : 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30'
+          ? 'bg-rose-50 dark:bg-rose-900/30'
+          : 'bg-surface-hover'
       }`}>
-        <label className={`${compact ? 'text-[10px]' : 'text-sm'} font-bold ${
+        <label className={`${compact ? 'text-[10px]' : 'text-sm'} font-semibold ${
           label === '승' 
             ? 'text-emerald-700 dark:text-emerald-300' 
             : label === '패'
             ? 'text-rose-700 dark:text-rose-300'
-            : 'text-blue-700 dark:text-blue-300'
+            : 'text-foreground'
         }`}>
           {label === '승' ? '승리' : label === '패' ? '패배' : label}
         </label>
@@ -66,19 +66,15 @@ const PlayerSelect: React.FC<PlayerSelectProps> = ({
             transition-all duration-200 ease-out
             ${isSelected 
               ? label === '승'
-                ? 'bg-gradient-to-br from-emerald-500 to-green-600 dark:from-emerald-600 dark:to-green-700 text-white shadow-md shadow-emerald-500/30 scale-105 ring-2 ring-emerald-400 dark:ring-emerald-500'
+                ? 'bg-emerald-500 dark:bg-emerald-600 text-white ring-2 ring-emerald-400'
                 : label === '패'
-                ? 'bg-gradient-to-br from-rose-500 to-red-600 dark:from-rose-600 dark:to-red-700 text-white shadow-md shadow-rose-500/30 scale-105 ring-2 ring-rose-400 dark:ring-rose-500'
-                : 'bg-gradient-to-br from-blue-500 to-indigo-600 dark:from-blue-600 dark:to-indigo-700 text-white shadow-md shadow-blue-500/30 scale-105 ring-2 ring-blue-400 dark:ring-blue-500'
+                ? 'bg-rose-500 dark:bg-rose-600 text-white ring-2 ring-rose-400'
+                : 'bg-accent-gradient text-white ring-2 ring-purple-400 dark:ring-purple-500'
               : isOppositeSelected
-                ? 'bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed opacity-50'
-                : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 shadow-sm hover:shadow-md border border-slate-200 dark:border-slate-700 hover:-translate-y-0.5'
+                ? 'bg-surface-hover text-muted cursor-not-allowed opacity-50'
+                : 'bg-surface text-foreground border border-border hover:bg-surface-hover'
             }
-            ${!isSelected && !isOppositeSelected && label === '승' ? 'hover:border-emerald-300 dark:hover:border-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20' : ''}
-            ${!isSelected && !isOppositeSelected && label === '패' ? 'hover:border-rose-300 dark:hover:border-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20' : ''}
-            ${!isSelected && !isOppositeSelected && isFilterMode ? 'hover:border-blue-300 dark:hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20' : ''}
-            focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
-            ${label === '승' ? 'focus-visible:ring-emerald-400' : label === '패' ? 'focus-visible:ring-rose-400' : 'focus-visible:ring-blue-400'}
+            focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-focus
           `;
           
           return (
@@ -104,12 +100,8 @@ const PlayerSelect: React.FC<PlayerSelectProps> = ({
               key={index}
               className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${
                 selectedPlayers.length > index
-                  ? label === '승'
-                    ? 'bg-emerald-500 scale-100'
-                    : label === '패'
-                    ? 'bg-rose-500 scale-100'
-                    : 'bg-blue-500 scale-100'
-                  : 'bg-slate-200 dark:bg-slate-700 scale-75'
+                  ? label === '승' ? 'bg-win scale-100' : label === '패' ? 'bg-lose scale-100' : 'bg-accent-gradient scale-100'
+                  : 'bg-border-strong scale-75'
               }`}
             />
           ))}

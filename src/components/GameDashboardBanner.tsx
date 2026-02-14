@@ -252,7 +252,7 @@ const GameDashboardBanner: React.FC<GameDashboardBannerProps> = ({ games, single
           className={`${event.bgColor} border-x-0 border-y p-4 sm:p-6 shadow-lg relative overflow-hidden w-full max-w-full`}
           style={{ animationDelay: `${index * 100}ms` }}
         >
-          {/* 배경 그라데이션 오버레이 - 고정된 그라데이션 */}
+          {/* 배경 그라데이션 오버레이 */}
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-50 pointer-events-none"></div>
           
           <div className="flex flex-col gap-3 w-full max-w-6xl mx-auto relative z-10 items-center">

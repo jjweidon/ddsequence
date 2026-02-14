@@ -331,8 +331,7 @@ export default function Home() {
     {/* 에러 팝업 */}
     {error && (
       <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 animate-fadeIn w-[calc(100%-2rem)] max-w-2xl">
-        <div className="bg-rose-50 dark:bg-rose-900/50 border-2 border-rose-200 dark:border-rose-800 
-                      text-rose-700 dark:text-rose-300 px-6 py-3 shadow-lg w-full">
+        <div className="bg-surface border border-border text-foreground px-6 py-4 shadow-lg w-full">
           <span className="text-sm font-medium text-center block">{error}</span>
         </div>
       </div>
@@ -341,33 +340,29 @@ export default function Home() {
     {/* 성공 팝업 */}
     {success && (
       <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 animate-fadeIn w-[calc(100%-2rem)] max-w-2xl">
-        <div className="bg-emerald-50 dark:bg-emerald-900/50 border-2 border-emerald-200 dark:border-emerald-800 
-                      text-emerald-700 dark:text-emerald-300 px-6 py-3 shadow-lg w-full flex items-center justify-center gap-2">
+        <div className="bg-emerald-500 dark:bg-emerald-600 border border-emerald-600 dark:border-emerald-700 
+                      text-white px-6 py-4 shadow-lg shadow-emerald-500/30 w-full flex items-center justify-center gap-2">
           <span className="text-xl flex-shrink-0">✅</span>
           <span className="text-sm font-medium text-center">{success}</span>
         </div>
       </div>
     )}
     
-    <main className="min-h-screen bg-slate-50 dark:bg-slate-900 py-8 px-4 sm:px-6">
+    <main className="min-h-screen bg-page py-8 px-4 sm:px-6">
       <div className="max-w-2xl mx-auto">
         {/* 헤더 */}
         <div className="text-center mb-8">
-          
-          <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-400 dark:to-blue-500 
-                       bg-clip-text text-transparent">
+          <h1 className="text-3xl sm:text-4xl font-bold mb-2 text-foreground tracking-tight">
             뚱팸 시퀀스
           </h1>
-          <p className="text-slate-600 dark:text-slate-400 text-sm">승률 계산기</p>
+          <p className="text-muted text-sm">승률 계산기</p>
         </div>
       
         <div className="flex flex-col gap-6 w-full">
         {/* 기록 추가 섹션 */}
-        <div className="bg-white dark:bg-slate-800 rounded-sm shadow-lg border border-slate-200 dark:border-slate-700 
-                      overflow-hidden">
-          <div className="px-6 py-5 bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-900 dark:to-gray-900 
-                        border-b border-slate-200 dark:border-slate-700">
-            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+        <div className="bg-surface rounded-lg border border-border overflow-hidden">
+          <div className="px-6 py-5 border-b border-border">
+            <h2 className="text-xl font-semibold text-foreground">
               기록 추가
             </h2>
           </div>
@@ -382,7 +377,7 @@ export default function Home() {
               />
               
               <div className="flex items-center justify-center pt-6">
-                <div className="w-px h-12 bg-slate-200 dark:bg-slate-700"></div>
+                <div className="w-px h-12 bg-border"></div>
               </div>
               
               <PlayerSelect 
@@ -397,11 +392,9 @@ export default function Home() {
             <div className="grid grid-cols-2 gap-4">
               <button
                 onClick={() => setIsPenaltyModalOpen(true)}
-                className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800/50 
-                         text-orange-700 dark:text-orange-300 font-semibold px-4 sm:px-6 py-3 rounded-xl
-                         transition-all duration-200 transform hover:bg-orange-100 dark:hover:bg-orange-900/30 
-                         hover:scale-[1.02] hover:shadow-md active:scale-95
-                         focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2
+                className="bg-surface-hover border border-border text-foreground font-medium px-4 sm:px-6 py-3 rounded-lg
+                         transition-colors duration-200 hover:bg-border
+                         focus:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2
                          flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap text-xs sm:text-sm"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
@@ -410,13 +403,9 @@ export default function Home() {
                 <span>패널티 기록</span>
               </button>
               <button
-                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 
-                         dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800
-                         text-white font-bold px-6 py-3 rounded-xl
-                         transition-all duration-200 transform hover:scale-[1.02]
-                         active:scale-95 disabled:opacity-50 disabled:scale-100
-                         disabled:cursor-not-allowed
-                         focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2"
+                className="bg-accent-gradient hover:brightness-110 text-white font-semibold px-6 py-3 rounded-lg transition-all duration-200
+                         transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed
+                         focus:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2"
                 onClick={handleSubmit}
                 disabled={loading || winningTeam.length !== 2 || losingTeam.length !== 2}
               >
@@ -447,7 +436,7 @@ export default function Home() {
         {/* 통계 섹션 */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+            <h2 className="text-xl font-semibold text-foreground">
               통계
             </h2>
             <div className="flex items-center gap-3">
@@ -458,14 +447,12 @@ export default function Home() {
                   e.stopPropagation();
                   copyStatsToClipboard();
                 }}
-                className="p-2.5 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 
-                         hover:bg-slate-100 dark:hover:bg-slate-800 rounded-sm
-                         transition-all duration-200
-                         focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2"
+                className="p-2.5 text-muted hover:text-foreground hover:bg-surface-hover rounded-lg transition-colors duration-200
+                         focus:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2"
                 title="통계 복사하기"
               >
                 {isCopied ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-emerald-500" viewBox="0 0 20 20" fill="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-success" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 ) : (
@@ -477,10 +464,9 @@ export default function Home() {
               </button>
               <Link 
                 href="/history" 
-                className="flex items-center gap-2 px-4 py-2.5 text-slate-700 dark:text-slate-300 font-semibold text-sm
-                         hover:bg-slate-100 dark:hover:bg-slate-800 rounded-sm
-                         transition-all duration-200
-                         focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2"
+                className="flex items-center gap-2 px-4 py-2.5 text-foreground font-medium text-sm
+                         hover:bg-surface-hover rounded-lg transition-colors duration-200
+                         focus:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2"
               >
                 <span>역대 기록</span>
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -491,15 +477,14 @@ export default function Home() {
           </div>
           
           {/* 기간 선택 탭 */}
-          <div className="bg-white dark:bg-slate-800 rounded-sm shadow-md border border-slate-200 dark:border-slate-700 p-2">
-            <div className="relative flex rounded-sm overflow-hidden">
-              {/* 슬라이더 바 */}
+          <div className="bg-surface rounded-lg border border-border p-1">
+            <div className="relative flex rounded-lg overflow-hidden bg-surface-hover">
+              {/* 슬라이더 바 - accent 그라데이션 */}
               <div
-                className="absolute inset-y-0 bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 
-                         rounded-sm shadow-md transition-all duration-300 ease-out"
+                className="absolute inset-y-1 bg-accent-gradient rounded-md shadow-sm transition-all duration-300 ease-out"
                 style={{
-                  width: '50%',
-                  left: dateRangeMode === 'all' ? '0%' : '50%',
+                  width: 'calc(50% - 4px)',
+                  left: dateRangeMode === 'all' ? '2px' : 'calc(50% + 2px)',
                 }}
               />
               <button
@@ -509,10 +494,10 @@ export default function Home() {
                   e.stopPropagation();
                   handleDateRangeModeChange('all');
                 }}
-                className={`flex-1 py-3 px-6 text-sm font-bold rounded-sm transition-all duration-200 relative z-10 ${
+                className={`flex-1 py-3 px-6 text-sm font-medium rounded-md transition-colors duration-200 relative z-10 ${
                   dateRangeMode === 'all'
                     ? 'text-white'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                    : 'text-muted hover:text-foreground'
                 }`}
               >
                 전체
@@ -524,10 +509,10 @@ export default function Home() {
                   e.stopPropagation();
                   handleDateRangeModeChange('custom');
                 }}
-                className={`flex-1 py-3 px-6 text-sm font-bold rounded-sm transition-all duration-200 relative z-10 ${
+                className={`flex-1 py-3 px-6 text-sm font-medium rounded-md transition-colors duration-200 relative z-10 ${
                   dateRangeMode === 'custom'
                     ? 'text-white'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                    : 'text-muted hover:text-foreground'
                 }`}
               >
                 기간 선택
@@ -543,13 +528,12 @@ export default function Home() {
           
           {/* 통계 데이터 */}
           {statsLoading ? (
-            <div className="flex flex-col items-center justify-center py-16 bg-white dark:bg-slate-800 rounded-sm 
-                          shadow-md border border-slate-200 dark:border-slate-700">
-              <svg className="animate-spin h-12 w-12 text-blue-600 dark:text-blue-400 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <div className="flex flex-col items-center justify-center py-16 bg-surface rounded-lg border border-border">
+              <svg className="animate-spin h-12 w-12 text-muted mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              <p className="text-slate-600 dark:text-slate-400 font-medium">통계 로딩 중...</p>
+              <p className="text-muted font-medium">통계 로딩 중...</p>
             </div>
           ) : (
             stats && (
@@ -577,18 +561,16 @@ export default function Home() {
     />
     
     {/* 명예의 전당 배너 */}
-    <div className="w-full bg-gradient-to-r from-amber-500/10 to-orange-600/10 
-                 dark:from-amber-500/20 dark:to-orange-600/20">
+    <div className="w-full border-t border-border">
       <Link 
         href="/hall-of-fame" 
-        className="block w-full px-6 py-4 
-                 hover:from-amber-500/20 hover:to-orange-600/20 dark:hover:from-amber-500/30 dark:hover:to-orange-600/30
-                 transition-all duration-200
+        className="block w-full px-6 py-4 bg-gradient-to-r from-amber-400 to-orange-500 
+                 hover:from-amber-500 hover:to-orange-600 transition-all duration-200 opacity-90
                  focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2"
       >
-        <div className="flex items-center justify-center gap-2 text-amber-700 dark:text-amber-400">
+        <div className="flex items-center justify-center gap-2 text-white font-semibold text-sm">
           <span className="text-lg">🏆</span>
-          <span className="font-semibold text-sm">명예의 전당</span>
+          <span>명예의 전당</span>
           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
           </svg>

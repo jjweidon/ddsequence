@@ -11,6 +11,7 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
 }) => {
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
+  const [selectedQuickOption, setSelectedQuickOption] = useState<number | null>(null);
 
   // 오늘 날짜를 YYYY-MM-DD 형식으로 반환 (한국 시간 기준)
   const getTodayString = () => {
@@ -48,6 +49,7 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
     
     setStartDate(startStr);
     setEndDate(endStr);
+    setSelectedQuickOption(option.days);
     // 빠른 선택 시에는 즉시 통계를 가져오지 않고, 사용자가 적용 버튼을 클릭할 때까지 대기
   };
 
@@ -57,20 +59,21 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
     e.stopPropagation(); // 이벤트 버블링 방지
     
     if (startDate && endDate) {
+      setSelectedQuickOption(null); // 수동 입력 시 빠른 선택 해제
       onDateRangeChange(startDate, endDate);
     }
   };
 
   return (
     <div 
-      className={`bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-sm shadow-md overflow-hidden transition-all duration-300 ease-out ${
+      className={`bg-surface border border-border rounded-lg overflow-hidden transition-all duration-300 ease-out ${
         isActive 
           ? 'opacity-100 max-h-[500px] transform translate-y-0 mb-6' 
           : 'opacity-0 max-h-0 transform -translate-y-4 pointer-events-none mb-0'
       }`}
     >
-      <div className="px-5 py-4 bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-900 dark:to-gray-900 border-b border-slate-200 dark:border-slate-700">
-        <h3 className="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+      <div className="px-5 py-4 border-b border-border">
+        <h3 className="text-base font-semibold text-foreground flex items-center gap-2">
           <span className="text-lg">📅</span>
           기간 선택
         </h3>
@@ -79,7 +82,7 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
       <div className="p-5">
         {/* 빠른 선택 버튼들 */}
         <div className="mb-5">
-          <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-3 uppercase tracking-wider">
+          <label className="block text-xs font-semibold text-muted mb-3 uppercase tracking-wider">
             빠른 선택
           </label>
           <div className="flex flex-wrap gap-2">
@@ -88,10 +91,12 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
                 key={index}
                 type="button"
                 onClick={(e) => handleQuickSelect(option, e)}
-                className="px-4 py-2 text-xs font-semibold bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 
-                         rounded-sm hover:bg-blue-500 hover:text-white dark:hover:bg-blue-600 
-                         transition-all duration-200 hover:scale-105 hover:shadow-md
-                         focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2"
+                className={`px-4 py-2 text-xs font-medium rounded-lg transition-colors duration-200
+                         focus:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2
+                         ${selectedQuickOption === option.days
+                           ? 'bg-accent-gradient text-white'
+                           : 'bg-surface-hover text-foreground hover:bg-accent-gradient hover:text-white'
+                         }`}
               >
                 {option.label}
               </button>
@@ -101,43 +106,47 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
         
         {/* 수동 날짜 선택 */}
         <div className="mb-4">
-          <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-3 uppercase tracking-wider">
+          <label className="block text-xs font-semibold text-muted mb-3 uppercase tracking-wider">
             직접 입력
           </label>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 시작일
               </label>
               <div className="relative">
                 <input
                   type="date"
                   value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
+                  onChange={(e) => {
+                    setStartDate(e.target.value);
+                    setSelectedQuickOption(null);
+                  }}
                   max={getTodayString()}
-                  className="w-full px-4 py-2.5 border-2 border-slate-200 dark:border-slate-600 
-                           bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 
-                           rounded-sm text-sm font-medium
-                           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                           transition-all duration-200"
+                  className="w-full px-4 py-2.5 border border-border bg-surface text-foreground 
+                           rounded-lg text-sm font-medium
+                           focus:outline-none focus:ring-2 focus:ring-focus focus:border-transparent
+                           transition-colors duration-200"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 종료일
               </label>
               <div className="relative">
                 <input
                   type="date"
                   value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
+                  onChange={(e) => {
+                    setEndDate(e.target.value);
+                    setSelectedQuickOption(null);
+                  }}
                   max={getTodayString()}
-                  className="w-full px-4 py-2.5 border-2 border-slate-200 dark:border-slate-600 
-                           bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 
-                           rounded-sm text-sm font-medium
-                           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                           transition-all duration-200"
+                  className="w-full px-4 py-2.5 border border-border bg-surface text-foreground 
+                           rounded-lg text-sm font-medium
+                           focus:outline-none focus:ring-2 focus:ring-focus focus:border-transparent
+                           transition-colors duration-200"
                 />
               </div>
             </div>
@@ -149,12 +158,9 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
           type="button"
           onClick={handleDateChange}
           disabled={!startDate || !endDate}
-          className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 
-                   dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800
-                   text-white font-bold py-3 px-6
-                   transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg
-                   disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none
-                   focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2"
+          className="w-full bg-accent-gradient hover:brightness-110 text-white font-semibold py-3 px-6 rounded-lg
+                   transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed
+                   focus:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2"
         >
           {startDate && endDate ? '기간 적용하기' : '날짜를 선택해주세요'}
         </button>
